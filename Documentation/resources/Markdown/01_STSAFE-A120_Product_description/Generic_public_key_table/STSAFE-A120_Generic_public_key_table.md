@@ -1,6 +1,8 @@
 # Generic Public Key Table {#Generic_Public_Key_Table}
 
-The **Generic Public Key Table** in the STSAFE-A120 device is used to securely store public keys that are essential for verifying digital signatures and authenticating off-chip entities. These public keys enable the device to perform critical security functions such as host key verification, entity authentication, and signature validation within secure communication protocols.
+The **Generic Public Key Table** in the STSAFE-A120 device is used to securely store public keys that are essential for verifying digital signatures and authenticating off-chip entities.
+
+These public keys enable the device to perform critical security functions such as host key verification, entity authentication, and signature validation within secure communication protocols.
 
 ## Number of Slots
 
@@ -46,10 +48,10 @@ The configuration flags control the roles and permissions of each public key slo
 
 ## Provisioning and Security Considerations
 
-- Public keys can be pre-provision by STMicroelectronics or provisioned using the **Write Public Key** command.
-Provisioning should ideally occur in a trusted environment to guarantee the authenticity of the public keys.
-The device rejects attempts to write a public key to a non-empty slot.
-Signature verification using these public keys is a fundamental part of the device’s secure channel and key provisioning protocols.
+Public keys can be pre-provision by STMicroelectronics or provisioned using the **Write Public Key** command.  
+Provisioning should ideally occur in a trusted environment to guarantee the authenticity of the public keys.  
+The device rejects attempts to write a public key to a non-empty slot.  
+Signature verification using these public keys is a fundamental part of the device’s secure channel and key provisioning protocols.  
 The **Change Right** flag allows a one-time update of configuration flags to lock the key’s usage permissions permanently.
 
 ---

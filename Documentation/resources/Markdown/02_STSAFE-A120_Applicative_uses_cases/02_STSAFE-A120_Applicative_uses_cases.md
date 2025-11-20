@@ -11,4 +11,5 @@ The STSAFE-A120 Secure Element is suitable for a variety of application scenario
 - @subpage STSAFE-A120_as_crypto_companion
   - Acting as a secure companion for cryptographic operations.
 
-> **NOTE:** Please follow one of the above link to get more details on a specific use-case. 
+> **NOTE:**  
+> Please follow one of the above link to get more details on a specific use-case.

@@ -1,6 +1,10 @@
 # Using STSAFE-A120 as a Cryptographic Companion{#STSAFE-A120_as_crypto_companion}
 
-The STSAFE-A120 is a specialized hardware security module engineered to perform and manage advanced cryptographic operations in embedded systems. It delivers hardware-accelerated support for AES, ECC, hash functions, true random number generation, and secure key wrapping/unwrapping. This technical guide provides an in-depth overview of the cryptographic mechanisms, supported algorithms and curves, practical use cases, secure key storage and provisioning strategies, and includes detailed host-device interaction diagrams using precise STSAFE-A120 command nomenclature.
+The STSAFE-A120 is a specialized hardware security module engineered to perform and manage advanced cryptographic operations in embedded systems.
+
+It delivers hardware-accelerated support for AES, ECC, hash functions, true random number generation, and secure key wrapping/unwrapping.
+
+This technical guide provides an in-depth overview of the cryptographic mechanisms, supported algorithms and curves, practical use cases, secure key storage and provisioning strategies, and includes detailed host-device interaction diagrams using precise STSAFE-A120 command nomenclature.
 
 ## Secure Key Storage and Management in STSAFE-A120
 
@@ -45,7 +49,8 @@ STSAFE-A120 offers flexible secure key provisioning and management options to it
 
 ### AES Symmetric Cryptography
 
-AES (Advanced Encryption Standard) is the cornerstone of symmetric cryptography, providing robust data confidentiality and integrity. The STSAFE-A120 supports AES-128 and AES-256 keys, offering multiple operational modes to address diverse security requirements:
+AES (Advanced Encryption Standard) is the cornerstone of symmetric cryptography, providing robust data confidentiality and integrity.  
+The STSAFE-A120 supports AES-128 and AES-256 keys, offering multiple operational modes to address diverse security requirements:
 
 - **CCM\*** (Counter with CBC-MAC): Delivers authenticated encryption with associated data (AEAD), ensuring confidentiality, integrity, and authenticity.
 - **ECB** (Electronic Codebook): Basic block cipher mode, primarily for legacy compatibility or specific use cases.
@@ -56,14 +61,14 @@ AES (Advanced Encryption Standard) is the cornerstone of symmetric cryptography,
 
 The following table summarizes the supported key types and usages for each AES mode in the STSAFE-A120:
 
-| Mode of Operation | Supported Key Types       | Supported Key Usages                          |
-|-------------------|--------------------------|-----------------------------------------------|
-| CCM\*             | AES-128, AES-256         | Encrypt, Decrypt, Encrypt by chunks, Decrypt by chunks |
-| ECB               | AES-128, AES-256         | Encrypt, Decrypt                              |
+| Mode of Operation | Supported Key Types       | Supported Key Usages                                        |
+|-------------------|--------------------------|--------------------------------------------------------------|
+| CCM\*             | AES-128, AES-256         | Encrypt, Decrypt, Encrypt by chunks, Decrypt by chunks       |
+| ECB               | AES-128, AES-256         | Encrypt, Decrypt                                             |
 | GCM               | AES-128, AES-256         | Encrypt, Decrypt, Encrypt by chunks, Decrypt by chunks, GMAC |
-| CMAC              | AES-128, AES-256         | Generate MAC, Verify MAC                      |
-| HMAC              | Generic secret           | Generate MAC, Verify MAC                      |
-| HKDF              | Generic secret           | Derive keys                                   |
+| CMAC              | AES-128, AES-256         | Generate MAC, Verify MAC                                     |
+| HMAC              | Generic secret           | Generate MAC, Verify MAC                                     |
+| HKDF              | Generic secret           | Derive keys                                                  |
 
 AES symmetric cryptography is applicable in the following scenarios:
 
@@ -98,11 +103,13 @@ Host -> Device: Confirm Symmetric Keys\n(Key Confirmation MAC + Key Info)
 Device --> Host: (Keys Stored Securely)
 @enduml
 
-> **NOTE:** For plaintext or wrapped provisioning, substitute the `Establish Symmetric Keys` and `Confirm Symmetric Keys` commands with `Write Symmetric Key Plaintext` or `Write Symmetric Key Wrapped`, following a similar host-device interaction sequence.
+> **NOTE:**  
+> For plaintext or wrapped provisioning, substitute the `Establish Symmetric Keys` and `Confirm Symmetric Keys` commands with `Write Symmetric Key Plaintext` or `Write Symmetric Key Wrapped`, following a similar host-device interaction sequence.
 
 ### Deriving Symmetric Keys
 
-New symmetric keys can be derived from existing keys using the `Derive Keys` command, which implements HKDF. Derived keys may be stored internally or exported to the host, supporting session key generation and hierarchical key management.
+New symmetric keys can be derived from existing keys using the `Derive Keys` command, which implements HKDF.  
+Derived keys may be stored internally or exported to the host, supporting session key generation and hierarchical key management.
 
 @startuml
 participant "HOST \n (MCU/MPU)" as Host
@@ -112,13 +119,16 @@ Host -> Device: Derive Keys\n(Input Key + HKDF Parameters + Output Key Descripti
 Device --> Host: Derived Key(s) or Confirmation
 @enduml
 
-> **NOTE:** This interaction pattern applies to all key derivation operations, including MAC and encryption key derivation.
+> **NOTE:**  
+> This interaction pattern applies to all key derivation operations, including MAC and encryption key derivation.
 
 ---
 
 ### Data Encryption
 
-The STSAFE-A120 provides secure primitives for encrypting sensitive data, both in transit and at rest. Encryption is performed using a symmetric key stored within the device, invoked via the `Encrypt` command. Authenticated encryption modes such as CCM* and GCM are supported.
+The STSAFE-A120 provides secure primitives for encrypting sensitive data, both in transit and at rest.  
+Encryption is performed using a symmetric key stored within the device, invoked via the `Encrypt` command.  
+Authenticated encryption modes such as CCM* and GCM are supported.
 
 @startuml
 participant "HOST \n (MCU/MPU)" as Host
@@ -128,11 +138,13 @@ Host -> Device: Encrypt\n(Key Slot + Nonce + Plaintext + Associated Data)
 Device --> Host: Ciphertext + Authentication Tag
 @enduml
 
-> **NOTE:** For large datasets, utilize the chunked commands `Start Encrypt`, `Process Encrypt`, and `Finish Encrypt` to manage data in segments.
+> **NOTE:**  
+> For large datasets, utilize the chunked commands `Start Encrypt`, `Process Encrypt`, and `Finish Encrypt` to manage data in segments.
 
 ### Data Decryption
 
-Decryption of received ciphertext and verification of its integrity are facilitated by the `Decrypt` command, using a symmetric key securely stored in the device. Authentication tag verification is supported for AEAD modes.
+Decryption of received ciphertext and verification of its integrity are facilitated by the `Decrypt` command, using a symmetric key securely stored in the device.  
+Authentication tag verification is supported for AEAD modes.
 
 '''
 @startuml
@@ -144,11 +156,13 @@ Device --> Host: Plaintext + Verification Result
 @enduml
 '''
 
-> **NOTE:** For large ciphertexts, employ `Start Decrypt`, `Process Decrypt`, and `Finish Decrypt` commands for segmented processing.
+> **NOTE:**  
+> For large ciphertexts, employ `Start Decrypt`, `Process Decrypt` and `Finish Decrypt` commands for segmented processing.
 
 ### Message Authentication Code (MAC) Generation
 
-The STSAFE-A120 enables generation of MACs to ensure message integrity and authenticity. The `Generate MAC` command supports both CMAC and HMAC modes, selectable via key slot and MAC length parameters.
+The STSAFE-A120 enables generation of MACs to ensure message integrity and authenticity.  
+The `Generate MAC` command supports both CMAC and HMAC modes, selectable via key slot and MAC length parameters.
 
 '''
 @startuml
@@ -160,7 +174,8 @@ Device --> Host: MAC
 @enduml
 '''
 
-> **NOTE:** The interaction scheme applies to both CMAC and HMAC; select the appropriate key slot and MAC length as required.
+> **NOTE:**  
+> The interaction scheme applies to both CMAC and HMAC; select the appropriate key slot and MAC length as required.
 
 ### MAC Verification
 
@@ -176,7 +191,8 @@ Device --> Host: Verification Result (True/False)
 @enduml
 '''
 
-> **NOTE:** The `Verify MAC` command is compatible with both CMAC and HMAC verification.
+> **NOTE:**  
+> The `Verify MAC` command is compatible with both CMAC and HMAC verification.
 
 ---
 
@@ -216,7 +232,8 @@ Device --> Host: Public Key
 @enduml
 '''
 
-> **NOTE:** The `Generate Key` command supports both static and ephemeral key generation; ephemeral keys are stored in RAM for transient key establishment.
+> **NOTE:**  
+> The `Generate Key` command supports both static and ephemeral key generation; ephemeral keys are stored in RAM for transient key establishment.
 
 ---
 
@@ -248,7 +265,8 @@ Device --> Host: Verification Result (True/False)
 @enduml
 '''
 
-> **NOTE:** The STSAFE-A120 supports both ECDSA and EdDSA signature verification; specify the key type as an argument to the `Verify Signature` command.
+> **NOTE:**  
+> The STSAFE-A120 supports both ECDSA and EdDSA signature verification; specify the key type as an argument to the `Verify Signature` command.
 
 ### Symmetric Key Establishment via ECDH
 
@@ -267,7 +285,8 @@ Device --> Host: Shared Secret
 @enduml
 '''
 
-> **NOTE:** Ephemeral keys are recommended for forward secrecy; derived shared secrets can be further processed using key derivation functions.
+> **NOTE:**  
+> Ephemeral keys are recommended for forward secrecy; derived shared secrets can be further processed using key derivation functions.
 
 Following example(s) illustrating this process are available in the STSAFE-A120 examples package  
 
@@ -279,7 +298,8 @@ Following example(s) illustrating this process are available in the STSAFE-A120 
 
 ### Hash Engine
 
-Hash functions generate fixed-length digests from arbitrary input data, supporting data integrity, digital signatures, and MAC operations. The STSAFE-A120 supports:
+Hash functions generate fixed-length digests from arbitrary input data, supporting data integrity, digital signatures, and MAC operations.  
+The STSAFE-A120 supports:
 
 - **SHA-2 Family**: SHA-256, SHA-384, SHA-512.
 - **SHA-3 Family**: SHA3-256, SHA3-384, SHA3-512.
@@ -304,7 +324,7 @@ Device --> Host: Hash Digest
 @enduml
 '''
 
-Following example(s) illustrating this process are available in the STSAFE-A120 examples package  
+Following example(s) illustrating this process are available in the STSAFE-A120 examples package:
 
 - [STSAFE-A120 Hash](#STSAFE-A120_Hash)
 
@@ -312,7 +332,8 @@ Following example(s) illustrating this process are available in the STSAFE-A120 
 
 ### Random Number Generation
 
-Random numbers are fundamental to cryptographic operations such as key generation, nonces, and salts. The STSAFE-A120 integrates a True Random Number Generator (TRNG) compliant with NIST SP800-90B.
+Random numbers are fundamental to cryptographic operations such as key generation, nonces, and salts.  
+The STSAFE-A120 integrates a True Random Number Generator (TRNG) compliant with NIST SP800-90B.
 
 Random numbers are used for:
 
@@ -332,7 +353,7 @@ Device --> Host: Random Bytes
 @enduml
 '''
 
-Following example(s) illustrating this process are available in the STSAFE-A120 examples package  
+Following example(s) illustrating this process are available in the STSAFE-A120 examples package:
 
 - [STSAFE-A120_Random_number_generation](#STSAFE-A120_Random_number_generation)
 
@@ -342,7 +363,8 @@ Following example(s) illustrating this process are available in the STSAFE-A120 
 
 ### Key Wrapping and Unwrapping
 
-Key wrapping securely encrypts keys for storage or transport, maintaining confidentiality and integrity. The STSAFE-A120 supports AES key wrap in accordance with NIST SP800-38F.
+Key wrapping securely encrypts keys for storage or transport, maintaining confidentiality and integrity.  
+The STSAFE-A120 supports AES key wrap in accordance with NIST SP800-38F.
 
 Key wrapping is utilized for:
 
@@ -365,7 +387,7 @@ Device --> Host: Working Key
 @enduml
 '''
 
-Following example(s) illustrating this process are available in the STSAFE-A120 examples package  
+Following example(s) illustrating this process are available in the STSAFE-A120 examples package:
 
 - [STSAFE-A120 Key wrapping](#STSAFE-A120_wrap_unwrap)
 

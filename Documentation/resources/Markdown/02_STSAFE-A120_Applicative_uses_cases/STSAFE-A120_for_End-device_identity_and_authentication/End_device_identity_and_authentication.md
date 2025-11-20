@@ -1,20 +1,30 @@
 # STSAFE-A120 for End-Device Identity and Authentication {#End_device_identity_and_authentication}
 
-The STSAFE-A120 is a dedicated secure element engineered to deliver robust, hardware-based identity and authentication for end devices. By integrating the STSAFE-A120 into your design, each device is provisioned with a unique, tamper-resistant identity, ensuring that cryptographic keys and credentials are stored in a secure, isolated environment. This permanent identity is protected against cloning and unauthorized extraction, forming the foundation for trusted device authentication in connected systems.
+The STSAFE-A120 is a dedicated secure element engineered to deliver robust, hardware-based identity and authentication for end devices.
+
+By integrating the STSAFE-A120 into your design, each device is provisioned with a unique, tamper-resistant identity, ensuring that cryptographic keys and credentials are stored in a secure, isolated environment.
+
+This permanent identity is protected against cloning and unauthorized extraction, forming the foundation for trusted device authentication in connected systems.
 
 ## Overview of Device Identity and Authentication
 
-In today’s interconnected networks, reliably identifying and authenticating devices is essential for maintaining security and trust. The STSAFE-A120 addresses this requirement by securely storing cryptographic keys and credentials, enabling devices to prove their identity using strong cryptographic protocols. All sensitive operations are performed internally within the secure element, ensuring that private keys and credentials are never exposed to the main processor or external interfaces.
+In today’s interconnected networks, reliably identifying and authenticating devices is essential for maintaining security and trust.  
+The STSAFE-A120 addresses this requirement by securely storing cryptographic keys and credentials, enabling devices to prove their identity using strong cryptographic protocols.  
+All sensitive operations are performed internally within the secure element, ensuring that private keys and credentials are never exposed to the main processor or external interfaces.
 
-Devices equipped with the STSAFE-A120 can participate in challenge-response authentication protocols, interact securely with servers or cloud platforms, and prevent unauthorized access. Only devices with valid credentials can successfully authenticate, significantly enhancing the overall security posture of the system.
+Devices equipped with the STSAFE-A120 can participate in challenge-response authentication protocols, interact securely with servers or cloud platforms, and prevent unauthorized access.  
+Only devices with valid credentials can successfully authenticate, significantly enhancing the overall security posture of the system.
 
 ![Fake ID detection](Fake_ID_detection.png)
 
 The integration of STSAFE-A120 devices provides several key security benefits:
 
-- **Hardware-based security:** All sensitive data, including cryptographic keys, are stored and managed within the STSAFE-A120 secure element, isolated from the main processor and system memory. This isolation greatly reduces the attack surface and protects against software-based threats.
-- **Attack resistance:** The device is engineered to resist a wide range of attacks, including physical tampering, side-channel analysis, and software exploits. This ensures long-term protection of credentials and device integrity.
-- **Secure key management:** Key pairs are generated, stored, and used exclusively inside the secure element. Private keys never leave the device, minimizing the risk of compromise and unauthorized access.
+- **Hardware-based security:** All sensitive data, including cryptographic keys, are stored and managed within the STSAFE-A120 secure element, isolated from the main processor and system memory.  
+  This isolation greatly reduces the attack surface and protects against software-based threats.
+- **Attack resistance:** The device is engineered to resist a wide range of attacks, including physical tampering, side-channel analysis, and software exploits.  
+  This ensures long-term protection of credentials and device integrity.
+- **Secure key management:** Key pairs are generated, stored, and used exclusively inside the secure element.  
+  Private keys never leave the device, minimizing the risk of compromise and unauthorized access.
 
 Typical authentication use cases include:
 
@@ -25,7 +35,9 @@ Typical authentication use cases include:
 
 ## STSAFE-A120 Device Authentication Process
 
-The STSAFE-A120 leverages Elliptic Curve Cryptography (ECC) for device authentication. Each device is provisioned with a unique ECC key pair: the private key remains securely stored inside the STSAFE-A120, while the public key can be distributed as needed. All ECC operations, including digital signature generation and verification, are performed within the secure element, ensuring that private keys are never exposed.
+The STSAFE-A120 leverages Elliptic Curve Cryptography (ECC) for device authentication.  
+Each device is provisioned with a unique ECC key pair: the private key remains securely stored inside the STSAFE-A120, while the public key can be distributed as needed.  
+All ECC operations, including digital signature generation and verification, are performed within the secure element, ensuring that private keys are never exposed.
 
 The following diagram illustrates the device authentication workflow using the Elliptic Curve Digital Signature Algorithm (ECDSA):
 
@@ -117,16 +129,22 @@ group Device authentication (if certificate is valid)
     end group
 @enduml
 
-ECC provides strong security with efficient key sizes, making it ideal for embedded and resource-constrained environments. For example, a 256-bit ECC key offers greater security than a 2048-bit RSA key, with lower computational and memory requirements.
+ECC provides strong security with efficient key sizes, making it ideal for embedded and resource-constrained environments.  
+For example, a 256-bit ECC key offers greater security than a 2048-bit RSA key, with lower computational and memory requirements.
 
-A critical aspect of public key authentication is verifying that a public key is associated with an authorized device. This is achieved through certificates issued by trusted Certificate Authorities (CAs). Devices presenting public keys without valid certificates are not trusted. The diagram above demonstrates how certificate verification is integrated into the authentication process.
+A critical aspect of public key authentication is verifying that a public key is associated with an authorized device.  
+This is achieved through certificates issued by trusted Certificate Authorities (CAs).  
+Devices presenting public keys without valid certificates are not trusted.  
+The diagram above demonstrates how certificate verification is integrated into the authentication process.
 
 ## STSAFE-A120 Private key table and leaf-certificate 
 
-All STSAFE-A120 devices **Slot 0** are pre-provisioned by STMicroelectronics during device personalization. This slot contains a private key that is typically used as the device's **root or leaf private key**.
-The private key in Slot 0 is associated with a **leaf certificate** that is pre-provisioned in the **user non-volatile memory (NVM) slot 0**. This setup enables the device to perform secure authentication and cryptographic operations tied to a trusted certificate chain.
+All STSAFE-A120 devices **Slot 0** are pre-provisioned by STMicroelectronics during device personalization.  
+This slot contains a private key that is typically used as the device's **root or leaf private key**.
+The private key in Slot 0 is associated with a **leaf certificate** that is pre-provisioned in the **user non-volatile memory (NVM) slot 0**.  
+This setup enables the device to perform secure authentication and cryptographic operations tied to a trusted certificate chain.
 
-See below the leaf-certificate of SPL05 generated by "STM STSAFE-A PROD CA 01" certificate authority
+See below the leaf-certificate of SPL05 generated by "STM STSAFE-A PROD CA 01" certificate authority:
 
 ![SPL05_leaf_certificate](SPL05_leaf_certificate.png)
 
@@ -135,7 +153,7 @@ Please refer to section [Private key table and leaf certificate(s)](#Private_key
 
 ## Related examples
 
-The following examples illustrates the End-device authentication process using STSAFE-A120 secure element 
+The following examples illustrates the End-device authentication process using STSAFE-A120 secure element:
 
 - [STSAFE-A120 Device authentication example](#STSAFE-A120_Device_authentication)
 - [STSAFE-A120 Device authentication Multi-steps example](#STSAFE-A120_Multi-step_device_authentication)

@@ -1,6 +1,8 @@
 # Symmetric Key Table {#Symmetric_key_table}
 
-The **Symmetric Key Table** in the STSAFE-A120 device is designed to securely store and manage symmetric keys used for a variety of cryptographic operations including encryption, decryption, message authentication code (MAC) generation and verification, and key derivation. This table provides flexible key management capabilities with fine-grained control over key usage, access conditions, and lifecycle.
+The **Symmetric Key Table** in the STSAFE-A120 device is designed to securely store and manage symmetric keys used for a variety of cryptographic operations including encryption, decryption, message authentication code (MAC) generation and verification, and key derivation.
+
+This table provides flexible key management capabilities with fine-grained control over key usage, access conditions, and lifecycle.
 
 ## Number of Slots
 
@@ -12,15 +14,15 @@ The **Symmetric Key Table** in the STSAFE-A120 device is designed to securely st
 
 Each symmetric key slot includes the following key attributes:
 
-| Attribute                  | Description                                                                                      |
-|----------------------------|------------------------------------------------------------------------------------------------|
-| **Key Value**              | The actual symmetric key bit string (AES-128, AES-256, or Generic secret key).                  |
-| **Key Type**               | Specifies the key type: AES-128, AES-256, or Generic secret (variable length 16 to 32 bytes).   |
-| **Mode of Operation**      | Cryptographic mode supported by the key (e.g., CCM*, CMAC, ECB, GCM, HMAC, HKDF).               |
-| **Key Usage**              | Defines permitted operations such as encrypt, decrypt, generate MAC, verify MAC, derive keys.  |
-| **Lock Indicator**         | Controls protection level of the slot: Unlocked, Locked, or Erasable.                           |
-| **Provisioning Control**   | Flags controlling provisioning methods (plaintext, wrapped, derived) and update permissions.    |
-| **Mode-specific Parameters** | Parameters specific to the mode of operation (e.g., authentication tag length for CCM* or GCM). |
+| Attribute                    | Description                                                                                       |
+|------------------------------|---------------------------------------------------------------------------------------------------|
+| **Key Value**                | The actual symmetric key bit string (AES-128, AES-256, or Generic secret key).                    |
+| **Key Type**                 | Specifies the key type: AES-128, AES-256, or Generic secret (variable length 16 to 32 bytes).     |
+| **Mode of Operation**        | Cryptographic mode supported by the key (e.g., CCM*, CMAC, ECB, GCM, HMAC, HKDF).                 |
+| **Key Usage**                | Defines permitted operations such as encrypt, decrypt, generate MAC, verify MAC, derive keys.     |
+| **Lock Indicator**           | Controls protection level of the slot: Unlocked, Locked, or Erasable.                             |
+| **Provisioning Control**     | Flags controlling provisioning methods (plaintext, wrapped, derived) and update permissions.      |
+| **Mode-specific Parameters** | Parameters specific to the mode of operation (e.g., authentication tag length for CCM* or GCM).   |
 
 
 ## Applicative Usage of Symmetric Key Slots
@@ -40,16 +42,18 @@ Each symmetric key slot includes the following key attributes:
 
 ## Key Usage and Modes of Operation
 
-| Mode of Operation | Supported Key Types       | Supported Key Usages                          |
-|-------------------|---------------------------|----------------------------------------------|
-| **CCM\***         | AES-128, AES-256          | Encrypt, Decrypt, Encrypt by chunks, Decrypt by chunks |
-| **ECB**           | AES-128, AES-256          | Encrypt, Decrypt                             |
+| Mode of Operation | Supported Key Types       | Supported Key Usages                                         |
+|-------------------|---------------------------|--------------------------------------------------------------|
+| **CCM\***         | AES-128, AES-256          | Encrypt, Decrypt, Encrypt by chunks, Decrypt by chunks       |
+| **ECB**           | AES-128, AES-256          | Encrypt, Decrypt                                             |
 | **GCM**           | AES-128, AES-256          | Encrypt, Decrypt, Encrypt by chunks, Decrypt by chunks, GMAC |
-| **CMAC**          | AES-128, AES-256          | Generate MAC, Verify MAC                     |
-| **HMAC**          | Generic secret            | Generate MAC, Verify MAC                     |
-| **HKDF**          | Generic secret            | Derive keys                                  |
+| **CMAC**          | AES-128, AES-256          | Generate MAC, Verify MAC                                     |
+| **HMAC**          | Generic secret            | Generate MAC, Verify MAC                                     |
+| **HKDF**          | Generic secret            | Derive keys                                                  |
 
-> **NOTE:** AES CTR mode is supported as a sub-mode of CCM* with specific configuration. GMAC is supported as a specialization of GCM mode for authentication only.
+> **NOTE:**  
+> AES CTR mode is supported as a sub-mode of CCM* with specific configuration.  
+> GMAC is supported as a specialization of GCM mode for authentication only.
 
 ## Provisioning Control and Security
 
@@ -63,5 +67,7 @@ Each symmetric key slot includes the following key attributes:
 
 ## Key Management
 
- Keys can be securely erased using the **Erase Symmetric Key Slot** command if the slot is marked as Erasable or Unlocked. Usage limits and access conditions can be configured to restrict key operations and enhance security.
-The device supports atomic and chunked encryption/decryption operations for handling large data securely. Symmetric keys never leave the device in plaintext when wrapped provisioning is used, ensuring key confidentiality.
+Keys can be securely erased using the **Erase Symmetric Key Slot** command if the slot is marked as Erasable or Unlocked.  
+Usage limits and access conditions can be configured to restrict key operations and enhance security.  
+The device supports atomic and chunked encryption/decryption operations for handling large data securely.  
+Symmetric keys never leave the device in plaintext when wrapped provisioning is used, ensuring key confidentiality.
