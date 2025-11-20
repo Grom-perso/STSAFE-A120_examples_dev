@@ -1,14 +1,17 @@
 # Getting Started with STSAFE-A120 SPL05 Generic Sample Profile {#STSAFE-A120_How_to_use_STSAFE-A120_SPL05}
 
-This section summarizes the mandatory steps and key information to start using the STSAFE-A120 device configured with the SPL05 generic sample profile .
+This section summarizes the mandatory steps and key information to start using the STSAFE-A120 device configured with the SPL05 generic sample profile.
+
 Detailed profile description is available on [www.st.com](https://www.st.com/resource/en/application_note/an6053-stsafea120-spl05-generic-sample-profile-description-stmicroelectronics.pdf)
 
 
 ## Overview of SPL05 Profile
 
-The SPL05 profile provides a flexible, secure configuration of the STSAFE-A120 device, suitable for a wide range of applications. Key features include:
+The SPL05 profile provides a flexible, secure configuration of the STSAFE-A120 device, suitable for a wide range of applications.  
+Key features include:
 
-- **Preprovisioned NIST P-256 private key (Slot 0)** associated with a unique X.509 leaf certificate stored in User NVM Slot 0. This certificate is compatible with Amazon JIT and Microsoft Azure and attested by the ST root CA.
+- **Preprovisioned NIST P-256 private key (Slot 0)** associated with a unique X.509 leaf certificate stored in User NVM Slot 0.  
+  This certificate is compatible with Amazon JIT and Microsoft Azure and attested by the ST root CA.
 - **Four additional private key slots (Slots 1-4)** available for asymmetric cryptography use cases.
 - **Four provisionable public key slots** for external entity authentication.
 - **Sixteen provisionable symmetric key slots** for symmetric cryptography.
@@ -54,7 +57,7 @@ The SPL05 profile provides a flexible, secure configuration of the STSAFE-A120 d
 - User NVM zones are configured with read and update access conditions.
 - Zone 0 contains the leaf certificate and is non-erasable.
 - Other zones can be used to store certificates, data, or counters as needed.
-- Use `Read`, `Update`, and `Decrement` commands to access and modify User NVM data respecting access conditions.
+- Use `Read`, `Update` and `Decrement` commands to access and modify User NVM data respecting access conditions.
 
 ### Step 7: Implement Cryptographic Operations
 

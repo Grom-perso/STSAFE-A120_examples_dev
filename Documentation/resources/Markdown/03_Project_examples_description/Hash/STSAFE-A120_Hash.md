@@ -23,9 +23,6 @@ The following diagram shows the interactions between host and target STSAFE devi
 	participant HOST order 1
 	participant STSAFE order 2
 	rnote over HOST: Initialize STSAFE device handler\n (STSAFE-A120 ; addr 0x20)
-	
-
-	end
 @enduml
 
 

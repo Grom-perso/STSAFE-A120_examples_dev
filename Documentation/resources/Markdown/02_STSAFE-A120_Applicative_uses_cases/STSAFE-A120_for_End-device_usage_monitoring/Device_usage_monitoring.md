@@ -1,6 +1,10 @@
 # STSAFE-A120 for End-Device Secure Storage and Usage Monitoring {#End_device_life_cycle_monitoring}
 
-The STSAFE-A120 secure element is a highly integrated, hardware-based solution specifically designed to meet the security requirements of embedded systems. By leveraging its tamper-resistant architecture, the STSAFE-A120 provides a secure environment for the storage and management of sensitive assets, such as cryptographic secrets, device configuration parameters, and usage records. This isolation of critical data within the secure element ensures robust protection against unauthorized access, extraction, or manipulation, thereby enhancing the overall trustworthiness of the device.
+The STSAFE-A120 secure element is a highly integrated, hardware-based solution specifically designed to meet the security requirements of embedded systems.
+
+By leveraging its tamper-resistant architecture, the STSAFE-A120 provides a secure environment for the storage and management of sensitive assets, such as cryptographic secrets, device configuration parameters, and usage records.
+
+This isolation of critical data within the secure element ensures robust protection against unauthorized access, extraction, or manipulation, thereby enhancing the overall trustworthiness of the device.
 
 ![Powertool battery read manufacturing information](Drill_read_zone_1.png)
 
@@ -10,16 +14,20 @@ The STSAFE-A120 secure element is a highly integrated, hardware-based solution s
 The integration of STSAFE-A120 devices provides several key security benefits:
 
 - **Tamper-Resistant Hardware:**  
-    The STSAFE-A120 incorporates advanced countermeasures against both physical and logical attacks. Its secure architecture is engineered to withstand invasive and non-invasive threats, ensuring that sensitive information remains protected throughout the device’s lifecycle.
+    The STSAFE-A120 incorporates advanced countermeasures against both physical and logical attacks.  
+    Its secure architecture is engineered to withstand invasive and non-invasive threats, ensuring that sensitive information remains protected throughout the device’s lifecycle.
 
 - **Monotonic Counters and Secure Memory:**  
-    Integrated monotonic counters and secure memory blocks enable reliable tracking of device usage events. These counters are designed to prevent rollback or tampering attempts, supporting accurate monitoring of operational cycles, consumable usage, or maintenance events.
+    Integrated monotonic counters and secure memory blocks enable reliable tracking of device usage events.  
+    These counters are designed to prevent rollback or tampering attempts, supporting accurate monitoring of operational cycles, consumable usage, or maintenance events.
 
 - **Secure Messaging Protocols:**  
-    The device supports secure messaging protocols that authenticate and encrypt communications between the host microcontroller and the secure element. This ensures both data integrity and confidentiality, protecting against eavesdropping and command injection.
+    The device supports secure messaging protocols that authenticate and encrypt communications between the host microcontroller and the secure element.  
+    This ensures both data integrity and confidentiality, protecting against eavesdropping and command injection.
 
 - **Flexible User-NVM Zones:**  
-    Up to 16 kBytes of User-NVM memory can be partitioned into multiple logical zones. Each zone can be configured with customizable access conditions and optional counter functionality, allowing for granular control over data storage and access rights.
+    Up to 16 kBytes of User-NVM memory can be partitioned into multiple logical zones.  
+    Each zone can be configured with customizable access conditions and optional counter functionality, allowing for granular control over data storage and access rights.
 
 The STSAFE-A120’s flexible User-NVM zones provide original equipment manufacturers (OEMs) with the capability to securely store and monitor a wide variety of end-device information, including but not limited to:
 
@@ -38,20 +46,26 @@ The STSAFE-A120’s flexible User-NVM zones provide original equipment manufactu
     - Prevention of unwanted excessive use of the device  
     - Limitation of accessory usage via one-way counters  
 
-Monitoring device usage is essential for several reasons, including brand protection, product traceability, mitigation of gray market activities, and enforcement of quality and safety standards. The STSAFE-A120 enables OEMs to implement these controls in a secure and auditable manner.
+Monitoring device usage is essential for several reasons, including brand protection, product traceability, mitigation of gray market activities, and enforcement of quality and safety standards.  
+The STSAFE-A120 enables OEMs to implement these controls in a secure and auditable manner.
 
-> **IMPORTANT:** Host key provisioning and secure session enablement are prerequisites for secure access to the STSAFE-A120 User-NVM. Refer to the relevant section for further details on establishing secure communication channels.
+> **IMPORTANT:**  
+> Host key provisioning and secure session enablement are prerequisites for secure access to the STSAFE-A120 User-NVM.  
+> Refer to the relevant section for further details on establishing secure communication channels.
 
 ## STSAFE-A120 User-NVM Partitioning
 
-The STSAFE-A120 device features up to 16 kBytes of physical User-NVM memory, which is intended for storing customer digital assets and monitoring end-application usage. This memory is partitioned into logical zones, as defined in the chip personalization profile during manufacturing at the STMicroelectronics factory.
+The STSAFE-A120 device features up to 16 kBytes of physical User-NVM memory, which is intended for storing customer digital assets and monitoring end-application usage.  
+This memory is partitioned into logical zones, as defined in the chip personalization profile during manufacturing at the STMicroelectronics factory.
 
 Below is an extract from the [STSAFE-A120 SPL05 Generic sample profile description](https://www.st.com/resource/en/application_note/an6053-stsafea120-spl05-generic-sample-profile-description-stmicroelectronics.pdf), illustrating device User-NVM partitioning:
 
 ![User NVM Partitioning](SPL05_User_NVM_Partitioning.png)
 ![User NVM Partitioning Extended](SPL05_User_NVM_Partitioning_ext.png)
 
-> **Note:** STSAFE-A120 User-NVM can be pre-provisioned with custom partitioning data that are part of a static personalization profile defining the number of zones, their sizes, and the presence of one-way counters. This profile is defined per customer and loaded at the STMicroelectronics Secure Factory . this profile cannot be changed post-manufacturing.
+> **Note:**  
+> STSAFE-A120 User-NVM can be pre-provisioned with custom partitioning data that are part of a static personalization profile defining the number of zones, their sizes, and the presence of one-way counters.  
+> This profile is defined per customer and loaded at the STMicroelectronics Secure Factory . this profile cannot be changed post-manufacturing.
 
 ### Types of User-NVM Zones
 
@@ -61,13 +75,16 @@ The STSAFE-A120 supports two primary types of User-NVM zones:
     These are standard data storage zones, suitable for storing configuration data, logs, or other information that does not require usage tracking.
 
 - **Zone with Counter:**  
-    These zones are equipped with a monotonic counter, enabling secure tracking of usage events. Counters are ideal for applications such as consumable management, warranty enforcement, or access limitation.
+    These zones are equipped with a monotonic counter, enabling secure tracking of usage events.  
+    Counters are ideal for applications such as consumable management, warranty enforcement, or access limitation.
 
 Each zone is uniquely addressable and can be accessed via Read, Update, and Increment commands, depending on its configuration.
 
 ## STSAFE-A120 User-NVM Data Zones
 
-User-NVM Data Zones are memory blocks accessible by the host processor using Read and Update commands. These zones are suitable for storing configuration data, logs, and other non-counter information. Following diagram shows the interaction performed between Host processor and STSAFE-A120 when reading and updating a zone. 
+User-NVM Data Zones are memory blocks accessible by the host processor using Read and Update commands.  
+These zones are suitable for storing configuration data, logs, and other non-counter information.  
+Following diagram shows the interaction performed between Host processor and STSAFE-A120 when reading and updating a zone. 
 
 @startuml
     'Define participant (define order = display order left to right)
@@ -98,7 +115,8 @@ User-NVM Data Zones are memory blocks accessible by the host processor using Rea
     activate HOST $ST_DARK_BLUE_25
 @enduml
 
-When updating a zone, atomicity can be requested to ensure data integrity. If a power failure interrupts command processing, atomicity guarantees that the update is either fully completed or not performed at all, preventing partial writes and data corruption.
+When updating a zone, atomicity can be requested to ensure data integrity.  
+If a power failure interrupts command processing, atomicity guarantees that the update is either fully completed or not performed at all, preventing partial writes and data corruption.
 
 ## STSAFE-A120 User NVM Counter Zones
 
@@ -108,7 +126,10 @@ Counter Zones consist of a 4-byte monotonic counter and an associated data block
 | :---: | :---: |
 | (4-Byte) | (optional; n-bytes) |
 
-The counter is initialized according to the device personalization profile. The decrement command reduces the counter by a specified amount and can optionally update the associated data. Associated data can be used to record information about each decrement event, such as the date or the triggering event. All decrement operations are atomic, ensuring data consistency even in the event of power loss.
+The counter is initialized according to the device personalization profile.  
+The decrement command reduces the counter by a specified amount and can optionally update the associated data.  
+Associated data can be used to record information about each decrement event, such as the date or the triggering event.  
+All decrement operations are atomic, ensuring data consistency even in the event of power loss.
 
 The following diagram shows the interaction performed between Host processor and STSAFE-A120 when reading and decrementing a User-NVM counter zone. 
 
@@ -155,7 +176,9 @@ The possible values for these access conditions are:
 | Host  | 001b | Access restricted to hosts with a valid host key. |
 | Never  | Other | Access is never granted. |
 
-> **Note:** Access conditions are sorted by increasing strictness. Each zone’s AC change right attribute indicates whether its access conditions can be changed to a stricter value.
+> **Note:**  
+> Access conditions are sorted by increasing strictness.  
+> Each zone’s AC change right attribute indicates whether its access conditions can be changed to a stricter value.
 
 | Applicative Zone Type | Read AC | Update/Decrement AC | 
 | :--- | :---: | :---: |
@@ -166,7 +189,8 @@ The possible values for these access conditions are:
 | Terminated zone | Never | Never | 
 
 
-when AC is set to "Host" , interactions Message Authentication Codes (MAC) ensure authenticity and integrity of commands and responses, protecting against malicious data injection during updates. The following diagram shows the interaction performed between Host processor and STSAFE-A120 when updating a User-NVM data zone through host authenticated channel. 
+when AC is set to "Host" , interactions Message Authentication Codes (MAC) ensure authenticity and integrity of commands and responses, protecting against malicious data injection during updates.  
+The following diagram shows the interaction performed between Host processor and STSAFE-A120 when updating a User-NVM data zone through host authenticated channel. 
 
 @startuml
     !define KEY <size:20><&key></size>
@@ -203,7 +227,9 @@ when AC is set to "Host" , interactions Message Authentication Codes (MAC) ensur
     activate HOST $ST_DARK_BLUE_25
 @enduml
 
-On top of Zone Access condition , Host key encryption can be enabled at the User-NVM command level (read/update/decrement). Enabling this option allows to encrypt the exchanges performed between Host and STSAFE-A120. The following diagram shows the interaction performed between Host processor and STSAFE-A120 when updating a User-NVM data zone through host secure channel. 
+On top of Zone Access condition, Host key encryption can be enabled at the User-NVM command level (read/update/decrement).  
+Enabling this option allows to encrypt the exchanges performed between Host and STSAFE-A120.  
+The following diagram shows the interaction performed between Host processor and STSAFE-A120 when updating a User-NVM data zone through host secure channel. 
 
 @startuml
     !define KEY <size:20><&key></size>
@@ -266,7 +292,9 @@ On top of Zone Access condition , Host key encryption can be enabled at the User
 
 @enduml
 
-> **IMPORTANT:** In STSAFE-A120, Host key encryption can be enabled at the command level (read/update/decrement), not at the zone level. When enabled, encryption applies to all zones.
+> **IMPORTANT:**  
+> In STSAFE-A120, Host key encryption can be enabled at the command level (read/update/decrement), not at the zone level.  
+> When enabled, encryption applies to all zones.
 
 ## Related examples
 
