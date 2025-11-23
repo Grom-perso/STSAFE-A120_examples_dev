@@ -353,7 +353,7 @@
                     <state>$PROJ_DIR$\..\</state>
                     <state>$PROJ_DIR$\..\..\..\Apps_utils</state>
                     <state>$PROJ_DIR$\..\..\..\..\</state>
-                    <state>$PROJ_DIR$\..\..\..\..\Middleware\STM32_Cryptographic\include</state>
+                    <state>$PROJ_DIR$\..\..\..\..\Middleware\mbedtls\include</state>
                     <state>$PROJ_DIR$\..\..\..\..\Middleware\STSELib</state>
                     <state>$PROJ_DIR$\..\..\..\..\Platform</state>
                     <state>$PROJ_DIR$\..\..\..\..\Platform\Core\CMSIS\Include</state>
@@ -1446,7 +1446,7 @@
                     <state>$PROJ_DIR$\..\</state>
                     <state>$PROJ_DIR$\..\..\..\Apps_utils</state>
                     <state>$PROJ_DIR$\..\..\..\..\</state>
-                    <state>$PROJ_DIR$\..\..\..\..\Middleware\STM32_Cryptographic\include</state>
+                    <state>$PROJ_DIR$\..\..\..\..\Middleware\mbedtls\include</state>
                     <state>$PROJ_DIR$\..\..\..\..\Middleware\STSELib</state>
                     <state>$PROJ_DIR$\..\..\..\..\Platform</state>
                     <state>$PROJ_DIR$\..\..\..\..\Platform\Core\CMSIS\Include</state>
@@ -2211,10 +2211,10 @@
         <group>
             <name>STM32CryptoLib</name>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Middleware\STM32_Cryptographic\interface\cmox_low_level.c</name>
+                <name>$PROJ_DIR$\..\..\..\..\Middleware\mbedtls\interface\cmox_low_level.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Middleware\STM32_Cryptographic\lib\libSTM32Cryptographic_CM4.a</name>
+                <name>$PROJ_DIR$\..\..\..\..\Middleware\mbedtls\lib\libSTM32Cryptographic_CM4.a</name>
             </file>
         </group>
         <group>
