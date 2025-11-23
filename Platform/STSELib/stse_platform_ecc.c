@@ -316,7 +316,7 @@ stse_ReturnCode_t stse_platform_ecc_generate_key_pair(
 
     /* Generate key pair using platform RNG */
     retval = mbedtls_ecp_gen_keypair(&ecp_keypair.grp, &ecp_keypair.d, &ecp_keypair.Q,
-                                     stse_platform_generate_random, NULL);
+                                     stse_platform_mbedtls_rng, NULL);
     if (retval != 0) {
         mbedtls_ecp_keypair_free(&ecp_keypair);
         return STSE_PLATFORM_ECC_GENERATE_KEY_PAIR_ERROR;
@@ -405,7 +405,7 @@ stse_ReturnCode_t stse_platform_ecc_sign(
     /* Sign message */
     retval = mbedtls_ecdsa_sign(&ecp_keypair.grp, &r, &s, &ecp_keypair.d,
                                 pDigest, digestLen,
-                                stse_platform_generate_random, NULL);
+                                stse_platform_mbedtls_rng, NULL);
     if (retval != 0) {
         goto cleanup;
     }
@@ -489,7 +489,7 @@ stse_ReturnCode_t stse_platform_ecc_ecdh(
 
     /* Compute shared secret: z = d_local * Q_peer */
     retval = mbedtls_ecdh_compute_shared(&grp, &z, &Q_peer, &d_local,
-                                         stse_platform_generate_random, NULL);
+                                         stse_platform_mbedtls_rng, NULL);
     if (retval != 0) {
         goto cleanup;
     }

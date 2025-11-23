@@ -4,6 +4,3 @@
 [submodule "Middleware/mbedtls"]
 	path = Middleware/mbedtls
 	url = https://github.com/Mbed-TLS/mbedtls.git
-[submodule "Middleware/mbedtls"]
-	path = Middleware/mbedtls
-	url = https://github.com/Mbed-TLS/mbedtls.git

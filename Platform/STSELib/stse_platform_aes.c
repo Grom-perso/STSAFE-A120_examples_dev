@@ -68,10 +68,10 @@ stse_ReturnCode_t stse_platform_aes_cmac_init(const PLAT_UI8 *pKey,
 }
 
 stse_ReturnCode_t stse_platform_aes_cmac_append(PLAT_UI8 *pInput,
-                                                PLAT_UI16 lenght) {
+                                                PLAT_UI16 length) {
     int retval;
 
-    retval = mbedtls_cipher_cmac_update(&CMAC_Handler, pInput, lenght);
+    retval = mbedtls_cipher_cmac_update(&CMAC_Handler, pInput, length);
 
     if (retval != 0) {
         return STSE_PLATFORM_AES_CMAC_COMPUTE_ERROR;
