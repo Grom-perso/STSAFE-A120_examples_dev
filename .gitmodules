@@ -4,3 +4,4 @@
 [submodule "Middleware/mbedtls"]
 	path = Middleware/mbedtls
 	url = https://github.com/Mbed-TLS/mbedtls.git
+	branch = v3.6.2

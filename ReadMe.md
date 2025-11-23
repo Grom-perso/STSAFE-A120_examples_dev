@@ -39,7 +39,7 @@ or compiled from the library sources by executing following commands from the ST
 
 ## Installing the MbedTLS Cryptographic Library
 
-This package uses **MbedTLS v3.6.2** as the cryptographic library, which is included as a git submodule.
+This package uses **MbedTLS v3.6.2** (tag: v3.6.2, commit: 107ea89daa) as the cryptographic library, which is included as a git submodule pinned to this specific version.
 
 To initialize the MbedTLS submodule after cloning the repository:
 
@@ -47,7 +47,7 @@ To initialize the MbedTLS submodule after cloning the repository:
 git submodule update --init --recursive
 ```
 
-> **NOTE**: MbedTLS is an open-source cryptographic library licensed under Apache 2.0. The examples in this package require the MbedTLS submodule to be initialized.
+> **NOTE**: MbedTLS is an open-source cryptographic library licensed under Apache 2.0. The submodule is pinned to tag v3.6.2 to ensure stability and reproducibility. The examples in this package require the MbedTLS submodule to be initialized.
 
 
 
