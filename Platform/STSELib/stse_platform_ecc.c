@@ -15,124 +15,126 @@
  ******************************************************************************
  */
 
-#include "Middleware/STM32_Cryptographic/include/cmox_crypto.h"
+#include "mbedtls/ecdsa.h"
+#include "mbedtls/ecdh.h"
+#include "mbedtls/ecp.h"
+#include "mbedtls/nist_kw.h"
+#include "mbedtls/entropy.h"
+#include "mbedtls/ctr_drbg.h"
 #include "stse_conf.h"
 #include "stselib.h"
 
-cmox_ecc_handle_t Ecc_Ctx;
-PLAT_UI8 cmox_math_buffer[2400];
-
-static cmox_ecc_impl_t stse_platform_get_cmox_ecc_impl(stse_ecc_key_type_t key_type) {
+static mbedtls_ecp_group_id stse_platform_get_mbedtls_ecp_group_id(stse_ecc_key_type_t key_type) {
     switch (key_type) {
 #ifdef STSE_CONF_ECC_NIST_P_256
     case STSE_ECC_KT_NIST_P_256:
-        return CMOX_ECC_SECP256R1_LOWMEM;
+        return MBEDTLS_ECP_DP_SECP256R1;
 #endif
 #ifdef STSE_CONF_ECC_NIST_P_384
     case STSE_ECC_KT_NIST_P_384:
-        return CMOX_ECC_SECP384R1_LOWMEM;
+        return MBEDTLS_ECP_DP_SECP384R1;
 #endif
 #ifdef STSE_CONF_ECC_NIST_P_521
     case STSE_ECC_KT_NIST_P_521:
-        return CMOX_ECC_SECP521R1_LOWMEM;
+        return MBEDTLS_ECP_DP_SECP521R1;
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_256
     case STSE_ECC_KT_BP_P_256:
-        return CMOX_ECC_BPP256R1_LOWMEM;
+        return MBEDTLS_ECP_DP_BP256R1;
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_384
     case STSE_ECC_KT_BP_P_384:
-        return CMOX_ECC_BPP384R1_LOWMEM;
+        return MBEDTLS_ECP_DP_BP384R1;
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_512
     case STSE_ECC_KT_BP_P_512:
-        return CMOX_ECC_BPP512R1_LOWMEM;
+        return MBEDTLS_ECP_DP_BP512R1;
 #endif
 #ifdef STSE_CONF_ECC_CURVE_25519
     case STSE_ECC_KT_CURVE25519:
-        return CMOX_ECC_CURVE25519;
+        return MBEDTLS_ECP_DP_CURVE25519;
 #endif
 #ifdef STSE_CONF_ECC_EDWARD_25519
     case STSE_ECC_KT_ED25519:
-        return CMOX_ECC_ED25519_OPT_LOWMEM;
+        return MBEDTLS_ECP_DP_CURVE25519;  /* MbedTLS uses Curve25519 for Ed25519 operations */
 #endif
     default:
-        return NULL;
+        return MBEDTLS_ECP_DP_NONE;
     }
 }
 
-static size_t stse_platform_get_cmox_ecc_pub_key_len(stse_ecc_key_type_t key_type) {
+static size_t stse_platform_get_ecc_pub_key_len(stse_ecc_key_type_t key_type) {
     switch (key_type) {
 #ifdef STSE_CONF_ECC_NIST_P_256
     case STSE_ECC_KT_NIST_P_256:
-        return CMOX_ECC_SECP256R1_PUBKEY_LEN;
+        return 65;  /* 1 + 2*32 for uncompressed format */
 #endif
 #ifdef STSE_CONF_ECC_NIST_P_384
     case STSE_ECC_KT_NIST_P_384:
-        return CMOX_ECC_SECP384R1_PUBKEY_LEN;
+        return 97;  /* 1 + 2*48 for uncompressed format */
 #endif
 #ifdef STSE_CONF_ECC_NIST_P_521
     case STSE_ECC_KT_NIST_P_521:
-        return CMOX_ECC_SECP521R1_PUBKEY_LEN;
+        return 133;  /* 1 + 2*66 for uncompressed format */
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_256
     case STSE_ECC_KT_BP_P_256:
-        return CMOX_ECC_BPP256R1_PUBKEY_LEN;
+        return 65;  /* 1 + 2*32 for uncompressed format */
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_384
     case STSE_ECC_KT_BP_P_384:
-        return CMOX_ECC_BPP384R1_PUBKEY_LEN;
+        return 97;  /* 1 + 2*48 for uncompressed format */
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_512
     case STSE_ECC_KT_BP_P_512:
-        return CMOX_ECC_BPP512R1_PUBKEY_LEN;
+        return 129;  /* 1 + 2*64 for uncompressed format */
 #endif
 #ifdef STSE_CONF_ECC_CURVE_25519
     case STSE_ECC_KT_CURVE25519:
-        return CMOX_ECC_CURVE25519_PUBKEY_LEN;
+        return 32;
 #endif
 #ifdef STSE_CONF_ECC_EDWARD_25519
     case STSE_ECC_KT_ED25519:
-        return CMOX_ECC_ED25519_PUBKEY_LEN;
+        return 32;
 #endif
     default:
         return 0u;
     }
 }
 
-static size_t stse_platform_get_cmox_ecc_sig_len(stse_ecc_key_type_t key_type) {
+static size_t stse_platform_get_ecc_sig_len(stse_ecc_key_type_t key_type) {
     switch (key_type) {
 #ifdef STSE_CONF_ECC_NIST_P_256
     case STSE_ECC_KT_NIST_P_256:
-        return CMOX_ECC_SECP256R1_SIG_LEN;
+        return 64;  /* 2*32 for r,s */
 #endif
 #ifdef STSE_CONF_ECC_NIST_P_384
     case STSE_ECC_KT_NIST_P_384:
-        return CMOX_ECC_SECP384R1_SIG_LEN;
+        return 96;  /* 2*48 for r,s */
 #endif
 #ifdef STSE_CONF_ECC_NIST_P_521
     case STSE_ECC_KT_NIST_P_521:
-        return CMOX_ECC_SECP521R1_SIG_LEN;
+        return 132;  /* 2*66 for r,s */
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_256
     case STSE_ECC_KT_BP_P_256:
-        return CMOX_ECC_BPP256R1_SIG_LEN;
+        return 64;  /* 2*32 for r,s */
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_384
     case STSE_ECC_KT_BP_P_384:
-        return CMOX_ECC_BPP384R1_SIG_LEN;
+        return 96;  /* 2*48 for r,s */
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_512
     case STSE_ECC_KT_BP_P_512:
-        return CMOX_ECC_BPP512R1_SIG_LEN;
+        return 128;  /* 2*64 for r,s */
 #endif
 #ifdef STSE_CONF_ECC_CURVE_25519
     case STSE_ECC_KT_CURVE25519:
-        return STSE_OK; /* No signature with curve25519 */
+        return 0; /* No signature with curve25519 */
 #endif
 #ifdef STSE_CONF_ECC_EDWARD_25519
     case STSE_ECC_KT_ED25519:
-        return CMOX_ECC_ED25519_SIG_LEN;
+        return 64;
 #endif
     default:
         return 0u;
@@ -465,27 +467,42 @@ stse_ReturnCode_t stse_platform_ecc_ecdh(
     defined(STSE_CONF_USE_SYMMETRIC_KEY_PROVISIONING_WRAPPED) ||          \
     defined(STSE_CONF_USE_SYMMETRIC_KEY_PROVISIONING_WRAPPED_AUTHENTICATED)
 
-#define KEK_WRAP_IV_SIZE 8
-const PLAT_UI8 KEK_WRAP_IV[KEK_WRAP_IV_SIZE] = {0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6};
-
 stse_ReturnCode_t stse_platform_nist_kw_encrypt(PLAT_UI8 *pPayload, PLAT_UI32 payload_length,
                                                 PLAT_UI8 *pKey, PLAT_UI8 key_length,
                                                 PLAT_UI8 *pOutput, PLAT_UI32 *pOutput_length) {
-    cmox_cipher_retval_t retval;
-    size_t cmox_output_length = *pOutput_length;
+    int retval;
+    mbedtls_nist_kw_context kw_ctx;
+    size_t output_length = 0;
 
-    retval = cmox_cipher_encrypt(
-        CMOX_AESSMALL_KEYWRAP_ENC_ALGO,
-        pPayload, payload_length,
-        pKey, key_length,
-        KEK_WRAP_IV, KEK_WRAP_IV_SIZE,
-        pOutput, &cmox_output_length);
+    mbedtls_nist_kw_init(&kw_ctx);
 
-    if (retval != CMOX_CIPHER_SUCCESS) {
+    /* Set key wrap key */
+    retval = mbedtls_nist_kw_setkey(&kw_ctx,
+                                    MBEDTLS_CIPHER_ID_AES,
+                                    pKey,
+                                    key_length * 8,
+                                    1);  /* 1 for wrap (encrypt) */
+    if (retval != 0) {
+        mbedtls_nist_kw_free(&kw_ctx);
         return STSE_PLATFORM_KEYWRAP_ERROR;
     }
 
-    *pOutput_length = (PLAT_UI32)cmox_output_length;
+    /* Perform key wrap */
+    retval = mbedtls_nist_kw_wrap(&kw_ctx,
+                                  MBEDTLS_KW_MODE_KW,
+                                  pPayload,
+                                  payload_length,
+                                  pOutput,
+                                  &output_length,
+                                  *pOutput_length);
+
+    mbedtls_nist_kw_free(&kw_ctx);
+
+    if (retval != 0) {
+        return STSE_PLATFORM_KEYWRAP_ERROR;
+    }
+
+    *pOutput_length = (PLAT_UI32)output_length;
 
     return STSE_OK;
 }
