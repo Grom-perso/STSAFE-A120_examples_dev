@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>__VFP_FP__, STM32L452xx, DEBUG</Define>
               <Undefine></Undefine>
-              <IncludePath>..\;..\..\..\Apps_utils;..\..\..\..\;..\..\..\..\Middleware\STM32_Cryptographic\include;..\..\..\..\Middleware\STSELib;..\..\..\..\Platform;..\..\..\..\Platform\Core\CMSIS\Include;..\..\..\..\Platform\Core\CMSIS\Device\ST\STM32L4xx\Include;..\..\..\..\Platform\STSELib</IncludePath>
+              <IncludePath>..\;..\..\..\Apps_utils;..\..\..\..\;..\..\..\..\Middleware\mbedtls\include;..\..\..\..\Middleware\STSELib;..\..\..\..\Platform;..\..\..\..\Platform\Core\CMSIS\Include;..\..\..\..\Platform\Core\CMSIS\Device\ST\STM32L4xx\Include;..\..\..\..\Platform\STSELib</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -407,12 +407,12 @@
             <File>
               <FileName>cmox_low_level.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\Middleware\STM32_Cryptographic\interface\cmox_low_level.c</FilePath>
+              <FilePath>..\..\..\..\Middleware\mbedtls\interface\cmox_low_level.c</FilePath>
             </File>
             <File>
               <FileName>libSTM32Cryptographic_CM4.a</FileName>
               <FileType>4</FileType>
-              <FilePath>..\..\..\..\Middleware\STM32_Cryptographic\lib\libSTM32Cryptographic_CM4.a</FilePath>
+              <FilePath>..\..\..\..\Middleware\mbedtls\lib\libSTM32Cryptographic_CM4.a</FilePath>
             </File>
           </Files>
         </Group>
@@ -1080,7 +1080,7 @@
               <MiscControls></MiscControls>
               <Define>__VFP_FP__, STM32L452xx</Define>
               <Undefine></Undefine>
-              <IncludePath>..\;..\..\..\Apps_utils;..\..\..\..\;..\..\..\..\Middleware\STM32_Cryptographic\include;..\..\..\..\Middleware\STSELib;..\..\..\..\Platform;..\..\..\..\Platform\Core\CMSIS\Include;..\..\..\..\Platform\Core\CMSIS\Device\ST\STM32L4xx\Include;..\..\..\..\Platform\STSELib</IncludePath>
+              <IncludePath>..\;..\..\..\Apps_utils;..\..\..\..\;..\..\..\..\Middleware\mbedtls\include;..\..\..\..\Middleware\STSELib;..\..\..\..\Platform;..\..\..\..\Platform\Core\CMSIS\Include;..\..\..\..\Platform\Core\CMSIS\Device\ST\STM32L4xx\Include;..\..\..\..\Platform\STSELib</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1147,12 +1147,12 @@
             <File>
               <FileName>cmox_low_level.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\Middleware\STM32_Cryptographic\interface\cmox_low_level.c</FilePath>
+              <FilePath>..\..\..\..\Middleware\mbedtls\interface\cmox_low_level.c</FilePath>
             </File>
             <File>
               <FileName>libSTM32Cryptographic_CM4.a</FileName>
               <FileType>4</FileType>
-              <FilePath>..\..\..\..\Middleware\STM32_Cryptographic\lib\libSTM32Cryptographic_CM4.a</FilePath>
+              <FilePath>..\..\..\..\Middleware\mbedtls\lib\libSTM32Cryptographic_CM4.a</FilePath>
             </File>
           </Files>
         </Group>

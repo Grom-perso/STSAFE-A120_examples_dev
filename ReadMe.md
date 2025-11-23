@@ -15,7 +15,7 @@ Following HW/SW prerequisites are required to work with the package
     - [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html)
     - [Keil uVision 5.37](https://www.st.com/en/partner-products-and-services/arm-keil-mdk.html)
     - [IAR ewarm 9.40.1](https://www.st.com/en/partner-products-and-services/iar-embedded-workbench-for-arm.html)
-  - [X-CUBE-CRYPTOLIB 4.5.0](https://www.st.com/en/embedded-software/x-cube-cryptolib.html)
+  - [MbedTLS 3.6.2](https://github.com/Mbed-TLS/mbedtls) (included as submodule)
   - [Doxygen v1.14.0](https://github.com/doxygen/doxygen/releases/tag/Release_1_14_0) 
 
 Please refer to package documentation to get information on how to get started with the package.
@@ -37,14 +37,17 @@ or compiled from the library sources by executing following commands from the ST
 > Doxygen version 1.14.0 is required to build the documentation  
 
 
-## Installing the STM32 Cryptolibrary 
+## Installing the MbedTLS Cryptographic Library
 
-Due to **STM32 Cryptographic library** license agreement enforcement (required for distributing SW module under SLA088) . 
-This package does not include the library objects and headers .
+This package uses **MbedTLS v3.6.2** (tag: v3.6.2, commit: 107ea89daa) as the cryptographic library, which is included as a git submodule pinned to this specific version.
 
-Please follow the instructions from ["Middleware/STM32_Cryptographic/ReadMe.md"](Middleware/STM32_Cryptographic/ReadMe.md) to install the library into the package
+To initialize the MbedTLS submodule after cloning the repository:
 
-> **IMPORTANT**: The examples provided in this package are not functional if the **STM32 Cryptographic library** is not installed
+```bash
+git submodule update --init --recursive
+```
+
+> **NOTE**: MbedTLS is an open-source cryptographic library licensed under Apache 2.0. The submodule is pinned to tag v3.6.2 to ensure stability and reproducibility. The examples in this package require the MbedTLS submodule to be initialized.
 
 
 
