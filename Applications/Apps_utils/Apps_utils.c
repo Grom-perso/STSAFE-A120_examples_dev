@@ -138,10 +138,11 @@ stse_ReturnCode_t get_curve_id_key_type(stsafea_ecc_curve_id_t curve_id, stse_ec
  * @param  pSTSE Pointer to STSE handler structure
  * @note   Retrieves and displays all symmetric key slot information including:
  *         - Key type (AES-128/AES-256)
- *         - Mode of operation (CCM*/CMAC/ECB/GCM/HKDF/HMAC)
+ *         - Mode of operation (CCM*;CMAC;ECB;GCM;HKDF;HMAC)
  *         - Key usage flags (derive, MAC generation/verification, encryption/decryption)
  *         - Parameters (MAC length, auth tag length, counter values, HKDF settings)
  */
+
 void apps_print_symmetric_key_table_info(stse_Handler_t *pSTSE) {
     stse_ReturnCode_t ret;
     PLAT_UI8 i;
