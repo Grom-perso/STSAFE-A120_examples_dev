@@ -23,5 +23,8 @@ __docbook
 /.metadata/
 inline_umlgraph_cache_all.pu
 
+# STM32_Cryptographic library
+Middleware/STM32_Cryptographic/
+
 # CodeQL
 _codeql_detected_source_root
