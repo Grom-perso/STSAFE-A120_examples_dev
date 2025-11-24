@@ -22,3 +22,6 @@ __docbook
 *.xml
 /.metadata/
 inline_umlgraph_cache_all.pu
+
+# CodeQL
+_codeql_detected_source_root

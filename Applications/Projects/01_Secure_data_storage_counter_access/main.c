@@ -18,9 +18,22 @@
 #include "Apps_utils.h"
 
 /* Defines -------------------------------------------------------------------*/
-#define READ_BUFFER_SIZE 16
-#define RANDOM_SIZE 16
+#define READ_BUFFER_SIZE 16  /**< Size of read buffer for zone data */
+#define RANDOM_SIZE 16       /**< Size of random data to write */
 
+/**
+ * @brief  Main program entry point - STSAFE-A120 Secure data storage with counter
+ * @details Demonstrates data partition with monotonic counter operations:
+ *          - Queries partition configuration and displays zone information
+ *          - Reads data from zone with counter (zone 0)
+ *          - Reads and displays current counter value
+ *          - Generates random data and updates zone
+ *          - Verifies counter increment after update
+ *          - Demonstrates decrement-only counter functionality
+ * @note   Zone IDs are aligned with STSAFE-A120 SPL05 personalization.
+ *         Counters provide tamper detection by tracking update operations.
+ * @retval Not applicable (infinite loop on success or error)
+ */
 int main(void) {
     stse_ReturnCode_t stse_ret = STSE_API_INVALID_PARAMETER;
     stse_Handler_t stse_handler;
@@ -30,7 +43,7 @@ int main(void) {
     uint32_t counter_value;
     uint32_t new_counter_value;
 
-    /* - Initialize Terminal */
+    /* Initialize Terminal */
     apps_terminal_init(115200);
 
     /* - Print Example instruction on terminal */

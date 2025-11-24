@@ -19,6 +19,20 @@
 
 /* Defines -------------------------------------------------------------------*/
 
+/**
+ * @brief  Main program entry point - STSAFE-A120 Host key provisioning example
+ * @details Demonstrates host key provisioning in plaintext:
+ *          - Queries current host key provisioning control fields
+ *          - Displays warning about enabling re-provisioning
+ *          - Sets host key slot to allow re-provisioning
+ *          - Writes AES-128 host MAC and cipher keys in plaintext
+ *          - Verifies keys by establishing a host session
+ * @warning This example enables permanent re-provisioning access and
+ *          writes test keys - NOT suitable for production use
+ * @note   Host keys enable secure communication channel between host
+ *         and STSAFE-A120 using C-MAC and C-ENC
+ * @retval Not applicable (infinite loop on success or error)
+ */
 int main(void) {
     stse_ReturnCode_t stse_ret = STSE_API_INVALID_PARAMETER;
     stse_Handler_t stse_handler;
@@ -29,7 +43,7 @@ int main(void) {
                             0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF}};
     stsafea_host_key_provisioning_ctrl_fields_t provisioning_ctrl_fields;
 
-    /* - Initialize Terminal */
+    /* Initialize Terminal */
     apps_terminal_init(115200);
 
     /* - Print Example instruction on terminal */

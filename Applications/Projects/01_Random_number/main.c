@@ -19,6 +19,14 @@
 
 /* Defines -------------------------------------------------------------------*/
 
+/**
+ * @brief  Main program entry point - STSAFE-A120 Random number generation example
+ * @details Demonstrates random number generation:
+ *          - Initializes STSAFE-A120 device
+ *          - Generates 64 bytes of random data using STSAFE-A120 TRNG
+ *          - Displays the generated random bytes in hexadecimal format
+ * @retval Not applicable (infinite loop on success or error)
+ */
 int main(void) {
     stse_ReturnCode_t stse_ret = STSE_API_INVALID_PARAMETER;
     stse_Handler_t stse_handler;
@@ -26,7 +34,7 @@ int main(void) {
     PLAT_UI16 random_size = 64;
     PLAT_UI8 pRandom[random_size];
 
-    /* - Initialize Terminal */
+    /* Initialize Terminal */
     apps_terminal_init(115200);
 
     /* - Print Example instruction on terminal */

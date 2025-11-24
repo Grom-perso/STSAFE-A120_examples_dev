@@ -124,6 +124,20 @@ PLAT_UI8 command_encryption_table[] = {
     0x1F, 0x1A, ENCRYPT_NO, /* Decompress public key         */
 };
 
+/**
+ * @brief  Main program entry point - STSAFE-A120 Command AC provisioning
+ * @details Demonstrates command access condition provisioning:
+ *          - Queries and displays current command AC records
+ *          - Prompts user to confirm AC update (permanent operation)
+ *          - Provisions command access conditions from predefined table
+ *          - Sets encryption flags for commands requiring secure channel
+ *          - Verifies provisioning by querying updated AC records
+ * @warning This is a permanent operation that configures command security.
+ *          Use with caution - incorrect settings may lock device functions.
+ * @note   Access conditions control which commands require host authentication
+ *         (FREE=no auth, HOST_CMAC=host session required)
+ * @retval Not applicable (infinite loop on success or error)
+ */
 int main(void) {
     stse_ReturnCode_t stse_ret = STSE_API_INVALID_PARAMETER;
     stse_Handler_t stse_handler;
@@ -133,7 +147,7 @@ int main(void) {
     PLAT_UI8 put_cmd_enc_header[] = {0x10, 0x2A, 0x2D};
     PLAT_UI8 rsp_header;
 
-    /*- Create CMD / RSP frames */
+    /* Create CMD / RSP frames */
     stse_frame_allocate(CmdFrame);
     stse_frame_allocate(RspFrame);
     stse_frame_element_allocate_push(&CmdFrame, eCmd_header, 3, NULL);

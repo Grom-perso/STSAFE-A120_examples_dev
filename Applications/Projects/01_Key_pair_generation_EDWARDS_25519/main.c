@@ -18,13 +18,26 @@
 #include "Apps_utils.h"
 
 /* Defines -------------------------------------------------------------------*/
-#define HASH_SIZE(x) (x - x % 16)
+#define HASH_SIZE(x) (x - x % 16)  /**< Macro to align hash size to 16-byte boundary */
 
+/**
+ * @brief  Main program entry point - STSAFE-A120 Edwards-25519 key pair generation
+ * @details Demonstrates EdDSA key pair generation and signature:
+ *          - Queries asymmetric key table to find available slot
+ *          - Generates Edwards-25519 (Ed25519) key pair in selected slot
+ *          - Retrieves the generated public key
+ *          - Creates a random message and computes SHA-512 hash
+ *          - Generates EdDSA signature using the private key
+ *          - Verifies the signature using platform crypto library
+ * @note   Ed25519 is a modern signature scheme offering high security
+ *         and performance with small key and signature sizes
+ * @retval Not applicable (infinite loop on success or error)
+ */
 int main(void) {
     stse_ReturnCode_t stse_ret = STSE_API_INVALID_PARAMETER;
     stse_Handler_t stse_handler;
 
-    /* - Initialize Terminal */
+    /* Initialize Terminal */
     apps_terminal_init(115200);
 
     /* - Print Example instruction on terminal */

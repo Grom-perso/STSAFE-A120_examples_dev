@@ -51,6 +51,20 @@
 #define STSAFE_CERTIFICATE_ZONE_0 0U
 #define STSE_STATIC_PRIVATE_KEY_SLOT_0 0U
 
+/**
+ * @brief  Main program entry point - STSAFE-A120 Device authentication example
+ * @details Demonstrates STSAFE-A120 device authentication process:
+ *          - Initializes STSAFE-A120 device handler
+ *          - Uses ST production CA certificate (SPL05)
+ *          - Authenticates device by verifying certificate chain:
+ *            * Reads device certificate from zone 0
+ *            * Validates certificate signature using CA public key
+ *            * Verifies device can sign with private key in slot 0
+ *          - Reports authentication success or failure
+ * @note   This example can be used as reference for building distant
+ *         server authentication use cases
+ * @retval 0 on success (never reached due to infinite loop)
+ */
 int main(void) {
     stse_ReturnCode_t stse_ret = STSE_API_INVALID_PARAMETER;
     stse_Handler_t stse_handler;
@@ -59,7 +73,7 @@ int main(void) {
     static stse_perso_info_t stsafe_a120_spl05_perso_info = {.cmd_AC_status = 0x5555555555545555, .ext_cmd_AC_status = 0x5555555555555555};
 #endif
 
-    /* - Initialize Terminal */
+    /* Initialize Terminal */
     apps_terminal_init(115200);
 
     /* - Print Example instruction on terminal */

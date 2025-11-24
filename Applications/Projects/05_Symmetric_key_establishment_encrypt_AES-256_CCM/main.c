@@ -27,6 +27,20 @@ const stsafea_aes_128_host_keys_t host_keys = {
     .host_cipher_key = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF,
                         0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF}};
 
+/**
+ * @brief  Main program entry point - STSAFE-A120 AES-256 CCM* key establishment
+ * @details Demonstrates symmetric key establishment and CCM* AEAD operations:
+ *          - Establishes host secure session for protected communication
+ *          - Generates ephemeral ECC key pair on host
+ *          - Performs ECDH key agreement with STSAFE-A120
+ *          - Derives AES-256 key and provisions to symmetric key slot
+ *          - Encrypts test message using CCM* (Counter with CBC-MAC) mode
+ *          - Decrypts message and verifies authentication tag
+ *          - Compares decrypted message with original
+ * @note   Key establishment via ECDH provides secure key derivation.
+ *         CCM* provides authenticated encryption with associated data (AEAD).
+ * @retval Not applicable (infinite loop on success or error)
+ */
 int main(void) {
     stse_ReturnCode_t stse_ret = STSE_API_INVALID_PARAMETER;
     stse_Handler_t stse_handler;
@@ -38,7 +52,7 @@ int main(void) {
     PLAT_UI8 pNonce[STSAFEA_NONCE_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C};
     uint8_t decrypt_verification = 0;
 
-    /* - Initialize Terminal */
+    /* Initialize Terminal */
     apps_terminal_init(115200);
 
     /* - Print Example instruction on terminal */
