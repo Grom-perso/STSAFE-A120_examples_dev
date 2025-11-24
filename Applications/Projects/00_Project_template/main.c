@@ -19,12 +19,18 @@
 
 /* Defines -------------------------------------------------------------------*/
 
+/**
+ * @brief  Main program entry point
+ * @note   This is a template project for STSAFE-A120 examples
+ *         Add your application code here
+ * @retval Not applicable (infinite loop)
+ */
 int main(void) {
 
-    /* - Initialize Terminal */
+    /* Initialize Terminal */
     apps_terminal_init(115200);
 
     while (1) {
-        /* - Infinite loop */
+        /* Infinite loop - add your application code here */
     }
 }

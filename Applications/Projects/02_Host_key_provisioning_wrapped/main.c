@@ -19,6 +19,21 @@
 
 /* Defines -------------------------------------------------------------------*/
 
+/**
+ * @brief  Main program entry point - STSAFE-A120 Host key provisioning wrapped
+ * @details Demonstrates secure host key provisioning using wrapped envelope:
+ *          - Generates ephemeral ECC key pair on host
+ *          - Uses STSAFE-A120's public key for ECDH key agreement
+ *          - Derives shared secret using ECDH
+ *          - Wraps host keys using the shared secret
+ *          - Provisions wrapped host keys to STSAFE-A120
+ *          - Verifies keys by establishing a host session
+ * @note   Wrapped provisioning provides secure key transfer without exposing
+ *         keys in plaintext on the communication bus. Recommended for production.
+ * @warning This example permanently provisions host keys. Use appropriate
+ *          key management procedures for production deployments.
+ * @retval Not applicable (infinite loop on success or error)
+ */
 int main(void) {
     stse_ReturnCode_t stse_ret = STSE_API_INVALID_PARAMETER;
     stse_Handler_t stse_handler;
@@ -29,7 +44,7 @@ int main(void) {
                             0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF}};
     stsafea_host_key_provisioning_ctrl_fields_t provisioning_ctrl_fields;
 
-    /* - Initialize Terminal */
+    /* Initialize Terminal */
     apps_terminal_init(115200);
 
     /* - Print Example instruction on terminal */

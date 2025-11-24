@@ -27,6 +27,19 @@ const stsafea_aes_128_host_keys_t host_keys = {
     .host_cipher_key = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF,
                         0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF}};
 
+/**
+ * @brief  Main program entry point - STSAFE-A120 AES-128 CMAC wrapped key provisioning
+ * @details Demonstrates wrapped symmetric key provisioning and CMAC operations:
+ *          - Establishes host secure session for protected communication
+ *          - Wraps AES-128 key using local envelope (KEK from host session)
+ *          - Provisions wrapped key to symmetric key slot securely
+ *          - Configures key for CMAC mode of operation
+ *          - Computes CMAC on test message using provisioned key
+ *          - Verifies CMAC using platform crypto library
+ * @note   Wrapped provisioning protects the symmetric key during transfer.
+ *         Recommended over plaintext provisioning for production deployments.
+ * @retval Not applicable (infinite loop on success or error)
+ */
 int main(void) {
     stse_ReturnCode_t stse_ret = STSE_API_INVALID_PARAMETER;
     stse_Handler_t stse_handler;
@@ -36,7 +49,7 @@ int main(void) {
     PLAT_UI8 MAC[4] = {0};
     uint8_t mac_verification = 0;
 
-    /* - Initialize Terminal */
+    /* Initialize Terminal */
     apps_terminal_init(115200);
 
     /* - Print Example instruction on terminal */

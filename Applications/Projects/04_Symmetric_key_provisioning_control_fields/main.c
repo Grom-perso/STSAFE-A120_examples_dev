@@ -19,6 +19,22 @@
 
 /* Defines -------------------------------------------------------------------*/
 
+/**
+ * @brief  Main program entry point - STSAFE-A120 Symmetric key provisioning control fields
+ * @details Demonstrates symmetric key slot control field configuration:
+ *          - Queries and displays current control field settings for slot 0
+ *          - Configures control fields to enable key provisioning methods:
+ *            * Wrapped anonymous provisioning
+ *            * ECDHE anonymous provisioning
+ *          - Writes updated control fields to the device
+ *          - Verifies the changes by querying again
+ * @warning This is a permanent configuration that controls how symmetric keys
+ *          can be provisioned to the slot. Once change_right is disabled,
+ *          these settings cannot be modified again.
+ * @note   Control fields determine security level for key provisioning:
+ *         plaintext, wrapped, or ECDHE-based methods
+ * @retval Not applicable (infinite loop on success or error)
+ */
 int main(void) {
     stse_ReturnCode_t stse_ret = STSE_API_INVALID_PARAMETER;
     stse_Handler_t stse_handler;
@@ -32,7 +48,7 @@ int main(void) {
     ctrl_fields.wrapped_authentication_key = 0xFF;
     ctrl_fields.ECDHE_authentication_key = 0xFF;
 
-    /* - Initialize Terminal */
+    /* Initialize Terminal */
     apps_terminal_init(115200);
 
     /* - Print Example instruction on terminal */

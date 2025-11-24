@@ -30,6 +30,19 @@ const stsafea_aes_128_host_keys_t host_keys = {
                         0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF}};
 #endif
 
+/**
+ * @brief  Main program entry point - STSAFE-A120 Key wrapping example
+ * @details Demonstrates local envelope wrapping/unwrapping:
+ *          - Checks host key presence and session requirements
+ *          - Establishes host session if required for secure transfer
+ *          - Generates random plaintext secret (16 bytes)
+ *          - Wraps the secret using STSAFE-A120 local envelope
+ *          - Unwraps the secret using STSAFE-A120
+ *          - Compares original and unwrapped secrets to verify operation
+ * @note   For production use, enable host session to prevent secret
+ *         leakage over the communication bus
+ * @retval Not applicable (infinite loop on success or error)
+ */
 int main(void) {
     stse_ReturnCode_t stse_ret = STSE_API_INVALID_PARAMETER;
     stse_Handler_t stse_handler;
@@ -45,7 +58,7 @@ int main(void) {
     PLAT_UI8 wrap_cmd_encryption_flag = 0;
     PLAT_UI8 unwrap_rsp_encryption_flag = 0;
 
-    /* - Initialize Terminal */
+    /* Initialize Terminal */
     apps_terminal_init(115200);
 
     /* - Print Example instruction on terminal */

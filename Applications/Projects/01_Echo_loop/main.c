@@ -17,7 +17,15 @@
 
 #include "Apps_utils.h"
 
-/* --- Main application entry point --- */
+/**
+ * @brief  Main program entry point - STSAFE-A120 Echo loop example
+ * @details Demonstrates the echo command functionality:
+ *          - Generates random message with random length (1-500 bytes)
+ *          - Sends message to STSAFE-A120 device via echo command
+ *          - Receives and verifies echoed message
+ *          - Repeats continuously with 1 second delay
+ * @retval Not applicable (infinite loop)
+ */
 int main(void) {
     stse_ReturnCode_t stse_ret = STSE_API_INVALID_PARAMETER;
     stse_Handler_t stse_handler;

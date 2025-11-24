@@ -18,9 +18,22 @@
 #include "Apps_utils.h"
 
 /* Defines -------------------------------------------------------------------*/
-#define READ_BUFFER_SIZE 100
-#define RANDOM_SIZE 100
+#define READ_BUFFER_SIZE 100  /**< Size of read buffer for zone data */
+#define RANDOM_SIZE 100       /**< Size of random data to write to zone */
 
+/**
+ * @brief  Main program entry point - STSAFE-A120 Secure data storage zone access
+ * @details Demonstrates data storage partition operations:
+ *          - Queries total partition count
+ *          - Retrieves and displays partition configuration table
+ *          - Reads data from zone 1 and displays content
+ *          - Generates random data and writes to zone 1
+ *          - Reads back zone 1 to verify the update
+ *          - Compares read data with written data
+ * @note   Zone IDs are aligned with STSAFE-A120 SPL05 personalization.
+ *         Access parameters must be adapted for other personalizations.
+ * @retval Not applicable (infinite loop on success or error)
+ */
 int main(void) {
     stse_ReturnCode_t stse_ret = STSE_API_INVALID_PARAMETER;
     stse_Handler_t stse_handler;
@@ -28,7 +41,7 @@ int main(void) {
     uint8_t readBuffer[READ_BUFFER_SIZE];
     uint8_t random[RANDOM_SIZE];
 
-    /* - Initialize Terminal */
+    /* Initialize Terminal */
     apps_terminal_init(115200);
 
     /* - Print Example instruction on terminal */
