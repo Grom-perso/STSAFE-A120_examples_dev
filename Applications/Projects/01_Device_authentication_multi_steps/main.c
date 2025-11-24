@@ -51,6 +51,21 @@
 #define STSAFE_CERTIFICATE_ZONE_0 0U
 #define STSE_STATIC_PRIVATE_KEY_SLOT_0 0U
 
+/**
+ * @brief  Main program entry point - STSAFE-A120 Multi-step device authentication
+ * @details Demonstrates detailed device authentication process with individual steps:
+ *          - Reads device certificate from STSAFE-A120 zone 0
+ *          - Parses both CA and device certificates into structured format
+ *          - Extracts and displays certificate information (subject, issuer, keys)
+ *          - Verifies device certificate signature using CA public key
+ *          - Generates random challenge for device
+ *          - Requests device signature on challenge using private key
+ *          - Verifies signature using device's public key from certificate
+ * @note   This multi-step approach shows each authentication phase separately,
+ *         useful for understanding the authentication protocol or implementing
+ *         custom authentication flows for distant server scenarios
+ * @retval 0 on success (never reached due to infinite loop)
+ */
 int main(void) {
     stse_ReturnCode_t stse_ret = STSE_API_INVALID_PARAMETER;
     stse_Handler_t stse_handler;
@@ -59,7 +74,7 @@ int main(void) {
     stse_certificate_t parsed_ca_selfsigned_cert;
     static const uint8_t ca_selfsigned_cert[] = {CA_SELF_SIGNED_CERTIFICATE_01};
 
-    /* - Initialize Terminal */
+    /* Initialize Terminal */
     apps_terminal_init(115200);
 
     /* - Print Example instruction on terminal */

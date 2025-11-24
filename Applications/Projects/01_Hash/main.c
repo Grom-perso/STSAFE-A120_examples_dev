@@ -19,6 +19,15 @@
 
 /* Defines -------------------------------------------------------------------*/
 
+/**
+ * @brief  Main program entry point - STSAFE-A120 Hash example
+ * @details Demonstrates hash computation functionality:
+ *          - Generates a random 128-byte message
+ *          - Computes SHA-256 hash using platform crypto library
+ *          - Computes SHA-256 hash using STSAFE-A120 device
+ *          - Compares both hash values to verify correctness
+ * @retval Not applicable (infinite loop on success or error)
+ */
 int main(void) {
     stse_ReturnCode_t stse_ret = STSE_API_INVALID_PARAMETER;
     stse_Handler_t stse_handler;
@@ -31,7 +40,7 @@ int main(void) {
     PLAT_UI8 hash_platform[hash_length];
     PLAT_UI8 hash_stsafea[hash_length];
 
-    /* - Initialize Terminal */
+    /* Initialize Terminal */
     apps_terminal_init(115200);
 
     /* - Print Example instruction on terminal */

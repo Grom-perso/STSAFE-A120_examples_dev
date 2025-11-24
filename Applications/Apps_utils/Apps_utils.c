@@ -1,5 +1,26 @@
+/**
+ ******************************************************************************
+ * @file    Apps_utils.c
+ * @author  CS application team
+ * @brief   Application utilities implementation file providing common helper
+ *          functions for STSAFE-A120 examples
+ ******************************************************************************
+ *                      COPYRIGHT 2022 STMicroelectronics
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
+
 #include "Apps_utils.h"
 
+/**
+ * @brief  Hard fault exception handler
+ * @note   This function is called when a hard fault exception occurs and enters
+ *         an infinite loop to halt the system
+ */
 void HardFault_Handler(void) {
     printf("\n\r ## SYSTEM : HARDFAULT ## ");
     while (1) {
@@ -7,7 +28,10 @@ void HardFault_Handler(void) {
     }
 }
 
-/* STDIO redirect */
+/**
+ * @brief  STDIO redirection definitions for different compilers
+ * @note   Redirects standard I/O operations (putchar/getchar) to UART functions
+ */
 #if defined(__GNUC__) && !defined(__ARMCC_VERSION)
 #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
 #define GETCHAR_PROTOTYPE int __io_getchar()
@@ -15,14 +39,31 @@ void HardFault_Handler(void) {
 #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
 #define GETCHAR_PROTOTYPE int fgetc(FILE *f)
 #endif /* __GNUC__ */
+
+/**
+ * @brief  Redirect putchar to UART output
+ * @param  ch Character to output
+ * @return The character written
+ */
 PUTCHAR_PROTOTYPE {
     uart_putc(ch);
     return ch;
 }
+
+/**
+ * @brief  Redirect getchar to UART input
+ * @return The character read from UART
+ */
 GETCHAR_PROTOTYPE {
     return uart_getc();
 }
 
+/**
+ * @brief  Get string representation of ECC key type
+ * @param  key_type The ECC key type enumeration value
+ * @return Pointer to string containing the key type name
+ * @note   Returns "bad curve ID" string if key type is not recognized
+ */
 char *get_key_type_str(stse_ecc_key_type_t key_type) {
     switch (key_type) {
 #ifdef STSE_CONF_ECC_NIST_P_256
@@ -62,6 +103,13 @@ char *get_key_type_str(stse_ecc_key_type_t key_type) {
     }
 }
 
+/**
+ * @brief  Convert curve ID to key type enumeration
+ * @param  curve_id The ECC curve identifier to convert
+ * @param  pKey_type Pointer to store the corresponding key type
+ * @return STSE_OK on success, STSE_UNEXPECTED_ERROR if curve ID not found
+ * @note   Iterates through known curve IDs to find a match
+ */
 stse_ReturnCode_t get_curve_id_key_type(stsafea_ecc_curve_id_t curve_id, stse_ecc_key_type_t *pKey_type) {
     stse_ecc_key_type_t curve_id_index;
     int diff;
@@ -85,6 +133,15 @@ stse_ReturnCode_t get_curve_id_key_type(stsafea_ecc_curve_id_t curve_id, stse_ec
     return STSE_OK;
 }
 
+/**
+ * @brief  Print formatted symmetric key table information
+ * @param  pSTSE Pointer to STSE handler structure
+ * @note   Retrieves and displays all symmetric key slot information including:
+ *         - Key type (AES-128/AES-256)
+ *         - Mode of operation (CCM*/CMAC/ECB/GCM/HKDF/HMAC)
+ *         - Key usage flags (derive, MAC generation/verification, encryption/decryption)
+ *         - Parameters (MAC length, auth tag length, counter values, HKDF settings)
+ */
 void apps_print_symmetric_key_table_info(stse_Handler_t *pSTSE) {
     stse_ReturnCode_t ret;
     PLAT_UI8 i;
@@ -166,6 +223,17 @@ void apps_print_symmetric_key_table_info(stse_Handler_t *pSTSE) {
     }
 }
 
+/**
+ * @brief  Print symmetric key table provisioning control fields
+ * @param  pSTSE Pointer to STSE handler structure
+ * @note   Displays provisioning control field information for each symmetric key slot:
+ *         - Change right
+ *         - Derived key flag
+ *         - Plaintext provisioning
+ *         - Put key access
+ *         - Wrapped provisioning with authentication key
+ *         - ECDHE provisioning with authentication key
+ */
 void apps_print_symmetric_key_table_provisioning_control_fields(stse_Handler_t *pSTSE) {
     stse_ReturnCode_t ret;
     PLAT_UI8 i;
@@ -214,6 +282,16 @@ void apps_print_symmetric_key_table_provisioning_control_fields(stse_Handler_t *
     }
 }
 
+/**
+ * @brief  Print formatted asymmetric (ECC) key table information
+ * @param  pSTSE Pointer to STSE handler structure
+ * @note   Retrieves and displays ECC key slot information including:
+ *         - Global change right and usage limit
+ *         - Per-slot: presence, key type (NIST, Brainpool, Curve25519, Ed25519)
+ *         - EdDSA variant (Pure/PreHashed)
+ *         - Generate key access control
+ *         - Signature generation and key establishment capabilities
+ */
 void apps_print_asymmetric_key_table_info(stse_Handler_t *pSTSE) {
     stse_ReturnCode_t ret;
     PLAT_UI8 i;
@@ -276,6 +354,16 @@ void apps_print_asymmetric_key_table_info(stse_Handler_t *pSTSE) {
     }
 }
 
+/**
+ * @brief  Print host key provisioning control fields
+ * @param  pSTSE Pointer to STSE handler structure
+ * @note   Displays host key provisioning control information:
+ *         - Change right
+ *         - Re-provision capability
+ *         - Plaintext provisioning
+ *         - Wrapped anonymous provisioning
+ *         - Wrapped/DH derived authentication key slot number
+ */
 void apps_print_host_key_provisioning_control_fields(stse_Handler_t *pSTSE) {
     stsafea_host_key_provisioning_ctrl_fields_t provisioning_ctrl_fields;
     stse_ReturnCode_t ret;
@@ -299,6 +387,16 @@ void apps_print_host_key_provisioning_control_fields(stse_Handler_t *pSTSE) {
     printf("\n\r --------------+--------------+-----------+-------------------+----------------------------");
 }
 
+/**
+ * @brief  Print generic public key slot configuration flags
+ * @param  pSTSE Pointer to STSE handler structure
+ * @param  slot_number Slot number to query and display
+ * @note   Displays configuration information for the specified generic public key slot:
+ *         - Change right
+ *         - Establish symmetric key capability
+ *         - Start volatile KEK session capability
+ *         - Key presence status
+ */
 void apps_print_generic_public_key_slot_configuration_flags(stse_Handler_t *pSTSE, PLAT_UI8 slot_number) {
     stse_ReturnCode_t ret;
     PLAT_UI8 generic_public_key_presence;
@@ -328,6 +426,12 @@ void apps_print_generic_public_key_slot_configuration_flags(stse_Handler_t *pSTS
     printf("\n\r ------+--------------+--------------------------+----------------------------+--------------");
 }
 
+/**
+ * @brief  Print buffer content in hexadecimal format
+ * @param  buffer Pointer to buffer to display
+ * @param  buffer_size Size of the buffer in bytes
+ * @note   Formats output with 16 bytes per line, each byte as "0xXX"
+ */
 void apps_print_hex_buffer(uint8_t *buffer, uint16_t buffer_size) {
     uint16_t i;
     for (i = 0; i < buffer_size; i++) {
@@ -338,6 +442,17 @@ void apps_print_hex_buffer(uint8_t *buffer, uint16_t buffer_size) {
     }
 }
 
+/**
+ * @brief  Print data partition record table information
+ * @param  pSTSE Pointer to STSE handler structure
+ * @note   Retrieves and displays data storage partition information for each zone:
+ *         - Zone ID
+ *         - Counter presence flag
+ *         - Data segment size
+ *         - Read access control and change right
+ *         - Update access control and change right
+ *         - Current counter value
+ */
 void apps_print_data_partition_record_table(stse_Handler_t *pSTSE) {
     uint8_t i;
     stse_ReturnCode_t ret;
@@ -422,6 +537,16 @@ void apps_print_data_partition_record_table(stse_Handler_t *pSTSE) {
     }
 }
 
+/**
+ * @brief  Print command authorization record table
+ * @param  command_ac_record_table Pointer to array of command authorization records
+ * @param  total_command_count Number of commands in the table
+ * @note   Displays command access control information:
+ *         - Command header and extended header
+ *         - Access conditions (NEVER/FREE/ADMIN/HOST/ADMIN_OR_PWD/ADMIN_OR_HOST)
+ *         - Command encryption flag
+ *         - Response encryption flag
+ */
 void apps_print_command_ac_record_table(stse_cmd_authorization_record_t *command_ac_record_table,
                                         uint8_t total_command_count) {
     uint8_t i;
@@ -471,6 +596,12 @@ void apps_print_command_ac_record_table(stse_cmd_authorization_record_t *command
     }
 }
 
+/**
+ * @brief  Print human-readable life cycle state
+ * @param  life_cycle_state The life cycle state enumeration value
+ * @note   Prints one of: BORN, PATCHING, OPERATIONAL, TERMINATED,
+ *         BORN_AND_LOCKED, OPERATIONAL_AND_LOCKED, or UNKNOWN
+ */
 void apps_print_life_cycle_state(stsafea_life_cycle_state_t life_cycle_state) {
     switch (life_cycle_state) {
     case STSAFEA_LCS_BORN:
@@ -497,6 +628,12 @@ void apps_print_life_cycle_state(stsafea_life_cycle_state_t life_cycle_state) {
     }
 };
 
+/**
+ * @brief  Initialize terminal for application output
+ * @param  baudrate Baudrate for UART communication (currently hardcoded to 115200)
+ * @note   Initializes UART, disables I/O buffering for stdout/stdin,
+ *         and clears the terminal screen
+ */
 void apps_terminal_init(uint32_t baudrate) {
     (void)baudrate;
     /* - Initialize UART for example output log (baud 115200)  */
@@ -509,6 +646,14 @@ void apps_terminal_init(uint32_t baudrate) {
     printf(PRINT_RESET PRINT_CLEAR_SCREEN);
 }
 
+/**
+ * @brief  Read string from terminal
+ * @param  string Pointer to buffer to store the read string (can be NULL)
+ * @param  length Pointer to maximum length, updated with actual read length (can be NULL)
+ * @return 0 on success, 1 if maximum length exceeded
+ * @note   Reads characters until carriage return ('\r') is received
+ *         Echoes each character back to the terminal
+ */
 uint8_t apps_terminal_read_string(char *string, uint8_t *length) {
     char c = 1;
     uint16_t i = 0;
@@ -529,6 +674,12 @@ uint8_t apps_terminal_read_string(char *string, uint8_t *length) {
     return 0;
 }
 
+/**
+ * @brief  Read unsigned integer from terminal
+ * @param  integer Pointer to store the read integer value
+ * @return 0 on success, 1 on error
+ * @note   Reads a string of up to 6 characters and converts to integer using atoi()
+ */
 uint8_t apps_terminal_read_unsigned_integer(uint16_t *integer) {
     uint8_t length = 6;
     char string[length];
@@ -541,16 +692,35 @@ uint8_t apps_terminal_read_unsigned_integer(uint16_t *integer) {
     return 0;
 }
 
+/**
+ * @brief  Generate a random 32-bit number
+ * @return Random 32-bit unsigned integer
+ * @note   Uses the platform's random number generator
+ */
 uint32_t apps_generate_random_number(void) {
     return rng_generate_random_number();
 }
 
+/**
+ * @brief  Fill buffer with random data
+ * @param  pBuffer Pointer to buffer to fill
+ * @param  buffer_length Length of the buffer in bytes
+ * @note   Each byte is filled with a random value using the platform RNG
+ */
 void apps_randomize_buffer(uint8_t *pBuffer, uint16_t buffer_length) {
     for (uint16_t i = 0; i < buffer_length; i++) {
         *(pBuffer + i) = (rng_generate_random_number() & 0xFF);
     }
 }
 
+/**
+ * @brief  Compare two buffers byte by byte
+ * @param  pBuffer1 Pointer to first buffer
+ * @param  pBuffer2 Pointer to second buffer
+ * @param  buffers_length Length of buffers to compare in bytes
+ * @return 0 if buffers are identical, 1 if any byte differs
+ * @note   Compares buffers element by element
+ */
 uint8_t apps_compare_buffers(uint8_t *pBuffer1, uint8_t *pBuffer2, uint16_t buffers_length) {
 
     for (uint16_t i = 0; i < buffers_length; i++) {
@@ -562,10 +732,20 @@ uint8_t apps_compare_buffers(uint8_t *pBuffer1, uint8_t *pBuffer2, uint16_t buff
     return 0;
 }
 
+/**
+ * @brief  Delay execution for specified milliseconds
+ * @param  ms Number of milliseconds to delay
+ * @note   Wrapper around platform delay function
+ */
 void apps_delay_ms(uint16_t ms) {
     delay_ms(ms);
 }
 
+/**
+ * @brief  Process error by entering infinite loop
+ * @param  err Error code (currently unused)
+ * @note   This function never returns - used for error handling in examples
+ */
 void apps_process_error(uint32_t err) {
     while (1) {
         /* Infinite loop */
