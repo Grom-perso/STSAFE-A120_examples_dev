@@ -62,7 +62,7 @@ stse_ReturnCode_t stse_platform_aes_cmac_append(PLAT_UI8 *pInput,
 
 stse_ReturnCode_t stse_platform_aes_cmac_compute_finish(PLAT_UI8 *pTag, PLAT_UI8 *pTagLen) {
     int retval;
-    word32 tag_len = *pTagLen;
+    PLAT_UI32 tag_len = *pTagLen;
 
     if (!cmac_initialized) {
         return STSE_PLATFORM_AES_CMAC_COMPUTE_ERROR;
@@ -83,7 +83,7 @@ stse_ReturnCode_t stse_platform_aes_cmac_compute_finish(PLAT_UI8 *pTag, PLAT_UI8
 stse_ReturnCode_t stse_platform_aes_cmac_verify_finish(PLAT_UI8 *pTag) {
     int retval;
     PLAT_UI8 computed_tag[AES_BLOCK_SIZE];
-    word32 tag_len = AES_BLOCK_SIZE;
+    PLAT_UI32 tag_len = AES_BLOCK_SIZE;
 
     if (!cmac_initialized) {
         return STSE_PLATFORM_AES_CMAC_VERIFY_ERROR;
@@ -112,7 +112,7 @@ stse_ReturnCode_t stse_platform_aes_cmac_compute(const PLAT_UI8 *pPayload,
                                                  PLAT_UI8 *pTag,
                                                  PLAT_UI16 *pTag_length) {
     int retval;
-    word32 tag_len = *pTag_length;
+    PLAT_UI32 tag_len = *pTag_length;
 
     (void)exp_tag_size; /* wolfCrypt CMAC always generates full-length tag */
 

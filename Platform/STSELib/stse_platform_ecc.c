@@ -273,8 +273,8 @@ stse_ReturnCode_t stse_platform_ecc_generate_key_pair(
 #ifdef STSE_CONF_ECC_EDWARD_25519
     if (key_type == STSE_ECC_KT_ED25519) {
         ed25519_key ed_key;
-        word32 priv_len = ED25519_KEY_SIZE;
-        word32 pub_len = ED25519_PUB_KEY_SIZE;
+        PLAT_UI32 priv_len = ED25519_KEY_SIZE;
+        PLAT_UI32 pub_len = ED25519_PUB_KEY_SIZE;
 
         /* Initialize Ed25519 key */
         retval = wc_ed25519_init(&ed_key);
@@ -314,7 +314,7 @@ stse_ReturnCode_t stse_platform_ecc_generate_key_pair(
 #endif /* STSE_CONF_ECC_CURVE_25519 */
     {
         ecc_key ecc;
-        word32 priv_len, pub_len;
+        PLAT_UI32 priv_len, pub_len;
         int curve_id = stse_platform_get_wc_ecc_curve_id(key_type);
 
         if (curve_id < 0) {
@@ -384,7 +384,7 @@ stse_ReturnCode_t stse_platform_ecc_sign(
 #ifdef STSE_CONF_ECC_EDWARD_25519
     if (key_type == STSE_ECC_KT_ED25519) {
         ed25519_key ed_key;
-        word32 sig_len = ED25519_SIG_SIZE;
+        PLAT_UI32 sig_len = ED25519_SIG_SIZE;
 
         /* Initialize Ed25519 key */
         retval = wc_ed25519_init(&ed_key);
@@ -410,7 +410,7 @@ stse_ReturnCode_t stse_platform_ecc_sign(
 #endif /* STSE_CONF_ECC_EDWARD_25519 */
     {
         ecc_key ecc;
-        word32 sig_len = stse_platform_get_wc_ecc_sig_len(key_type);
+        PLAT_UI32 sig_len = stse_platform_get_wc_ecc_sig_len(key_type);
         int curve_id = stse_platform_get_wc_ecc_curve_id(key_type);
 
         if (curve_id < 0) {
@@ -476,7 +476,7 @@ stse_ReturnCode_t stse_platform_ecc_ecdh(
 #ifdef STSE_CONF_ECC_CURVE_25519
     if (key_type == STSE_ECC_KT_CURVE25519) {
         curve25519_key priv, pub;
-        word32 secret_len = CURVE25519_KEYSIZE;
+        PLAT_UI32 secret_len = CURVE25519_KEYSIZE;
 
         /* Initialize Curve25519 keys */
         retval = wc_curve25519_init(&priv);
@@ -517,7 +517,7 @@ stse_ReturnCode_t stse_platform_ecc_ecdh(
 #endif /* STSE_CONF_ECC_CURVE_25519 */
     {
         ecc_key priv, pub;
-        word32 secret_len = stse_platform_get_wc_ecc_priv_key_len(key_type);
+        PLAT_UI32 secret_len = stse_platform_get_wc_ecc_priv_key_len(key_type);
         int curve_id = stse_platform_get_wc_ecc_curve_id(key_type);
 
         if (curve_id < 0) {
@@ -587,7 +587,7 @@ stse_ReturnCode_t stse_platform_nist_kw_encrypt(PLAT_UI8 *pPayload, PLAT_UI32 pa
                                                 PLAT_UI8 *pKey, PLAT_UI8 key_length,
                                                 PLAT_UI8 *pOutput, PLAT_UI32 *pOutput_length) {
     int retval;
-    word32 output_len = *pOutput_length;
+    PLAT_UI32 output_len = *pOutput_length;
 
     /* Perform AES Key Wrap (NIST SP 800-38F) */
     retval = wc_AesKeyWrap(pKey, key_length, pPayload, payload_length, pOutput, output_len, NULL);

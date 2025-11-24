@@ -1,5 +1,5 @@
 /**
- * \file user_settings.h
+ * \file wolfssl_user_settings.h
  * \brief Custom wolfCrypt configuration for STSAFE-A120 examples
  *
  * This file overrides the default wolfCrypt configuration to enable only
