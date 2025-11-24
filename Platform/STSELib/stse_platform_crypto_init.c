@@ -15,15 +15,16 @@
  ******************************************************************************
  */
 
-#include "Middleware/STM32_Cryptographic/include/cmox_crypto.h"
+#include <wolfssl/wolfcrypt/settings.h>
+#include <wolfssl/wolfcrypt/wc_port.h>
 #include "stse_conf.h"
 #include "stselib.h"
 
 stse_ReturnCode_t stse_platform_crypto_init(void) {
     stse_ReturnCode_t ret = STSE_OK;
 
-    /* - Initialize STM32 CMOX library */
-    if (cmox_initialize(NULL) != CMOX_INIT_SUCCESS) {
+    /* - Initialize wolfCrypt library */
+    if (wolfCrypt_Init() != 0) {
         ret = STSE_PLATFORM_CRYPTO_INIT_ERROR;
     }
 

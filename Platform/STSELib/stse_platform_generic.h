@@ -37,6 +37,9 @@ extern "C" {
 #define PLAT_I32 int32_t
 #define PLAT_PACKED_STRUCT __PACKED
 
+/* wolfCrypt-compatible RNG function */
+int stse_platform_wolfcrypt_rng(void *p_rng, unsigned char *output, size_t output_len);
+
 #endif /* STSE_PLATFORM_GENERIC_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

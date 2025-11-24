@@ -1,5 +1,5 @@
 /******************************************************************************
- * \file	stse_platform_crypto.c
+ * \filestse_platform_crypto.c
  * \brief   STSecureElement cryptographic platform file
  * \author  STMicroelectronics - CS application team
  *
@@ -15,124 +15,157 @@
  ******************************************************************************
  */
 
-#include "Middleware/STM32_Cryptographic/include/cmox_crypto.h"
+#include <wolfssl/wolfcrypt/settings.h>
+#include <wolfssl/wolfcrypt/ecc.h>
+#include <wolfssl/wolfcrypt/curve25519.h>
+#include <wolfssl/wolfcrypt/ed25519.h>
+#include <wolfssl/wolfcrypt/asn.h>
 #include "stse_conf.h"
 #include "stselib.h"
 
-cmox_ecc_handle_t Ecc_Ctx;
-PLAT_UI8 cmox_math_buffer[2400];
-
-static cmox_ecc_impl_t stse_platform_get_cmox_ecc_impl(stse_ecc_key_type_t key_type) {
+/* Map STSE curve types to wolfCrypt curve IDs */
+static int stse_platform_get_wc_ecc_curve_id(stse_ecc_key_type_t key_type) {
     switch (key_type) {
 #ifdef STSE_CONF_ECC_NIST_P_256
     case STSE_ECC_KT_NIST_P_256:
-        return CMOX_ECC_SECP256R1_LOWMEM;
+        return ECC_SECP256R1;
 #endif
 #ifdef STSE_CONF_ECC_NIST_P_384
     case STSE_ECC_KT_NIST_P_384:
-        return CMOX_ECC_SECP384R1_LOWMEM;
+        return ECC_SECP384R1;
 #endif
 #ifdef STSE_CONF_ECC_NIST_P_521
     case STSE_ECC_KT_NIST_P_521:
-        return CMOX_ECC_SECP521R1_LOWMEM;
+        return ECC_SECP521R1;
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_256
     case STSE_ECC_KT_BP_P_256:
-        return CMOX_ECC_BPP256R1_LOWMEM;
+        return ECC_BRAINPOOLP256R1;
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_384
     case STSE_ECC_KT_BP_P_384:
-        return CMOX_ECC_BPP384R1_LOWMEM;
+        return ECC_BRAINPOOLP384R1;
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_512
     case STSE_ECC_KT_BP_P_512:
-        return CMOX_ECC_BPP512R1_LOWMEM;
-#endif
-#ifdef STSE_CONF_ECC_CURVE_25519
-    case STSE_ECC_KT_CURVE25519:
-        return CMOX_ECC_CURVE25519;
-#endif
-#ifdef STSE_CONF_ECC_EDWARD_25519
-    case STSE_ECC_KT_ED25519:
-        return CMOX_ECC_ED25519_OPT_LOWMEM;
+        return ECC_BRAINPOOLP512R1;
 #endif
     default:
-        return NULL;
+        return -1;
     }
 }
 
-static size_t stse_platform_get_cmox_ecc_pub_key_len(stse_ecc_key_type_t key_type) {
+static size_t stse_platform_get_wc_ecc_pub_key_len(stse_ecc_key_type_t key_type) {
     switch (key_type) {
 #ifdef STSE_CONF_ECC_NIST_P_256
     case STSE_ECC_KT_NIST_P_256:
-        return CMOX_ECC_SECP256R1_PUBKEY_LEN;
+        return 65; /* 1 + 2*32 (uncompressed format) */
 #endif
 #ifdef STSE_CONF_ECC_NIST_P_384
     case STSE_ECC_KT_NIST_P_384:
-        return CMOX_ECC_SECP384R1_PUBKEY_LEN;
+        return 97; /* 1 + 2*48 */
 #endif
 #ifdef STSE_CONF_ECC_NIST_P_521
     case STSE_ECC_KT_NIST_P_521:
-        return CMOX_ECC_SECP521R1_PUBKEY_LEN;
+        return 133; /* 1 + 2*66 */
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_256
     case STSE_ECC_KT_BP_P_256:
-        return CMOX_ECC_BPP256R1_PUBKEY_LEN;
+        return 65;
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_384
     case STSE_ECC_KT_BP_P_384:
-        return CMOX_ECC_BPP384R1_PUBKEY_LEN;
+        return 97;
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_512
     case STSE_ECC_KT_BP_P_512:
-        return CMOX_ECC_BPP512R1_PUBKEY_LEN;
+        return 129; /* 1 + 2*64 */
 #endif
 #ifdef STSE_CONF_ECC_CURVE_25519
     case STSE_ECC_KT_CURVE25519:
-        return CMOX_ECC_CURVE25519_PUBKEY_LEN;
+        return CURVE25519_KEYSIZE;
 #endif
 #ifdef STSE_CONF_ECC_EDWARD_25519
     case STSE_ECC_KT_ED25519:
-        return CMOX_ECC_ED25519_PUBKEY_LEN;
+        return ED25519_PUB_KEY_SIZE;
 #endif
     default:
         return 0u;
     }
 }
 
-static size_t stse_platform_get_cmox_ecc_sig_len(stse_ecc_key_type_t key_type) {
+static size_t stse_platform_get_wc_ecc_sig_len(stse_ecc_key_type_t key_type) {
     switch (key_type) {
 #ifdef STSE_CONF_ECC_NIST_P_256
     case STSE_ECC_KT_NIST_P_256:
-        return CMOX_ECC_SECP256R1_SIG_LEN;
+        return 64; /* 2*32 (r,s) */
 #endif
 #ifdef STSE_CONF_ECC_NIST_P_384
     case STSE_ECC_KT_NIST_P_384:
-        return CMOX_ECC_SECP384R1_SIG_LEN;
+        return 96; /* 2*48 */
 #endif
 #ifdef STSE_CONF_ECC_NIST_P_521
     case STSE_ECC_KT_NIST_P_521:
-        return CMOX_ECC_SECP521R1_SIG_LEN;
+        return 132; /* 2*66 */
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_256
     case STSE_ECC_KT_BP_P_256:
-        return CMOX_ECC_BPP256R1_SIG_LEN;
+        return 64;
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_384
     case STSE_ECC_KT_BP_P_384:
-        return CMOX_ECC_BPP384R1_SIG_LEN;
+        return 96;
 #endif
 #ifdef STSE_CONF_ECC_BRAINPOOL_P_512
     case STSE_ECC_KT_BP_P_512:
-        return CMOX_ECC_BPP512R1_SIG_LEN;
+        return 128; /* 2*64 */
 #endif
 #ifdef STSE_CONF_ECC_CURVE_25519
     case STSE_ECC_KT_CURVE25519:
-        return STSE_OK; /* No signature with curve25519 */
+        return 0; /* No signature with curve25519 */
 #endif
 #ifdef STSE_CONF_ECC_EDWARD_25519
     case STSE_ECC_KT_ED25519:
-        return CMOX_ECC_ED25519_SIG_LEN;
+        return ED25519_SIG_SIZE;
+#endif
+    default:
+        return 0u;
+    }
+}
+
+static size_t stse_platform_get_wc_ecc_priv_key_len(stse_ecc_key_type_t key_type) {
+    switch (key_type) {
+#ifdef STSE_CONF_ECC_NIST_P_256
+    case STSE_ECC_KT_NIST_P_256:
+        return 32;
+#endif
+#ifdef STSE_CONF_ECC_NIST_P_384
+    case STSE_ECC_KT_NIST_P_384:
+        return 48;
+#endif
+#ifdef STSE_CONF_ECC_NIST_P_521
+    case STSE_ECC_KT_NIST_P_521:
+        return 66;
+#endif
+#ifdef STSE_CONF_ECC_BRAINPOOL_P_256
+    case STSE_ECC_KT_BP_P_256:
+        return 32;
+#endif
+#ifdef STSE_CONF_ECC_BRAINPOOL_P_384
+    case STSE_ECC_KT_BP_P_384:
+        return 48;
+#endif
+#ifdef STSE_CONF_ECC_BRAINPOOL_P_512
+    case STSE_ECC_KT_BP_P_512:
+        return 64;
+#endif
+#ifdef STSE_CONF_ECC_CURVE_25519
+    case STSE_ECC_KT_CURVE25519:
+        return CURVE25519_KEYSIZE;
+#endif
+#ifdef STSE_CONF_ECC_EDWARD_25519
+    case STSE_ECC_KT_ED25519:
+        return ED25519_KEY_SIZE;
 #endif
     default:
         return 0u;
@@ -148,50 +181,64 @@ stse_ReturnCode_t stse_platform_ecc_verify(
 #if defined(STSE_CONF_ECC_NIST_P_256) || defined(STSE_CONF_ECC_NIST_P_384) || defined(STSE_CONF_ECC_NIST_P_521) ||                \
     defined(STSE_CONF_ECC_BRAINPOOL_P_256) || defined(STSE_CONF_ECC_BRAINPOOL_P_384) || defined(STSE_CONF_ECC_BRAINPOOL_P_512) || \
     defined(STSE_CONF_ECC_CURVE_25519) || defined(STSE_CONF_ECC_EDWARD_25519)
-    cmox_ecc_retval_t retval;
-    PLAT_UI32 faultCheck;
-
-    /*- Set ECC context */
-    cmox_ecc_construct(&Ecc_Ctx,                /* ECC context */
-                       CMOX_MATH_FUNCS_SMALL,   /* Small math functions */
-                       cmox_math_buffer,        /* Crypto math buffer */
-                       sizeof(cmox_math_buffer) /* buffer size */
-    );
+    int retval;
 
 #ifdef STSE_CONF_ECC_EDWARD_25519
     if (key_type == STSE_ECC_KT_ED25519) {
-        /* - Perform EDDSA verify */
-        retval = cmox_eddsa_verify(&Ecc_Ctx,                                         /* ECC context */
-                                   stse_platform_get_cmox_ecc_impl(key_type),        /* Curve param */
-                                   pPubKey,                                          /* Public key */
-                                   stse_platform_get_cmox_ecc_pub_key_len(key_type), /* Public key length */
-                                   pDigest,                                          /* Message */
-                                   digestLen,                                        /* Message length */
-                                   pSignature,                                       /* Pointer to signature */
-                                   stse_platform_get_cmox_ecc_sig_len(key_type),     /* Signature size */
-                                   &faultCheck                                       /* Fault check variable */
-        );
+        ed25519_key ed_key;
+        int stat = 0;
+
+        /* Import Ed25519 public key */
+        retval = wc_ed25519_init(&ed_key);
+        if (retval != 0) {
+            return STSE_PLATFORM_ECC_VERIFY_ERROR;
+        }
+
+        retval = wc_ed25519_import_public(pPubKey, ED25519_PUB_KEY_SIZE, &ed_key);
+        if (retval != 0) {
+            wc_ed25519_free(&ed_key);
+            return STSE_PLATFORM_ECC_VERIFY_ERROR;
+        }
+
+        /* Verify EdDSA signature */
+        retval = wc_ed25519_verify_msg(pSignature, ED25519_SIG_SIZE, pDigest, digestLen, &stat, &ed_key);
+        wc_ed25519_free(&ed_key);
+
+        if (retval != 0 || stat != 1) {
+            return STSE_PLATFORM_ECC_VERIFY_ERROR;
+        }
     } else
 #endif /* STSE_CONF_ECC_EDWARD_25519 */
     {
-        /* - Perform ECDSA verify */
-        retval = cmox_ecdsa_verify(&Ecc_Ctx,                                         /* ECC context */
-                                   stse_platform_get_cmox_ecc_impl(key_type),        /* Curve : SECP256R1 */
-                                   pPubKey,                                          /* Public key */
-                                   stse_platform_get_cmox_ecc_pub_key_len(key_type), /* Public key length */
-                                   pDigest,                                          /* Message */
-                                   digestLen,                                        /* Message length */
-                                   pSignature,                                       /* Pointer to signature */
-                                   stse_platform_get_cmox_ecc_sig_len(key_type),     /* Signature size */
-                                   &faultCheck                                       /* Fault check variable */
-        );
-    }
+        ecc_key ecc;
+        int stat = 0;
+        int curve_id = stse_platform_get_wc_ecc_curve_id(key_type);
 
-    /* - Clear ECC context */
-    cmox_ecc_cleanup(&Ecc_Ctx);
+        if (curve_id < 0) {
+            return STSE_PLATFORM_ECC_VERIFY_ERROR;
+        }
 
-    if (retval != CMOX_ECC_AUTH_SUCCESS) {
-        return STSE_PLATFORM_ECC_VERIFY_ERROR;
+        /* Initialize ECC key */
+        retval = wc_ecc_init(&ecc);
+        if (retval != 0) {
+            return STSE_PLATFORM_ECC_VERIFY_ERROR;
+        }
+
+        /* Import ECC public key (assuming uncompressed format: 0x04 || X || Y) */
+        retval = wc_ecc_import_x963(pPubKey, stse_platform_get_wc_ecc_pub_key_len(key_type), &ecc);
+        if (retval != 0) {
+            wc_ecc_free(&ecc);
+            return STSE_PLATFORM_ECC_VERIFY_ERROR;
+        }
+
+        /* Verify ECDSA signature (signature format: r || s) */
+        retval = wc_ecc_verify_hash(pSignature, stse_platform_get_wc_ecc_sig_len(key_type),
+                                     pDigest, digestLen, &stat, &ecc);
+        wc_ecc_free(&ecc);
+
+        if (retval != 0 || stat != 1) {
+            return STSE_PLATFORM_ECC_VERIFY_ERROR;
+        }
     }
 
     return STSE_OK;
@@ -200,45 +247,6 @@ stse_ReturnCode_t stse_platform_ecc_verify(
 #endif /* STSE_CONF_ECC_NIST_P_256 || STSE_CONF_ECC_NIST_P_384 || STSE_CONF_ECC_NIST_P_521 ||\
           STSE_CONF_ECC_BRAINPOOL_P_256 || STSE_CONF_ECC_BRAINPOOL_P_384 || STSE_CONF_ECC_BRAINPOOL_P_512 ||\
           STSE_CONF_ECC_CURVE_25519 || STSE_CONF_ECC_EDWARD_25519 */
-}
-
-static size_t stse_platform_get_cmox_ecc_priv_key_len(stse_ecc_key_type_t key_type) {
-    switch (key_type) {
-#ifdef STSE_CONF_ECC_NIST_P_256
-    case STSE_ECC_KT_NIST_P_256:
-        return CMOX_ECC_SECP256R1_PRIVKEY_LEN;
-#endif
-#ifdef STSE_CONF_ECC_NIST_P_384
-    case STSE_ECC_KT_NIST_P_384:
-        return CMOX_ECC_SECP384R1_PRIVKEY_LEN;
-#endif
-#ifdef STSE_CONF_ECC_NIST_P_521
-    case STSE_ECC_KT_NIST_P_521:
-        return CMOX_ECC_SECP521R1_PRIVKEY_LEN;
-#endif
-#ifdef STSE_CONF_ECC_BRAINPOOL_P_256
-    case STSE_ECC_KT_BP_P_256:
-        return CMOX_ECC_BPP256R1_PRIVKEY_LEN;
-#endif
-#ifdef STSE_CONF_ECC_BRAINPOOL_P_384
-    case STSE_ECC_KT_BP_P_384:
-        return CMOX_ECC_BPP384R1_PRIVKEY_LEN;
-#endif
-#ifdef STSE_CONF_ECC_BRAINPOOL_P_512
-    case STSE_ECC_KT_BP_P_512:
-        return CMOX_ECC_BPP512R1_PRIVKEY_LEN;
-#endif
-#ifdef STSE_CONF_ECC_CURVE_25519
-    case STSE_ECC_KT_CURVE25519:
-        return CMOX_ECC_CURVE25519_PRIVKEY_LEN;
-#endif
-#ifdef STSE_CONF_ECC_EDWARD_25519
-    case STSE_ECC_KT_ED25519:
-        return CMOX_ECC_ED25519_PRIVKEY_LEN;
-#endif
-    default:
-        return 0u;
-    }
 }
 
 /* Private_key */
@@ -260,69 +268,90 @@ stse_ReturnCode_t stse_platform_ecc_generate_key_pair(
 #if defined(STSE_CONF_ECC_NIST_P_256) || defined(STSE_CONF_ECC_NIST_P_384) || defined(STSE_CONF_ECC_NIST_P_521) ||                \
     defined(STSE_CONF_ECC_BRAINPOOL_P_256) || defined(STSE_CONF_ECC_BRAINPOOL_P_384) || defined(STSE_CONF_ECC_BRAINPOOL_P_512) || \
     defined(STSE_CONF_ECC_CURVE_25519) || defined(STSE_CONF_ECC_EDWARD_25519)
-    cmox_ecc_retval_t retval;
+    int retval;
 
-    /*- Set ECC context */
-    cmox_ecc_construct(&Ecc_Ctx,                /* ECC context */
-                       CMOX_MATH_FUNCS_SMALL,   /* Small math functions */
-                       cmox_math_buffer,        /* Crypto math buffer */
-                       sizeof(cmox_math_buffer) /* buffer size */
-    );
+#ifdef STSE_CONF_ECC_EDWARD_25519
+    if (key_type == STSE_ECC_KT_ED25519) {
+        ed25519_key ed_key;
+        word32 priv_len = ED25519_KEY_SIZE;
+        word32 pub_len = ED25519_PUB_KEY_SIZE;
 
-    /* Minimum random length equal the private key length */
-    size_t randomLength = stse_platform_get_cmox_ecc_priv_key_len(key_type);
-    /* Align the random length to modulo 4 */
-    randomLength += 4 - (randomLength & 0x3);
-    /* Add 32bytes to random length if the key is Curve25519 because it will use the Ed25519 key gen */
-#ifdef STSE_CONF_ECC_CURVE_25519
-    randomLength += ((key_type == STSE_ECC_KT_CURVE25519) ? 32 : 0);
-#endif /* STSE_CONF_ECC_CURVE_25519 */
-    /* Retry loop in case the RNG isn't strong enough */
-    do {
-        /* - Generate a random number */
-        PLAT_UI8 randomNumber[randomLength];
-        for (uint8_t i = 0; i < randomLength; i += 4) {
-            *((PLAT_UI32 *)&randomNumber[i]) = stse_platform_generate_random();
+        /* Initialize Ed25519 key */
+        retval = wc_ed25519_init(&ed_key);
+        if (retval != 0) {
+            return STSE_PLATFORM_ECC_GENERATE_KEY_PAIR_ERROR;
         }
 
-        /*- Generate EdDSA key pair */
-#ifdef STSE_CONF_ECC_EDWARD_25519
-        if (key_type == STSE_ECC_KT_ED25519) {
-            retval = cmox_eddsa_keyGen(&Ecc_Ctx,                                  /* ECC context */
-                                       stse_platform_get_cmox_ecc_impl(key_type), /* Curve param */
-                                       randomNumber,                              /* Random number */
-                                       randomLength,                              /* Random number length */
-                                       pPrivKey,                                  /* Private key */
-                                       NULL,                                      /* Private key length*/
-                                       pPubKey,                                   /* Public key */
-                                       NULL);                                     /* Public key length */
-        } else
+        /* Generate key pair using platform RNG */
+        retval = wc_ed25519_make_key(&stse_platform_wolfcrypt_rng, ED25519_KEY_SIZE, &ed_key);
+        if (retval != 0) {
+            wc_ed25519_free(&ed_key);
+            return STSE_PLATFORM_ECC_GENERATE_KEY_PAIR_ERROR;
+        }
+
+        /* Export private and public keys */
+        retval = wc_ed25519_export_private_only(&ed_key, pPrivKey, &priv_len);
+        if (retval != 0) {
+            wc_ed25519_free(&ed_key);
+            return STSE_PLATFORM_ECC_GENERATE_KEY_PAIR_ERROR;
+        }
+
+        retval = wc_ed25519_export_public(&ed_key, pPubKey, &pub_len);
+        wc_ed25519_free(&ed_key);
+
+        if (retval != 0) {
+            return STSE_PLATFORM_ECC_GENERATE_KEY_PAIR_ERROR;
+        }
+    } else
 #endif /* STSE_CONF_ECC_EDWARD_25519 */
 #ifdef STSE_CONF_ECC_CURVE_25519
-            if (key_type == STSE_ECC_KT_CURVE25519) {
-            memcpy(pPrivKey, static_c25519_priv_key, 32);
-            memcpy(pPubKey, static_c25519_pub_key, 32);
-
-            retval = CMOX_ECC_SUCCESS;
-        } else
+    if (key_type == STSE_ECC_KT_CURVE25519) {
+        /* Use static keys for Curve25519 as in original code */
+        memcpy(pPrivKey, static_c25519_priv_key, 32);
+        memcpy(pPubKey, static_c25519_pub_key, 32);
+        retval = 0;
+    } else
 #endif /* STSE_CONF_ECC_CURVE_25519 */
-        {
-            retval = cmox_ecdsa_keyGen(&Ecc_Ctx,                                  /* ECC context */
-                                       stse_platform_get_cmox_ecc_impl(key_type), /* Curve param */
-                                       randomNumber,                              /* Random number */
-                                       randomLength,                              /* Random number length */
-                                       pPrivKey,                                  /* Private key */
-                                       NULL,                                      /* Private key length*/
-                                       pPubKey,                                   /* Public key */
-                                       NULL);                                     /* Public key length */
+    {
+        ecc_key ecc;
+        word32 priv_len, pub_len;
+        int curve_id = stse_platform_get_wc_ecc_curve_id(key_type);
+
+        if (curve_id < 0) {
+            return STSE_PLATFORM_ECC_GENERATE_KEY_PAIR_ERROR;
         }
-    } while (retval == CMOX_ECC_ERR_WRONG_RANDOM);
 
-    /* - Clear ECC context */
-    cmox_ecc_cleanup(&Ecc_Ctx);
+        /* Initialize ECC key */
+        retval = wc_ecc_init(&ecc);
+        if (retval != 0) {
+            return STSE_PLATFORM_ECC_GENERATE_KEY_PAIR_ERROR;
+        }
 
-    if (retval != CMOX_ECC_SUCCESS) {
-        return STSE_PLATFORM_ECC_GENERATE_KEY_PAIR_ERROR;
+        /* Generate ECC key pair using platform RNG */
+        retval = wc_ecc_make_key_ex(&stse_platform_wolfcrypt_rng, NULL, 
+                                     stse_platform_get_wc_ecc_priv_key_len(key_type) * 8, 
+                                     curve_id, &ecc);
+        if (retval != 0) {
+            wc_ecc_free(&ecc);
+            return STSE_PLATFORM_ECC_GENERATE_KEY_PAIR_ERROR;
+        }
+
+        /* Export private key as raw bytes */
+        priv_len = stse_platform_get_wc_ecc_priv_key_len(key_type);
+        retval = wc_ecc_export_private_only(&ecc, pPrivKey, &priv_len);
+        if (retval != 0) {
+            wc_ecc_free(&ecc);
+            return STSE_PLATFORM_ECC_GENERATE_KEY_PAIR_ERROR;
+        }
+
+        /* Export public key in X9.63 format (uncompressed) */
+        pub_len = stse_platform_get_wc_ecc_pub_key_len(key_type);
+        retval = wc_ecc_export_x963(&ecc, pPubKey, &pub_len);
+        wc_ecc_free(&ecc);
+
+        if (retval != 0) {
+            return STSE_PLATFORM_ECC_GENERATE_KEY_PAIR_ERROR;
+        }
     }
 
     return STSE_OK;
@@ -346,62 +375,77 @@ stse_ReturnCode_t stse_platform_ecc_sign(
 #if defined(STSE_CONF_ECC_NIST_P_256) || defined(STSE_CONF_ECC_NIST_P_384) || defined(STSE_CONF_ECC_NIST_P_521) ||                \
     defined(STSE_CONF_ECC_BRAINPOOL_P_256) || defined(STSE_CONF_ECC_BRAINPOOL_P_384) || defined(STSE_CONF_ECC_BRAINPOOL_P_512) || \
     defined(STSE_CONF_ECC_CURVE_25519) || defined(STSE_CONF_ECC_EDWARD_25519)
-    cmox_ecc_retval_t retval;
+    int retval;
 
     if (pPrivKey == NULL) {
         return STSE_PLATFORM_INVALID_PARAMETER;
     }
 
-    /*- Set ECC context */
-    cmox_ecc_construct(&Ecc_Ctx,                /* ECC context */
-                       CMOX_MATH_FUNCS_SMALL,   /* Small math functions */
-                       cmox_math_buffer,        /* Crypto math buffer */
-                       sizeof(cmox_math_buffer) /* buffer size */
-    );
-
 #ifdef STSE_CONF_ECC_EDWARD_25519
     if (key_type == STSE_ECC_KT_ED25519) {
-        /* - Perform EDDSA sign */
-        retval = cmox_eddsa_sign(&Ecc_Ctx,                                          /* ECC context */
-                                 stse_platform_get_cmox_ecc_impl(key_type),         /* Curve param */
-                                 pPrivKey,                                          /* Private key */
-                                 stse_platform_get_cmox_ecc_priv_key_len(key_type), /* Private key length*/
-                                 pDigest,                                           /* Message */
-                                 digestLen,                                         /* Message length */
-                                 pSignature,                                        /* Signature */
-                                 NULL                                               /* Signature length */
-        );
+        ed25519_key ed_key;
+        word32 sig_len = ED25519_SIG_SIZE;
+
+        /* Initialize Ed25519 key */
+        retval = wc_ed25519_init(&ed_key);
+        if (retval != 0) {
+            return STSE_PLATFORM_ECC_SIGN_ERROR;
+        }
+
+        /* Import private key */
+        retval = wc_ed25519_import_private_only(pPrivKey, ED25519_KEY_SIZE, &ed_key);
+        if (retval != 0) {
+            wc_ed25519_free(&ed_key);
+            return STSE_PLATFORM_ECC_SIGN_ERROR;
+        }
+
+        /* Sign message */
+        retval = wc_ed25519_sign_msg(pDigest, digestLen, pSignature, &sig_len, &ed_key);
+        wc_ed25519_free(&ed_key);
+
+        if (retval != 0) {
+            return STSE_PLATFORM_ECC_SIGN_ERROR;
+        }
     } else
 #endif /* STSE_CONF_ECC_EDWARD_25519 */
     {
-        do {
-            /* - Generate a random number */
-            size_t randomLength = stse_platform_get_cmox_ecc_priv_key_len(key_type) + (4 - (stse_platform_get_cmox_ecc_priv_key_len(key_type) & 0x3));
-            PLAT_UI8 randomNumber[randomLength];
-            for (uint8_t i = 0; i < randomLength; i += 4) {
-                *((PLAT_UI32 *)&randomNumber[i]) = stse_platform_generate_random();
-            }
+        ecc_key ecc;
+        word32 sig_len = stse_platform_get_wc_ecc_sig_len(key_type);
+        int curve_id = stse_platform_get_wc_ecc_curve_id(key_type);
 
-            /* - Perform ECDSA sign */
-            retval = cmox_ecdsa_sign(&Ecc_Ctx,                                  /* ECC context */
-                                     stse_platform_get_cmox_ecc_impl(key_type), /* Curve param */
-                                     randomNumber,
-                                     stse_platform_get_cmox_ecc_priv_key_len(key_type),
-                                     pPrivKey,                                          /* Private key */
-                                     stse_platform_get_cmox_ecc_priv_key_len(key_type), /* Private key length*/
-                                     pDigest,                                           /* Message */
-                                     digestLen,                                         /* Message length */
-                                     pSignature,                                        /* Signature */
-                                     NULL                                               /* Signature length */
-            );
-        } while (retval == CMOX_ECC_ERR_WRONG_RANDOM);
-    }
+        if (curve_id < 0) {
+            return STSE_PLATFORM_ECC_SIGN_ERROR;
+        }
 
-    /* - Clear ECC context */
-    cmox_ecc_cleanup(&Ecc_Ctx);
+        /* Initialize ECC key */
+        retval = wc_ecc_init(&ecc);
+        if (retval != 0) {
+            return STSE_PLATFORM_ECC_SIGN_ERROR;
+        }
 
-    if (retval != CMOX_ECC_SUCCESS) {
-        return STSE_PLATFORM_ECC_SIGN_ERROR;
+        /* Import private key */
+        retval = wc_ecc_import_private_key(pPrivKey, stse_platform_get_wc_ecc_priv_key_len(key_type),
+                                            NULL, 0, &ecc);
+        if (retval != 0) {
+            wc_ecc_free(&ecc);
+            return STSE_PLATFORM_ECC_SIGN_ERROR;
+        }
+
+        /* Set curve parameters */
+        retval = wc_ecc_set_curve(&ecc, stse_platform_get_wc_ecc_priv_key_len(key_type) * 8, curve_id);
+        if (retval != 0) {
+            wc_ecc_free(&ecc);
+            return STSE_PLATFORM_ECC_SIGN_ERROR;
+        }
+
+        /* Sign hash with platform RNG */
+        retval = wc_ecc_sign_hash(pDigest, digestLen, pSignature, &sig_len, 
+                                   &stse_platform_wolfcrypt_rng, NULL, &ecc);
+        wc_ecc_free(&ecc);
+
+        if (retval != 0) {
+            return STSE_PLATFORM_ECC_SIGN_ERROR;
+        }
     }
 
     return STSE_OK;
@@ -412,7 +456,7 @@ stse_ReturnCode_t stse_platform_ecc_sign(
           STSE_CONF_ECC_CURVE_25519 || STSE_CONF_ECC_EDWARD_25519 */
 }
 #endif /* STSE_CONF_USE_HOST_KEY_PROVISIONING_WRAPPED_AUTHENTICATED || STSE_CONF_USE_SYMMETRIC_KEY_ESTABLISHMENT_AUTHENTICATED ||
-			STSE_CONF_USE_SYMMETRIC_KEY_PROVISIONING_WRAPPED_AUTHENTICATED */
+STSE_CONF_USE_SYMMETRIC_KEY_PROVISIONING_WRAPPED_AUTHENTICATED */
 
 #if defined(STSE_CONF_USE_HOST_KEY_ESTABLISHMENT) ||                      \
     defined(STSE_CONF_USE_HOST_KEY_PROVISIONING_WRAPPED) ||               \
@@ -427,67 +471,133 @@ stse_ReturnCode_t stse_platform_ecc_ecdh(
     const PLAT_UI8 *pPubKey,
     const PLAT_UI8 *pPrivKey,
     PLAT_UI8 *pSharedSecret) {
-    cmox_ecc_retval_t retval;
+    int retval;
 
-    /*- Set ECC context */
-    cmox_ecc_construct(&Ecc_Ctx,                /* ECC context */
-                       CMOX_MATH_FUNCS_SMALL,   /* Small math functions */
-                       cmox_math_buffer,        /* Crypto math buffer */
-                       sizeof(cmox_math_buffer) /* buffer size */
-    );
+#ifdef STSE_CONF_ECC_CURVE_25519
+    if (key_type == STSE_ECC_KT_CURVE25519) {
+        curve25519_key priv, pub;
+        word32 secret_len = CURVE25519_KEYSIZE;
 
-    retval = cmox_ecdh(&Ecc_Ctx,                                          /* ECC context */
-                       stse_platform_get_cmox_ecc_impl(key_type),         /* Curve param */
-                       pPrivKey,                                          /* Private key (local) */
-                       stse_platform_get_cmox_ecc_priv_key_len(key_type), /* Private key length*/
-                       pPubKey,                                           /* Public key (remote) */
-                       stse_platform_get_cmox_ecc_pub_key_len(key_type),  /* Public key length */
-                       pSharedSecret,                                     /* Shared secret */
-                       NULL                                               /* Shared secret length */
-    );
+        /* Initialize Curve25519 keys */
+        retval = wc_curve25519_init(&priv);
+        if (retval != 0) {
+            return STSE_PLATFORM_ECC_ECDH_ERROR;
+        }
 
-    /* - Clear ECC context */
-    cmox_ecc_cleanup(&Ecc_Ctx);
+        retval = wc_curve25519_init(&pub);
+        if (retval != 0) {
+            wc_curve25519_free(&priv);
+            return STSE_PLATFORM_ECC_ECDH_ERROR;
+        }
 
-    if (retval != CMOX_ECC_SUCCESS) {
-        return STSE_PLATFORM_ECC_ECDH_ERROR;
+        /* Import keys */
+        retval = wc_curve25519_import_private_raw(pPrivKey, CURVE25519_KEYSIZE, &priv);
+        if (retval != 0) {
+            wc_curve25519_free(&priv);
+            wc_curve25519_free(&pub);
+            return STSE_PLATFORM_ECC_ECDH_ERROR;
+        }
+
+        retval = wc_curve25519_import_public(pPubKey, CURVE25519_KEYSIZE, &pub);
+        if (retval != 0) {
+            wc_curve25519_free(&priv);
+            wc_curve25519_free(&pub);
+            return STSE_PLATFORM_ECC_ECDH_ERROR;
+        }
+
+        /* Compute shared secret */
+        retval = wc_curve25519_shared_secret(&priv, &pub, pSharedSecret, &secret_len);
+        wc_curve25519_free(&priv);
+        wc_curve25519_free(&pub);
+
+        if (retval != 0) {
+            return STSE_PLATFORM_ECC_ECDH_ERROR;
+        }
+    } else
+#endif /* STSE_CONF_ECC_CURVE_25519 */
+    {
+        ecc_key priv, pub;
+        word32 secret_len = stse_platform_get_wc_ecc_priv_key_len(key_type);
+        int curve_id = stse_platform_get_wc_ecc_curve_id(key_type);
+
+        if (curve_id < 0) {
+            return STSE_PLATFORM_ECC_ECDH_ERROR;
+        }
+
+        /* Initialize ECC keys */
+        retval = wc_ecc_init(&priv);
+        if (retval != 0) {
+            return STSE_PLATFORM_ECC_ECDH_ERROR;
+        }
+
+        retval = wc_ecc_init(&pub);
+        if (retval != 0) {
+            wc_ecc_free(&priv);
+            return STSE_PLATFORM_ECC_ECDH_ERROR;
+        }
+
+        /* Import private key */
+        retval = wc_ecc_import_private_key(pPrivKey, stse_platform_get_wc_ecc_priv_key_len(key_type),
+                                            NULL, 0, &priv);
+        if (retval != 0) {
+            wc_ecc_free(&priv);
+            wc_ecc_free(&pub);
+            return STSE_PLATFORM_ECC_ECDH_ERROR;
+        }
+
+        /* Set curve for private key */
+        retval = wc_ecc_set_curve(&priv, stse_platform_get_wc_ecc_priv_key_len(key_type) * 8, curve_id);
+        if (retval != 0) {
+            wc_ecc_free(&priv);
+            wc_ecc_free(&pub);
+            return STSE_PLATFORM_ECC_ECDH_ERROR;
+        }
+
+        /* Import public key (X9.63 format) */
+        retval = wc_ecc_import_x963(pPubKey, stse_platform_get_wc_ecc_pub_key_len(key_type), &pub);
+        if (retval != 0) {
+            wc_ecc_free(&priv);
+            wc_ecc_free(&pub);
+            return STSE_PLATFORM_ECC_ECDH_ERROR;
+        }
+
+        /* Compute shared secret */
+        retval = wc_ecc_shared_secret(&priv, &pub, pSharedSecret, &secret_len);
+        wc_ecc_free(&priv);
+        wc_ecc_free(&pub);
+
+        if (retval != 0) {
+            return STSE_PLATFORM_ECC_ECDH_ERROR;
+        }
     }
 
     return STSE_OK;
 }
 #endif /* STSE_CONF_USE_HOST_KEY_ESTABLISHMENT) || STSE_CONF_USE_HOST_KEY_PROVISIONING_WRAPPED) ||
-			STSE_CONF_USE_HOST_KEY_PROVISIONING_WRAPPED_AUTHENTICATED || STSE_CONF_USE_SYMMETRIC_KEY_ESTABLISHMENT) ||
-			STSE_CONF_USE_SYMMETRIC_KEY_ESTABLISHMENT_AUTHENTICATED || STSE_CONF_USE_SYMMETRIC_KEY_PROVISIONING_WRAPPED ||
-			STSE_CONF_USE_SYMMETRIC_KEY_PROVISIONING_WRAPPED_AUTHENTICATED */
+STSE_CONF_USE_HOST_KEY_PROVISIONING_WRAPPED_AUTHENTICATED || STSE_CONF_USE_SYMMETRIC_KEY_ESTABLISHMENT) ||
+STSE_CONF_USE_SYMMETRIC_KEY_ESTABLISHMENT_AUTHENTICATED || STSE_CONF_USE_SYMMETRIC_KEY_PROVISIONING_WRAPPED ||
+STSE_CONF_USE_SYMMETRIC_KEY_PROVISIONING_WRAPPED_AUTHENTICATED */
 
 #if defined(STSE_CONF_USE_HOST_KEY_PROVISIONING_WRAPPED) ||               \
     defined(STSE_CONF_USE_HOST_KEY_PROVISIONING_WRAPPED_AUTHENTICATED) || \
     defined(STSE_CONF_USE_SYMMETRIC_KEY_PROVISIONING_WRAPPED) ||          \
     defined(STSE_CONF_USE_SYMMETRIC_KEY_PROVISIONING_WRAPPED_AUTHENTICATED)
 
-#define KEK_WRAP_IV_SIZE 8
-const PLAT_UI8 KEK_WRAP_IV[KEK_WRAP_IV_SIZE] = {0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6};
-
 stse_ReturnCode_t stse_platform_nist_kw_encrypt(PLAT_UI8 *pPayload, PLAT_UI32 payload_length,
                                                 PLAT_UI8 *pKey, PLAT_UI8 key_length,
                                                 PLAT_UI8 *pOutput, PLAT_UI32 *pOutput_length) {
-    cmox_cipher_retval_t retval;
-    size_t cmox_output_length = *pOutput_length;
+    int retval;
+    word32 output_len = *pOutput_length;
 
-    retval = cmox_cipher_encrypt(
-        CMOX_AESSMALL_KEYWRAP_ENC_ALGO,
-        pPayload, payload_length,
-        pKey, key_length,
-        KEK_WRAP_IV, KEK_WRAP_IV_SIZE,
-        pOutput, &cmox_output_length);
-
-    if (retval != CMOX_CIPHER_SUCCESS) {
+    /* Perform AES Key Wrap (NIST SP 800-38F) */
+    retval = wc_AesKeyWrap(pKey, key_length, pPayload, payload_length, pOutput, output_len, NULL);
+    if (retval < 0) {
         return STSE_PLATFORM_KEYWRAP_ERROR;
     }
 
-    *pOutput_length = (PLAT_UI32)cmox_output_length;
+    *pOutput_length = (PLAT_UI32)retval;
 
     return STSE_OK;
 }
 #endif /* STSE_CONF_USE_HOST_KEY_PROVISIONING_WRAPPED || STSE_CONF_USE_HOST_KEY_PROVISIONING_WRAPPED_AUTHENTICATED ||
-			STSE_CONF_USE_SYMMETRIC_KEY_PROVISIONING_WRAPPED || STSE_CONF_USE_SYMMETRIC_KEY_PROVISIONING_WRAPPED_AUTHENTICATED */
+STSE_CONF_USE_SYMMETRIC_KEY_PROVISIONING_WRAPPED || STSE_CONF_USE_SYMMETRIC_KEY_PROVISIONING_WRAPPED_AUTHENTICATED */
