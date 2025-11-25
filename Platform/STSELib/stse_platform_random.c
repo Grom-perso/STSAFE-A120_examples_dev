@@ -18,6 +18,9 @@
 #include "Drivers/rng/rng.h"
 #include "stse_conf.h"
 #include "stselib.h"
+#include <wolfssl/wolfcrypt/settings.h>
+#include <wolfssl/wolfcrypt/types.h>
+#include <wolfssl/wolfcrypt/random.h>
 
 stse_ReturnCode_t stse_platform_generate_random_init(void) {
     rng_start();

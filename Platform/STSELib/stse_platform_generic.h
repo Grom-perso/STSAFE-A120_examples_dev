@@ -40,6 +40,10 @@ extern "C" {
 /* wolfCrypt-compatible RNG function */
 int stse_platform_wolfcrypt_rng(void *p_rng, unsigned char *output, size_t output_len);
 
+/* Get global WC_RNG instance */
+typedef struct WC_RNG WC_RNG;
+WC_RNG* stse_platform_get_rng(void);
+
 #endif /* STSE_PLATFORM_GENERIC_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

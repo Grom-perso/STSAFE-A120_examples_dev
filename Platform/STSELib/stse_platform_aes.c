@@ -21,10 +21,10 @@
 #include "stse_conf.h"
 #include "stselib.h"
 
+#if defined(STSE_CONF_USE_HOST_KEY_ESTABLISHMENT) || defined(STSE_CONF_USE_SYMMETRIC_KEY_ESTABLISHMENT) || defined(STSE_CONF_USE_HOST_SESSION)
+
 static Cmac cmac_ctx;
 static int cmac_initialized = 0;
-
-#if defined(STSE_CONF_USE_HOST_KEY_ESTABLISHMENT) || defined(STSE_CONF_USE_SYMMETRIC_KEY_ESTABLISHMENT) || defined(STSE_CONF_USE_HOST_SESSION)
 
 stse_ReturnCode_t stse_platform_aes_cmac_init(const PLAT_UI8 *pKey,
                                               PLAT_UI16 key_length,

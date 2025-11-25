@@ -23,38 +23,9 @@
 #include "stse_conf.h"
 #include "stselib.h"
 
-/* Map STSE curve types to wolfCrypt curve IDs */
-static int stse_platform_get_wc_ecc_curve_id(stse_ecc_key_type_t key_type) {
-    switch (key_type) {
-#ifdef STSE_CONF_ECC_NIST_P_256
-    case STSE_ECC_KT_NIST_P_256:
-        return ECC_SECP256R1;
-#endif
-#ifdef STSE_CONF_ECC_NIST_P_384
-    case STSE_ECC_KT_NIST_P_384:
-        return ECC_SECP384R1;
-#endif
-#ifdef STSE_CONF_ECC_NIST_P_521
-    case STSE_ECC_KT_NIST_P_521:
-        return ECC_SECP521R1;
-#endif
-#ifdef STSE_CONF_ECC_BRAINPOOL_P_256
-    case STSE_ECC_KT_BP_P_256:
-        return ECC_BRAINPOOLP256R1;
-#endif
-#ifdef STSE_CONF_ECC_BRAINPOOL_P_384
-    case STSE_ECC_KT_BP_P_384:
-        return ECC_BRAINPOOLP384R1;
-#endif
-#ifdef STSE_CONF_ECC_BRAINPOOL_P_512
-    case STSE_ECC_KT_BP_P_512:
-        return ECC_BRAINPOOLP512R1;
-#endif
-    default:
-        return -1;
-    }
-}
+#include "Platform/stse_platform_ecc_helpers.h"
 
+/* Map STSE curve types to wolfCrypt curve IDs */
 static size_t stse_platform_get_wc_ecc_pub_key_len(stse_ecc_key_type_t key_type) {
     switch (key_type) {
 #ifdef STSE_CONF_ECC_NIST_P_256
@@ -133,44 +104,9 @@ static size_t stse_platform_get_wc_ecc_sig_len(stse_ecc_key_type_t key_type) {
     }
 }
 
-static size_t stse_platform_get_wc_ecc_priv_key_len(stse_ecc_key_type_t key_type) {
-    switch (key_type) {
-#ifdef STSE_CONF_ECC_NIST_P_256
-    case STSE_ECC_KT_NIST_P_256:
-        return 32;
-#endif
-#ifdef STSE_CONF_ECC_NIST_P_384
-    case STSE_ECC_KT_NIST_P_384:
-        return 48;
-#endif
-#ifdef STSE_CONF_ECC_NIST_P_521
-    case STSE_ECC_KT_NIST_P_521:
-        return 66;
-#endif
-#ifdef STSE_CONF_ECC_BRAINPOOL_P_256
-    case STSE_ECC_KT_BP_P_256:
-        return 32;
-#endif
-#ifdef STSE_CONF_ECC_BRAINPOOL_P_384
-    case STSE_ECC_KT_BP_P_384:
-        return 48;
-#endif
-#ifdef STSE_CONF_ECC_BRAINPOOL_P_512
-    case STSE_ECC_KT_BP_P_512:
-        return 64;
-#endif
-#ifdef STSE_CONF_ECC_CURVE_25519
-    case STSE_ECC_KT_CURVE25519:
-        return CURVE25519_KEYSIZE;
-#endif
-#ifdef STSE_CONF_ECC_EDWARD_25519
-    case STSE_ECC_KT_ED25519:
-        return ED25519_KEY_SIZE;
-#endif
-    default:
-        return 0u;
-    }
-}
+
+
+
 
 stse_ReturnCode_t stse_platform_ecc_verify(
     stse_ecc_key_type_t key_type,
@@ -178,75 +114,13 @@ stse_ReturnCode_t stse_platform_ecc_verify(
     PLAT_UI8 *pDigest,
     PLAT_UI16 digestLen,
     PLAT_UI8 *pSignature) {
-#if defined(STSE_CONF_ECC_NIST_P_256) || defined(STSE_CONF_ECC_NIST_P_384) || defined(STSE_CONF_ECC_NIST_P_521) ||                \
-    defined(STSE_CONF_ECC_BRAINPOOL_P_256) || defined(STSE_CONF_ECC_BRAINPOOL_P_384) || defined(STSE_CONF_ECC_BRAINPOOL_P_512) || \
-    defined(STSE_CONF_ECC_CURVE_25519) || defined(STSE_CONF_ECC_EDWARD_25519)
-    int retval;
-
-#ifdef STSE_CONF_ECC_EDWARD_25519
-    if (key_type == STSE_ECC_KT_ED25519) {
-        ed25519_key ed_key;
-        int stat = 0;
-
-        /* Import Ed25519 public key */
-        retval = wc_ed25519_init(&ed_key);
-        if (retval != 0) {
-            return STSE_PLATFORM_ECC_VERIFY_ERROR;
-        }
-
-        retval = wc_ed25519_import_public(pPubKey, ED25519_PUB_KEY_SIZE, &ed_key);
-        if (retval != 0) {
-            wc_ed25519_free(&ed_key);
-            return STSE_PLATFORM_ECC_VERIFY_ERROR;
-        }
-
-        /* Verify EdDSA signature */
-        retval = wc_ed25519_verify_msg(pSignature, ED25519_SIG_SIZE, pDigest, digestLen, &stat, &ed_key);
-        wc_ed25519_free(&ed_key);
-
-        if (retval != 0 || stat != 1) {
-            return STSE_PLATFORM_ECC_VERIFY_ERROR;
-        }
-    } else
-#endif /* STSE_CONF_ECC_EDWARD_25519 */
-    {
-        ecc_key ecc;
-        int stat = 0;
-        int curve_id = stse_platform_get_wc_ecc_curve_id(key_type);
-
-        if (curve_id < 0) {
-            return STSE_PLATFORM_ECC_VERIFY_ERROR;
-        }
-
-        /* Initialize ECC key */
-        retval = wc_ecc_init(&ecc);
-        if (retval != 0) {
-            return STSE_PLATFORM_ECC_VERIFY_ERROR;
-        }
-
-        /* Import ECC public key (assuming uncompressed format: 0x04 || X || Y) */
-        retval = wc_ecc_import_x963(pPubKey, stse_platform_get_wc_ecc_pub_key_len(key_type), &ecc);
-        if (retval != 0) {
-            wc_ecc_free(&ecc);
-            return STSE_PLATFORM_ECC_VERIFY_ERROR;
-        }
-
-        /* Verify ECDSA signature (signature format: r || s) */
-        retval = wc_ecc_verify_hash(pSignature, stse_platform_get_wc_ecc_sig_len(key_type),
-                                     pDigest, digestLen, &stat, &ecc);
-        wc_ecc_free(&ecc);
-
-        if (retval != 0 || stat != 1) {
-            return STSE_PLATFORM_ECC_VERIFY_ERROR;
-        }
-    }
-
-    return STSE_OK;
-#else
-    return STSE_PLATFORM_ECC_VERIFY_ERROR;
-#endif /* STSE_CONF_ECC_NIST_P_256 || STSE_CONF_ECC_NIST_P_384 || STSE_CONF_ECC_NIST_P_521 ||\
-          STSE_CONF_ECC_BRAINPOOL_P_256 || STSE_CONF_ECC_BRAINPOOL_P_384 || STSE_CONF_ECC_BRAINPOOL_P_512 ||\
-          STSE_CONF_ECC_CURVE_25519 || STSE_CONF_ECC_EDWARD_25519 */
+    /* Assume signature is formatted as r||s with equal halves */
+    word32 sig_len = stse_platform_get_wc_ecc_sig_len(key_type);
+    word32 half_len = sig_len / 2;
+    
+    return stse_platform_ecc_verify_with_rs(key_type, pPubKey, pDigest, digestLen,
+                                            pSignature, half_len,
+                                            pSignature + half_len, half_len);
 }
 
 /* Private_key */
@@ -273,8 +147,8 @@ stse_ReturnCode_t stse_platform_ecc_generate_key_pair(
 #ifdef STSE_CONF_ECC_EDWARD_25519
     if (key_type == STSE_ECC_KT_ED25519) {
         ed25519_key ed_key;
-        PLAT_UI32 priv_len = ED25519_KEY_SIZE;
-        PLAT_UI32 pub_len = ED25519_PUB_KEY_SIZE;
+        word32 priv_len = ED25519_KEY_SIZE;
+        word32 pub_len = ED25519_PUB_KEY_SIZE;
 
         /* Initialize Ed25519 key */
         retval = wc_ed25519_init(&ed_key);
@@ -283,7 +157,7 @@ stse_ReturnCode_t stse_platform_ecc_generate_key_pair(
         }
 
         /* Generate key pair using platform RNG */
-        retval = wc_ed25519_make_key(&stse_platform_wolfcrypt_rng, ED25519_KEY_SIZE, &ed_key);
+        retval = wc_ed25519_make_key(stse_platform_get_rng(), ED25519_KEY_SIZE, &ed_key);
         if (retval != 0) {
             wc_ed25519_free(&ed_key);
             return STSE_PLATFORM_ECC_GENERATE_KEY_PAIR_ERROR;
@@ -314,7 +188,7 @@ stse_ReturnCode_t stse_platform_ecc_generate_key_pair(
 #endif /* STSE_CONF_ECC_CURVE_25519 */
     {
         ecc_key ecc;
-        PLAT_UI32 priv_len, pub_len;
+        word32 priv_len, pub_len;
         int curve_id = stse_platform_get_wc_ecc_curve_id(key_type);
 
         if (curve_id < 0) {
@@ -328,9 +202,9 @@ stse_ReturnCode_t stse_platform_ecc_generate_key_pair(
         }
 
         /* Generate ECC key pair using platform RNG */
-        retval = wc_ecc_make_key_ex(&stse_platform_wolfcrypt_rng, NULL, 
+        retval = wc_ecc_make_key_ex(stse_platform_get_rng(), 
                                      stse_platform_get_wc_ecc_priv_key_len(key_type) * 8, 
-                                     curve_id, &ecc);
+                                     &ecc, curve_id);
         if (retval != 0) {
             wc_ecc_free(&ecc);
             return STSE_PLATFORM_ECC_GENERATE_KEY_PAIR_ERROR;
@@ -384,7 +258,7 @@ stse_ReturnCode_t stse_platform_ecc_sign(
 #ifdef STSE_CONF_ECC_EDWARD_25519
     if (key_type == STSE_ECC_KT_ED25519) {
         ed25519_key ed_key;
-        PLAT_UI32 sig_len = ED25519_SIG_SIZE;
+        word32 sig_len = ED25519_SIG_SIZE;
 
         /* Initialize Ed25519 key */
         retval = wc_ed25519_init(&ed_key);
@@ -410,7 +284,7 @@ stse_ReturnCode_t stse_platform_ecc_sign(
 #endif /* STSE_CONF_ECC_EDWARD_25519 */
     {
         ecc_key ecc;
-        PLAT_UI32 sig_len = stse_platform_get_wc_ecc_sig_len(key_type);
+        word32 sig_len = stse_platform_get_wc_ecc_sig_len(key_type);
         int curve_id = stse_platform_get_wc_ecc_curve_id(key_type);
 
         if (curve_id < 0) {
@@ -440,7 +314,7 @@ stse_ReturnCode_t stse_platform_ecc_sign(
 
         /* Sign hash with platform RNG */
         retval = wc_ecc_sign_hash(pDigest, digestLen, pSignature, &sig_len, 
-                                   &stse_platform_wolfcrypt_rng, NULL, &ecc);
+                                   stse_platform_get_rng(), &ecc);
         wc_ecc_free(&ecc);
 
         if (retval != 0) {
@@ -476,7 +350,7 @@ stse_ReturnCode_t stse_platform_ecc_ecdh(
 #ifdef STSE_CONF_ECC_CURVE_25519
     if (key_type == STSE_ECC_KT_CURVE25519) {
         curve25519_key priv, pub;
-        PLAT_UI32 secret_len = CURVE25519_KEYSIZE;
+        word32 secret_len = CURVE25519_KEYSIZE;
 
         /* Initialize Curve25519 keys */
         retval = wc_curve25519_init(&priv);
@@ -517,7 +391,7 @@ stse_ReturnCode_t stse_platform_ecc_ecdh(
 #endif /* STSE_CONF_ECC_CURVE_25519 */
     {
         ecc_key priv, pub;
-        PLAT_UI32 secret_len = stse_platform_get_wc_ecc_priv_key_len(key_type);
+        word32 secret_len = stse_platform_get_wc_ecc_priv_key_len(key_type);
         int curve_id = stse_platform_get_wc_ecc_curve_id(key_type);
 
         if (curve_id < 0) {
