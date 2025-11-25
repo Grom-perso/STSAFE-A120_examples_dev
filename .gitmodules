@@ -1,3 +1,6 @@
 [submodule "Middleware/STSELib"]
 	path = Middleware/STSELib
 	url = https://github.com/STMicroelectronics/STSELib.git
+[submodule "Middleware/wolfssl"]
+	path = Middleware/wolfssl
+	url = https://github.com/wolfSSL/wolfssl.git
