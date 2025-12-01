@@ -48,11 +48,11 @@ The software package includes a set of drivers, middleware, and examples for STM
   
   - **STEP 1 :** Connect the STSAFE-A120 Nucleo expansion board on the top of the Host STM32 Nucleo board as shown in picture below:
   
-  ![](./X-NUCLEO-SAFEA1_eval_kit.png)
+  ![](./X-NUCLEO-ESE01A1.png)
   
 > **Note:**  
-> Jumper P7 (RST control) must be left open to communicate with the target STSAFE-A120.
-  
+>  X-NUCLEO-ESE01A1 PWR selector must be set to VCC=3.3V (STSAFE-A120 powered directly through Host 3.3V line).  As higlighted in the picture above.
+
   - **STEP 2 :** Connect the board to the development computer and Open and configure a terminal software as follow (i.e. Teraterm):
   
     ![](./teraterm_config.png)
