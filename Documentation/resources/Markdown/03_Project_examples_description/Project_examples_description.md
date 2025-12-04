@@ -18,6 +18,7 @@ Following applicative examples are available in the package to illustrate applic
   - @subpage STSAFE-A120_Host_key_provisioning_wrapped
   - @subpage STSAFE-A120_Command_AC_provisioning
   - @subpage STSAFE-A120_wrap_unwrap
+  - @subpage STSAFE-A120_ecdh
   - @subpage STSAFE-A120_Symmetric_key_provisioning_control_fields
   - @subpage STSAFE-A120_Symmetric_key_establishment_AES-128_CMAC
   - @subpage STSAFE-A120_Symmetric_key_establishment_AES-256_CCM
