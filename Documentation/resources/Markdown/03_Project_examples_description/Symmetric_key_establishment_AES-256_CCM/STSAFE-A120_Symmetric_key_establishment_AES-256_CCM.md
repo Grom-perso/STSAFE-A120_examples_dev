@@ -5,7 +5,7 @@ It uses the STSAFE Middleware APIs to a establish a key and encrypt then decrypt
 
 The example applicative flowchart is illustrated below :
 
-@startuml{STSAFE-A120_Symmetric_key_establishment_AES-256_CCM.png} "STSAFE-A120_Symmetric_key_establishment_AES-256_CCM Example flowchart" width=5cm
+@startuml "STSAFE-A120_Symmetric_key_establishment_AES-256_CCM Example flowchart" width=5cm
 	:MAIN;
 	:Initialize UART (baudrate = 115200)]
 	:Print example title and instructions]

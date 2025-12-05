@@ -8,14 +8,15 @@ Control fields provide fine-grained control over how symmetric keys can be insta
 
 The following flowchart illustrates the control field configuration process:
 
-@startuml{Symmetric_key_provisioning_control_fields_flowchart.png} "Symmetric Key Provisioning Control Fields flowchart" width=5cm
+@startuml "Symmetric Key Provisioning Control Fields flowchart" width=5cm
 	:MAIN;
 	:Initialize application terminal (baudrate = 115200);
 	:Display example title and instructions;
 	:ret = <b>stse_init</b>;
 	if(ret == STSE_OK) then (No)
 	:Display error message;
-	:Terminate application;
+	while (while(1))
+	end while
 	-[hidden]->
 	detach
 	else (Yes)

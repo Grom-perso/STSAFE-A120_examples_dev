@@ -10,14 +10,15 @@ It provides 256-bit security with relatively medium key sizes (521 bits), making
 
 The following flowchart illustrates the NIST P-521 key pair generation and signature verification process:
 
-@startuml{Key_pair_generation_NIST_P521_flowchart.png} "NIST P-521 Key Pair Generation flowchart" width=5cm
+@startuml "NIST P-521 Key Pair Generation flowchart" width=5cm
 	:MAIN;
 	:Initialize application terminal (baudrate = 115200);
 	:Display example title and instructions;
 	:ret = <b>stse_init</b>;
 	if(ret == STSE_OK) then (No)
 	:Display error message;
-	:Terminate application;
+	while (while(1))
+	end while
 	-[hidden]->
 	detach
 	else (Yes)

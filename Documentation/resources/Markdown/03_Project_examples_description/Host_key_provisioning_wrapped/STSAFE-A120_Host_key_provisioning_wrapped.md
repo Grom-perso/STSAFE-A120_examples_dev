@@ -8,7 +8,7 @@ Host key provisioning is a critical operation that enables secure communication 
 
 The following flowchart illustrates the main steps involved in the host key provisioning process:
 
-@startuml{STSAFE-A120_Host_key_provisioning_wrapped.png} "STSAFE-A120_Host_key_provisioning_wrapped Example flowchart" width=5cm
+@startuml "STSAFE-A120_Host_key_provisioning_wrapped Example flowchart" width=5cm
 	:MAIN;
 	:Initialize application terminal;
 	:Initialize STSAFE-A120 device (address 0x20);
@@ -16,6 +16,8 @@ The following flowchart illustrates the main steps involved in the host key prov
 	:Query host key provisioning control fields;
 	if(ret != STSE_OK) then (No)
 		:Display ERROR;
+		while (while(1))
+		end while
 		-[hidden]->
 		detach
 	else (Yes)
@@ -25,6 +27,8 @@ The following flowchart illustrates the main steps involved in the host key prov
 			:Update host key provisioning control fields;
 			if(ret != STSE_OK) then (No)
 				:Display ERROR;
+				while (while(1))
+				end while
 				-[hidden]->
 				detach
 			else (Yes)
@@ -35,6 +39,8 @@ The following flowchart illustrates the main steps involved in the host key prov
 				:Display "Control fields already set";
 			else (Yes)
 				:Display ERROR;
+				while (while(1))
+				end while
 				-[hidden]->
 				detach
 			endif
@@ -43,6 +49,8 @@ The following flowchart illustrates the main steps involved in the host key prov
 	:Provision host keys using wrapped method;
 	if(ret != STSE_OK) then (No)
 		:Display ERROR;
+		while (while(1))
+		end while
 		-[hidden]->
 		detach
 	else (Yes)

@@ -15,7 +15,8 @@ The following flowchart outlines the detailed steps performed by the echo loop e
   :ret = <b>stse_init</b>;
   if(ret == STSE_OK) then (No)
   :Display error message;
-  :Terminate application;
+	while (while(1))
+	end while
     -[hidden]->
   detach
   else (Yes)
@@ -28,7 +29,8 @@ The following flowchart outlines the detailed steps performed by the echo loop e
     :Wait for 1 second before next iteration;
     else (No)
     :Display error message;
-    :Terminate application;
+	while (while(1))
+	end while
     -[hidden]->
     detach
     endif

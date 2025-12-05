@@ -8,7 +8,7 @@ The template demonstrates the essential setup steps required for any STSAFE-A120
 
 The following flowchart illustrates the basic template structure:
 
-@startuml{Project_template_flowchart.png} "Project Template flowchart" width=5cm
+@startuml "Project Template flowchart" width=5cm
 	:MAIN;
 	:Initialize application terminal (baudrate = 115200);
 	note right

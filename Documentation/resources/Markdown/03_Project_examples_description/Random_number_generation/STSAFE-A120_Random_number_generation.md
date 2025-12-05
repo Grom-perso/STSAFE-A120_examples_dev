@@ -8,7 +8,7 @@ This example guides you through the process of initializing the STSAFE-A120 devi
 
 The following flowchart illustrates the main steps involved in the random number generation process using the STSAFE-A120:
 
-@startuml{STSAFE-A120_Random_number_generation.png} "STSAFE-A120_Random_number_generation Example flowchart" width=5cm
+@startuml "STSAFE-A120_Random_number_generation Example flowchart" width=5cm
 	:MAIN;
 	:Initialize UART (baudrate = 115200);
 	:Print example title and instructions;

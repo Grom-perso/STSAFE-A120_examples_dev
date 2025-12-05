@@ -10,14 +10,15 @@ It is designed to be fast, secure against timing attacks, and requires no random
 
 The following flowchart illustrates the Ed25519 key pair generation and signature verification process:
 
-@startuml{Key_pair_generation_EDWARDS_25519_flowchart.png} "Edwards-25519 Key Pair Generation flowchart" width=5cm
+@startuml "Edwards-25519 Key Pair Generation flowchart" width=5cm
 	:MAIN;
 	:Initialize application terminal (baudrate = 115200);
 	:Display example title and instructions;
 	:ret = <b>stse_init</b>;
 	if(ret == STSE_OK) then (No)
 	:Display error message;
-	:Terminate application;
+	while (while(1))
+	end while
 	-[hidden]->
 	detach
 	else (Yes)

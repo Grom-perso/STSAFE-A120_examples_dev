@@ -8,14 +8,15 @@ Wrapped key provisioning provides a secure method for transferring symmetric key
 
 The following flowchart illustrates the wrapped key provisioning and CMAC operation:
 
-@startuml{Symmetric_key_provisioning_wrapped_AES-128_CMAC_flowchart.png} "Wrapped AES-128 Key Provisioning CMAC flowchart" width=5cm
+@startuml "Wrapped AES-128 Key Provisioning CMAC flowchart" width=5cm
 	:MAIN;
 	:Initialize application terminal (baudrate = 115200);
 	:Display example title and instructions;
 	:ret = <b>stse_init</b>;
 	if(ret == STSE_OK) then (No)
 	:Display error message;
-	:Terminate application;
+	while (while(1))
+	end while
 	-[hidden]->
 	detach
 	else (Yes)

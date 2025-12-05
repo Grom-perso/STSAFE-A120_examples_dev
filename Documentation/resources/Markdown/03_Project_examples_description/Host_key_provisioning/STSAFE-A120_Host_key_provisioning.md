@@ -7,7 +7,7 @@ The example described here demonstrates the end-to-end procedure for provisionin
 
 The following flowchart illustrates the main steps involved in the host key provisioning process:
 
-@startuml{STSAFE-A120_Host_key_provisioning.png} "STSAFE-A120_Host_key_provisioning Example flowchart" width=5cm
+@startuml "STSAFE-A120_Host_key_provisioning Example flowchart" width=5cm
 	:MAIN;
 	:Initialize apps terminal]
 	:Initialize STSE device (addr 0x20)]
@@ -16,6 +16,8 @@ The following flowchart illustrates the main steps involved in the host key prov
 	if(ret != STSE_OK) then (No)
 	else (Yes)
 		:print ERROR]
+		while (while(1))
+		end while
 		-[hidden]-> detach
 	endif
 	:print Host key provisioning control fields]
@@ -25,6 +27,8 @@ The following flowchart illustrates the main steps involved in the host key prov
 		if(ret != STSE_OK) then (No)
 		else (Yes)
 			:print ERROR]
+			while (while(1))
+			end while
 			-[hidden]-> detach
 		endif
 	else (Yes)
@@ -32,6 +36,8 @@ The following flowchart illustrates the main steps involved in the host key prov
 			:print "control fields already set"]
 		else (Yes)
 			:print ERROR]
+			while (while(1))
+			end while
 			-[hidden]-> detach
 		endif
 	endif
@@ -39,12 +45,15 @@ The following flowchart illustrates the main steps involved in the host key prov
 	if(ret != STSE_OK) then (No)
 	else (Yes)
 		:print ERROR]
+		while (while(1))
+		end while
 		-[hidden]-> detach
 	endif
 	:print "stse_host_key_provisioning : PASS"]
 	while (while(1))
 	end while
-	-[hidden]-> detach
+	-[hidden]->
+	detach
 @enduml
 
 ## APIs and Services Utilized

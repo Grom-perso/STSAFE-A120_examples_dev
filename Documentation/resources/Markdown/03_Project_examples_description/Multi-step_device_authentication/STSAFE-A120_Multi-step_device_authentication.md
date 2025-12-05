@@ -15,6 +15,8 @@ The following flowchart illustrates the sequence of operations performed during 
 	if(ret != STSE_OK) then (No)
 	else (Yes)
 		:Print ERROR]
+		while (while(1))
+		end while
 		-[hidden]-> detach
 	endif
 	
@@ -22,6 +24,8 @@ The following flowchart illustrates the sequence of operations performed during 
 	if(ret != STSE_OK) then (No)
 	else (Yes)
 		:Print ERROR]
+		while (while(1))
+		end while
 		-[hidden]-> detach
 	endif
 
@@ -31,6 +35,8 @@ The following flowchart illustrates the sequence of operations performed during 
 	if(ret != STSE_OK) then (No)
 	else (Yes)
 		:Print ERROR]
+		while (while(1))
+		end while
 		-[hidden]-> detach
 	endif
 
@@ -38,6 +44,8 @@ The following flowchart illustrates the sequence of operations performed during 
 	if(ret != STSE_OK) then (No)
 	else (Yes)
 		:Print ERROR]
+		while (while(1))
+		end while
 		-[hidden]-> detach
 	endif
 
@@ -47,6 +55,8 @@ The following flowchart illustrates the sequence of operations performed during 
 	if(ret != STSE_OK) then (No)
 	else (Yes)
 		:Print ERROR]
+		while (while(1))
+		end while
 		-[hidden]-> detach
 	endif
 
@@ -56,6 +66,8 @@ The following flowchart illustrates the sequence of operations performed during 
 	if(ret != STSE_OK) then (No)
 	else (Yes)
 		:Print ERROR ]
+		while (while(1))
+		end while
 		-[hidden]-> detach
 	endif
 
@@ -64,12 +76,16 @@ The following flowchart illustrates the sequence of operations performed during 
 	if(ret != STSE_OK) then (No)
 	else (Yes)
 		:Print Error ]
+		while (while(1))
+		end while
 		-[hidden]-> detach
 	endif
 	:Print "<b>Device Authenticated</b>" ]
+
 	while (while(1) )
 	end while
-	-[hidden]-> detach
+	-[hidden]->
+	detach
 @enduml
 
 ## API Functions Utilized

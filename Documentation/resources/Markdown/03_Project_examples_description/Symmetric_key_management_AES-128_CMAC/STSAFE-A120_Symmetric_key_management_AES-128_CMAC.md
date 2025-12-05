@@ -5,7 +5,7 @@ It uses the STSAFE Middleware APIs to a write a key and compute then verify a MA
 
 The example applicative flowchart is illustrated below :
 
-@startuml{STSAFE-A120_Symmetric_key_management_AES-128_CMAC.png} "STSAFE-A120_Symmetric_key_management_AES-128_CMAC Example flowchart" width=5cm
+@startuml "STSAFE-A120_Symmetric_key_management_AES-128_CMAC Example flowchart" width=5cm
 	:MAIN;
 	:Initialize UART (baudrate = 115200)]
 	:Print example title and instructions]

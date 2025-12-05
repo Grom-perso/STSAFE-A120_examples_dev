@@ -16,14 +16,15 @@ The ECDH example application illustrates how to:
 
 The following flowchart outlines the main steps performed by the ECDH example application:
 
-@startuml{ECDH_Example_flowchart.png} "ECDH Example flowchart" width=5cm
+@startuml "ECDH Example flowchart" width=5cm
   :MAIN;
   :Initialize application terminal (baudrate = 115200);
   :Display example title and user instructions;
   :ret = <b>stse_init</b>;
   if(ret == STSE_OK) then (No)
   :Display error message;
-  :Terminate application;
+	while (while(1))
+	end while
     -[hidden]->
   detach
   else (Yes)
@@ -38,7 +39,8 @@ The following flowchart outlines the main steps performed by the ECDH example ap
   detach
   else (No)
   :Display error message;
-  :Terminate application;
+	while (while(1))
+	end while
   -[hidden]->
   detach
   endif

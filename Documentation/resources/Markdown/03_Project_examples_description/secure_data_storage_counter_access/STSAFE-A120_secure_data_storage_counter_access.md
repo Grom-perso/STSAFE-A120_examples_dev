@@ -17,7 +17,7 @@ These operations are essential for applications requiring secure monitoring of c
 
 The following flowchart illustrates the main steps of the example application, from initialization to secure counter access and update:
 
-@startuml{STSAFE-A120_secure_data_storage_zone_access.png} "STSAFE-A120_Device_authentication Example flowchart" width=5cm
+@startuml "STSAFE-A120_Device_authentication Example flowchart" width=5cm
 
 	:MAIN;
 	:Initialize Apps terminal (baudrate = 115200)];
@@ -26,6 +26,8 @@ The following flowchart illustrates the main steps of the example application, f
 	if(ret != STSE_OK) then (No)
 	else (Yes)
 		:Print ERROR];
+		while (while(1))
+		end while
 		-[hidden]->
 		detach
 	endif
@@ -40,6 +42,8 @@ The following flowchart illustrates the main steps of the example application, f
 	if(ret != STSE_OK) then (No)
 	else (Yes)
 		:Print ERROR];
+		while (while(1))
+		end while
 		-[hidden]->
 		detach
 	endif
@@ -58,6 +62,8 @@ The following flowchart illustrates the main steps of the example application, f
 	if(ret != STSE_OK) then (No)
 	else (Yes)
 		:Print ERROR];
+		while (while(1))
+		end while
 		-[hidden]->
 		detach
 	endif
@@ -71,6 +77,8 @@ The following flowchart illustrates the main steps of the example application, f
 	if(ret != STSE_OK) then (No)
 	else (Yes)
 		:Print ERROR];
+		while (while(1))
+		end while
 		-[hidden]->
 		detach
 	endif

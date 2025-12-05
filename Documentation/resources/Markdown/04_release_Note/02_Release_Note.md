@@ -1,6 +1,11 @@
 # RELEASE NOTE
 
-## v1.0.1 - Dec 25 (Latest) 
+## v1.0.2 - Dec 25 (Latest) 
+
+- Update documentation 
+- Add ECDH example
+
+## v1.0.1 - Dec 25 
 
 - Update documentation 
 - Add NIST-P-521 and BP-P-512 key-pair generation examples

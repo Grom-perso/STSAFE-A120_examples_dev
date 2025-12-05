@@ -1,4 +1,4 @@
-# STSAFE-A120 Hash{#STSAFE-A120_Hash}
+# STSAFE-A120 Hash {#STSAFE-A120_Hash}
 
 This example demonstrates how to performs xxx . 
 
@@ -6,7 +6,7 @@ This example demonstrates how to performs xxx .
 
 The example applicative flowchart is illustrated below :
 
-@startuml{STSAFE-A120_Hash.png} "STSAFE-A120_Device_authentication Example flowchart" width=5cm
+@startuml "STSAFE-A120_Device_authentication Example flowchart" width=5cm
 	:MAIN;
 	: Initialize apps terminal]
 	:Initialize STSAFE device (addr 0x20) ]
@@ -18,7 +18,7 @@ The example applicative flowchart is illustrated below :
 
 The following diagram shows the interactions between host and target STSAFE device :
 
-@startuml{STSAFE-A120_Get_product_information.png} "STSAFE-A120 Get product information Interactions Diagram" width=5cm
+@startuml "STSAFE-A120 Get product information Interactions Diagram" width=5cm
 	skinparam sequenceMessageAlign center
 	participant HOST order 1
 	participant STSAFE order 2

@@ -15,7 +15,8 @@ The following flowchart illustrates the command AC provisioning process:
 	:ret = <b>stse_init</b>;
 	if(ret == STSE_OK) then (No)
 	:Display error message;
-	:Terminate application;
+	while (while(1))
+	end while
 	-[hidden]->
 	detach
 	else (Yes)
