@@ -1,6 +1,7 @@
 # STSAFE-A120 Random Number Generation {#STSAFE-A120_Random_number_generation}
 
-Random number generation is a fundamental requirement in security applications, including cryptographic key generation, authentication, and secure data exchange. The STSAFE-A120 Secure Element offers a hardware-based random number generator, ensuring high entropy and resistance to prediction or manipulation.
+Random number generation is a fundamental requirement in security applications, including cryptographic key generation, authentication, and secure data exchange.  
+The STSAFE-A120 Secure Element offers a hardware-based random number generator, ensuring high entropy and resistance to prediction or manipulation.
 
 This example guides you through the process of initializing the STSAFE-A120 device, configuring the communication interface, and invoking the random number generation command. The generated random number can be used for various security-related tasks, such as creating symmetric or asymmetric keys, generating authentication challenges, or seeding cryptographic algorithms.
 
@@ -15,11 +16,7 @@ The following flowchart illustrates the main steps involved in the random number
 	:Initialize STSAFE device;
 	:Generate random number with STSAFE-A120;
 	:Print the random number;
-
-	while (while(1))
-	end while
-	-[hidden]->
-	detach
+	stop
 @enduml
 
 ## Execution and Output

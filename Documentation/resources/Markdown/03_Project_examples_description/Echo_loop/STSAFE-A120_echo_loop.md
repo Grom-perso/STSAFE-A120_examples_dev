@@ -1,6 +1,8 @@
 # STSAFE-A120 Echo Loop {#STSAFE-A120_echo_loop}
 
-This example provides a comprehensive demonstration of the echo loop functionality between a Host system and a target STSAFE-A120 device. The echo loop is a fundamental mechanism used to verify communication integrity, device responsiveness, and data consistency between the host and the secure element (SE). By continuously sending randomized messages from the host to the STSAFE-A120 and receiving the echoed responses, users can validate both the hardware and software integration of the SE in real-world scenarios.
+This example provides a comprehensive demonstration of the echo loop functionality between a Host system and a target STSAFE-A120 device.  
+The echo loop is a fundamental mechanism used to verify communication integrity, device responsiveness, and data consistency between the host and the secure element (SE).  
+By continuously sending randomized messages from the host to the STSAFE-A120 and receiving the echoed responses, users can validate both the hardware and software integration of the SE in real-world scenarios.
 
 ![STSAFE-A120_echo_loop_example](./STSAFE-A120_Echo_loop.png)
 
@@ -9,35 +11,33 @@ This example provides a comprehensive demonstration of the echo loop functionali
 The following flowchart outlines the detailed steps performed by the echo loop example application:
 
 @startuml{Echo_loop_Example_flowchart.png} "Echo Loop Example flowchart" width=5cm
-  :MAIN;
-  :Initialize application terminal (baudrate = 115200);
-  :Display example title and user instructions;
-  :ret = <b>stse_init</b>;
-  if(ret == STSE_OK) then (No)
-  :Display error message;
+:MAIN;
+:Initialize application terminal (baudrate = 115200);
+:Display example title and user instructions;
+:ret = <b>stse_init</b>;
+if(ret == STSE_OK) then (No)
+	:Display error message;
+	note right: Infinite loop
+	-[hidden]->
+	detach
+else (Yes)
 	while (while(1))
+		:Generate a randomized "<b>Message</b>" with variable length and content;
+		:Display the generated <b>"Message"</b>;
+		:ret = <b>stse_device_echo</b>;
+		if(ret == STSE_OK) then (Yes)
+			:Display the <b>"Echoed message"</b> received from STSAFE-A120;
+			:Wait for 1 second before next iteration;
+		else (No)
+			:Display error message;
+			note right: Infinite loop
+			-[hidden]->
+			detach
+		endif
 	end while
-    -[hidden]->
-  detach
-  else (Yes)
-  while (while(1))
-    :Generate a randomized "<b>Message</b>" with variable length and content;
-    :Display the generated <b>"Message"</b>;
-    :ret = <b>stse_device_echo</b>;
-    if(ret == STSE_OK) then (Yes)
-    :Display the <b>"Echoed message"</b> received from STSAFE-A120;
-    :Wait for 1 second before next iteration;
-    else (No)
-    :Display error message;
-	while (while(1))
-	end while
-    -[hidden]->
-    detach
-    endif
-  end while
-  -[hidden]->
-    detach
-  endif
+-[hidden]->
+detach
+endif
 @enduml
 
 ## Host Terminal Output

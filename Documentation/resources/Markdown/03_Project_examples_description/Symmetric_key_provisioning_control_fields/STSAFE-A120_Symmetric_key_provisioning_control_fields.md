@@ -14,24 +14,20 @@ The following flowchart illustrates the control field configuration process:
 	:Display example title and instructions;
 	:ret = <b>stse_init</b>;
 	if(ret == STSE_OK) then (No)
-	:Display error message;
-	while (while(1))
-	end while
-	-[hidden]->
-	detach
+		:Display error message;
+		note right: Infinite loop
+		-[hidden]->
+		detach
 	else (Yes)
-	:Query current control field settings for slot 0;
-	:Display current settings;
-	:Configure control fields to enable provisioning methods;
-	:Display WARNING - permanent configuration;
-	:Wait for user confirmation;
-	:Write updated control fields to device;
-	:Verify changes by querying again;
-	:Display updated settings;
-	while (while(1))
-	end while
-	-[hidden]->
-	detach
+		:Query current control field settings for slot 0;
+		:Display current settings;
+		:Configure control fields to enable provisioning methods;
+		:Display WARNING - permanent configuration;
+		:Wait for user confirmation;
+		:Write updated control fields to device;
+		:Verify changes by querying again;
+		:Display updated settings;
+		stop
 	endif
 @enduml
 

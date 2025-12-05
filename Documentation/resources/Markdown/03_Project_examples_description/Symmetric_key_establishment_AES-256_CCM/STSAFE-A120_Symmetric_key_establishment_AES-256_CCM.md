@@ -7,18 +7,15 @@ The example applicative flowchart is illustrated below :
 
 @startuml "STSAFE-A120_Symmetric_key_establishment_AES-256_CCM Example flowchart" width=5cm
 	:MAIN;
-	:Initialize UART (baudrate = 115200)]
-	:Print example title and instructions]
-	:Initialize STSAFE device]
-    :Ask user to enter a slot number]
-	:Establish AES-256 CCM* key in selected slot]
-	:Encrypt message with the STSAFE-A API]
-	:Decrypt message with the STSAFE-A Platform]
+	:Initialize UART (baudrate = 115200);
+	:Print example title and instructions;
+	:Initialize STSAFE device;
+  :Ask user to enter a slot number;
+	:Establish AES-256 CCM* key in selected slot;
+	:Encrypt message with the STSAFE-A API;
+	:Decrypt message with the STSAFE-A Platform;
 
-	while (while(1) )
-	end while
-	-[hidden]->
-    detach
+	stop
 @enduml
 
 When executed following logs can be seen on the host attached computer terminal window \n

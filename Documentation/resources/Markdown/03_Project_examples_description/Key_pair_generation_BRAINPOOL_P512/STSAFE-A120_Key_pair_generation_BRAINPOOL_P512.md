@@ -16,27 +16,26 @@ The following flowchart illustrates the BRAINPOOL P-512 key pair generation and 
 	:Display example title and instructions;
 	:ret = <b>stse_init</b>;
 	if(ret == STSE_OK) then (No)
-	:Display error message;
-	while (while(1))
-	end while
-	-[hidden]->
-	detach
+		:Display error message;
+		note right: Infinite loop
+		-[hidden]->
+		detach
 	else (Yes)
-	:Query asymmetric key table to find available slot;
-	:Generate BRAINPOOL P-512 key pair in selected slot;
-	:Retrieve the generated public key;
-	:Create random message and compute SHA-512 hash;
-	:Generate ECDSA signature using private key;
-	:Verify signature using platform crypto library;
-	if(Signature valid?) then (Yes)
-	:Display success message;
-	else (No)
-	:Display error message;
-	endif
-	while (while(1))
-	end while
-	-[hidden]->
-	detach
+		:Query asymmetric key table to find available slot;
+		:Generate BRAINPOOL P-512 key pair in selected slot;
+		:Retrieve the generated public key;
+		:Create random message and compute SHA-512 hash;
+		:Generate ECDSA signature using private key;
+		:Verify signature using platform crypto library;
+		if(Signature valid?) then (Yes)
+			:Display success message;
+			stop
+		else (No)
+			:Display error message;
+		    note right: Infinite loop
+			-[hidden]->
+			detach
+		endif
 	endif
 @enduml
 

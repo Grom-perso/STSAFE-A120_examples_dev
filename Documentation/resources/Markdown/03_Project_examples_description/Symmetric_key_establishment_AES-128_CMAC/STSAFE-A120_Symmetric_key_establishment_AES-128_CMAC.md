@@ -7,18 +7,15 @@ The example applicative flowchart is illustrated below :
 
 @startuml "STSAFE-A120_Symmetric_key_establishment_AES-128_CMAC Example flowchart" width=5cm
 	:MAIN;
-	:Initialize UART (baudrate = 115200)]
-	:Print example title and instructions]
-	:Initialize STSAFE device]
-    :Ask user to enter a slot number]
-	:Establish AES-128 CMAC key in selected slot]
-	:Compute MAC over message with the STSAFE-A API]
-	:Verify MAC over message with the STSAFE-A Platform]
+	:Initialize UART (baudrate = 115200);
+	:Print example title and instructions;
+	:Initialize STSAFE device;
+    :Ask user to enter a slot number;
+	:Establish AES-128 CMAC key in selected slot;
+	:Compute MAC over message with the STSAFE-A API;
+	:Verify MAC over message with the STSAFE-A Platform;
 
-	while (while(1) )
-	end while
-	-[hidden]->
-    detach
+	stop
 @enduml
 
 When executed following logs can be seen on the host attached computer terminal window  

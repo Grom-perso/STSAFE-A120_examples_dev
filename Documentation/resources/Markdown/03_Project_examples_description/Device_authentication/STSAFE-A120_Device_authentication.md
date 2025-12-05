@@ -1,58 +1,51 @@
 # STSAFE-A120 Device Authentication {#STSAFE-A120_Device_authentication}
 
-The STSAFE-A120 is a secure element designed to provide robust cryptographic functions, including device authentication, certificate management, and secure storage. In this example, the authentication process leverages several key APIs from the STSecureElement library to interact with the device, retrieve its certificate, and verify its authenticity against a trusted Certificate Authority (CA).
+The STSAFE-A120 is a secure element designed to provide robust cryptographic functions, including device authentication, certificate management, and secure storage.  
+In this example, the authentication process leverages several key APIs from the STSecureElement library to interact with the device, retrieve its certificate, and verify its authenticity against a trusted Certificate Authority (CA).
 
 ## Example Flowchart
 
 The following flowchart illustrates the step-by-step process implemented in the example application:
 
 @startuml "STSAFE-A120_Device_authentication Example flowchart" width=5cm
-    :MAIN;
-    :Initialize application terminal (baudrate = 115200);
-    :Display example title and user instructions;
-    :ret = <b>stse_init</b>;
-    if(ret != STSE_OK) then (Initialization Failed)
-        :Display ERROR message;
-        while (while(1))
-        end while
-          -[hidden]->
-        detach
-    else
-
-    :ret = <b>stse_get_device_certificate_size</b>;
-    if(ret != STSE_OK) then (Certificate Size Retrieval Failed)
-        :Display ERROR message;
-        while (while(1))
-        end while
-          -[hidden]->
-        detach
-    else
-
-    :ret = <b>stse_get_device_certificate</b>;
-    if(ret != STSE_OK) then (Certificate Retrieval Failed)
-        :Display ERROR message;
-        while (while(1))
-        end while
-          -[hidden]->
-        detach
-    else
-
-    :Display retrieved <b>Device Certificate</b>;
-    
-    :ret = <b>stse_device_authenticate</b>;
-    if(ret != STSE_OK) then (Authentication Failed)
-        :Display ERROR message;
-        while (while(1))
-        end while
-          -[hidden]->
-        detach
-    else (Authentication Succeeded)
-
-	while (while(1) )
-	end while
+:MAIN;
+:Initialize application terminal (baudrate = 115200);
+:Display example title and user instructions;
+:ret = <b>stse_init</b>;
+if(ret != STSE_OK) then (Yes)
+	:Display Initialization Failed message;
+	note right: Infinite loop
 	-[hidden]->
-    detach
-    endif
+	detach
+else (No)
+	:ret = <b>stse_get_device_certificate_size</b>;
+	if(ret != STSE_OK) then (Yes)
+		:Display Certificate Size Retrieval Failed message;
+		note right: Infinite loop
+		-[hidden]->
+		detach
+	else (No)
+		:ret = <b>stse_get_device_certificate</b>;
+		if(ret != STSE_OK) then (Yes)
+			:Display Certificate Retrieval Failed message;
+			note right: Infinite loop
+			-[hidden]->
+			detach
+		else (No)
+			:Display retrieved <b>Device Certificate</b>;
+			:ret = <b>stse_device_authenticate</b>;
+			if(ret != STSE_OK) then (Yes)
+				:Display Authentication Failed message;
+				note right: Infinite loop
+				-[hidden]->
+				detach
+			else (No)
+				:Display Authentication Succeeded message;
+				stop
+			endif
+		endif
+	endif
+endif
 @enduml
 
 ## STSELib API Functions Utilized

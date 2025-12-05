@@ -1,8 +1,10 @@
 # STSAFE-A120 Command Access Condition Provisioning {#STSAFE-A120_Command_AC_provisioning}
 
-This example demonstrates how to configure command access conditions (AC) and encryption flags for STSAFE-A120 commands. Command access conditions define the security level required to execute specific commands, while encryption flags control whether command and response frames must be encrypted when using a host secure session.
+This example demonstrates how to configure command access conditions (AC) and encryption flags for STSAFE-A120 commands.  
+Command access conditions define the security level required to execute specific commands, while encryption flags control whether command and response frames must be encrypted when using a host secure session.
 
-Access condition provisioning is a critical security configuration that determines which commands can be executed freely, which require host authentication (via host session), and which are forbidden. This configuration is typically performed during device personalization and cannot be changed afterward once the change right is disabled.
+Access condition provisioning is a critical security configuration that determines which commands can be executed freely, which require host authentication (via host session), and which are forbidden.  
+This configuration is typically performed during device personalization and cannot be changed afterward once the change right is disabled.
 
 ## Example Flowchart
 
@@ -15,8 +17,7 @@ The following flowchart illustrates the command AC provisioning process:
 	:ret = <b>stse_init</b>;
 	if(ret == STSE_OK) then (No)
 	:Display error message;
-	while (while(1))
-	end while
+	note right: Infinite loop
 	-[hidden]->
 	detach
 	else (Yes)
@@ -28,10 +29,7 @@ The following flowchart illustrates the command AC provisioning process:
 	:Provision encryption flags from table;
 	:Query updated command AC records;
 	:Display updated access conditions;
-	while (while(1))
-	end while
-	-[hidden]->
-	detach
+	stop
 	endif
 @enduml
 

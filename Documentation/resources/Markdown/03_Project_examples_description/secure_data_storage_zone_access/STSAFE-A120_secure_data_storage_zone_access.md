@@ -1,6 +1,6 @@
 # STSAFE-A120 Secure Data Storage Zone Access {#STSAFE-A120_secure_data_storage_zone_access}
 
-This example demonstrates how to makes use of the STSE data storage APIs by performing following accesses/commands to the target STSAFE-A120 device
+This example demonstrates how to makes use of the STSE data storage APIs by performing following accesses/commands to the target STSAFE-A120 device:
 - Query STSAFE-A total partition count
 - Query STSAFE-A partitions information
 - Read STSAFE-A counter zone 5
@@ -15,73 +15,66 @@ The example applicative flowchart is illustrated below :
 @startuml "STSAFE-A120_Device_authentication Example flowchart" width=5cm
 
 	:MAIN;
-	:Initialize Apps terminal (baudrate = 115200)]
-	:Print example title and instructions]
-	:ret = <b>stse_init</b>|
+	:Initialize Apps terminal (baudrate = 115200);
+	:Print example title and instructions;
+	:ret = <b>stse_init</b>|;
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR]
-		while (while(1))
-		end while
+		:Print ERROR;
+		note right: Infinite loop
 		-[hidden]->
 		detach
 	endif
 	
-	:Print data partition record table]
+	:Print data partition record table;
 	
 	:ret = <b>stse_data_storage_read_zone</b> (
 	\tzone 1 , 
 	\toffset 0 , 
 	\tsize of read buffer
-	)|
+	);
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR]
-		while (while(1))
-		end while
+		:Print ERROR;
+		note right: Infinite loop
 		-[hidden]->
 		detach
 	endif
 	
-	:Print read buffer]
-	:Randomize write buffer]
+	:Print read buffer;
+	:Randomize write buffer;
 	
 	:ret = <b>stse_data_storage_update_zone</b> (
 	\tzone 1 ,
 	\toffset 0 , 
 	\twrite buffer,
 	\tsize of write buffer
-	)|
+	);
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR]
-		while (while(1))
-		end while
+		:Print ERROR;
+		note right: Infinite loop
 		-[hidden]->
 		detach
 	endif
-	:Print write buffer ]
+	:Print write buffer;
 	
 	:ret = <b>stse_data_storage_read_zone</b> (
 	\tzone 1 , 
 	\toffset 0 , 
 	\tsize of read buffer
-	)|
+	);
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR]
-		while (while(1))
-		end while
+		:Print ERROR;
+		note right: Infinite loop
 		-[hidden]->
 		detach
 	endif
 	
-	:Print read buffer]
+	:Print read buffer;
 	
-	while (while(1) )
-	end while
-	-[hidden]->
-	detach
+	stop
 @enduml
 
 API and services used in the example :

@@ -1,6 +1,7 @@
 # STSAFE-A120 Project Template {#STSAFE-A120_Project_template}
 
-This template provides a minimal starting point for developing custom STSAFE-A120 application projects. It includes the basic initialization and structure needed to communicate with the STSAFE-A120 secure element, allowing developers to quickly build their own examples and applications.
+This template provides a minimal starting point for developing custom STSAFE-A120 application projects.  
+It includes the basic initialization and structure needed to communicate with the STSAFE-A120 secure element, allowing developers to quickly build their own examples and applications.
 
 The template demonstrates the essential setup steps required for any STSAFE-A120 application, including terminal initialization and the main application loop structure. Developers can use this as a foundation and add their specific functionality.
 

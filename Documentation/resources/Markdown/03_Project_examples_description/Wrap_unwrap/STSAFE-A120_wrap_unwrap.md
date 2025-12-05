@@ -1,91 +1,82 @@
 # STSAFE-A120 Secret or key wrapping {#STSAFE-A120_wrap_unwrap}
 
-This example demonstrates how how to wrap/unwrap payload using a target STSAFE-A120 device
+This example demonstrates how how to wrap/unwrap payload using a target STSAFE-A120 device.
 
 The example applicative flowchart is illustrated below :
 
 @startuml "STSAFE-A120_wrap_unwrap Example flowchart" width=5cm
 
 	:MAIN;
-	:Initialize Apps terminal (baudrate = 115200)]
+	:Initialize Apps terminal (baudrate = 115200);
 	
-	:Print example title and instructions]
+	:Print example title and instructions;
 	
-	:ret = <b>stse_init</b>|
+	:ret = <b>stse_init</b>;
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR]
-		while (while(1))
-		end while
+		:Print ERROR;
+	    note right: Infinite loop
 		-[hidden]->
 		detach
 	endif
 
-	:ret = <b>stsafea_generate_wrap_unwrap_key</b>|
+	:ret = <b>stsafea_generate_wrap_unwrap_key</b>;
 	if((ret != STSE_OK) && (ret != STSE_ACCESS_CONDITION_NOT_SATISFIED)) then (yes)
-		:Print ERROR]
-		while (while(1))
-		end while
+		:Print ERROR;
+	    note right: Infinite loop
 		-[hidden]->
 		detach
 	(No) else if (ret != STSE_ACCESS_CONDITION_NOT_SATISFIED) then (Yes)
-		:Print "New key provisioned"]
+		:Print "New key provisioned";
 	else(No)
 	endif
 	
-	:Print plain-text payload]
+	:Print plain-text payload;
 
-	:<b>stsafea_session_handler_allocate</b>|
+	:<b>stsafea_session_handler_allocate</b>;
 
-	:ret = <b>stsafea_open_host_session</b>|
+	:ret = <b>stsafea_open_host_session</b>;
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR]
-		while (while(1))
-		end while
+		:Print ERROR;
+	    note right: Infinite loop
 		-[hidden]->
 		detach
 	endif	
 
-	:ret = <b>stsafea_wrap_payload</b> (key 0 , plain-text payload) |
+	:ret = <b>stsafea_wrap_payload</b> (key 0 , plain-text payload);
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR]
-		while (while(1))
-		end while
+		:Print ERROR;
+	    note right: Infinite loop
 		-[hidden]->
 		detach
 	endif	
 
-	:ret = <b>stsafea_wrap_payload</b> (key 0 , plain-text payload) |
+	:ret = <b>stsafea_wrap_payload</b> (key 0 , plain-text payload);
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR]
-		while (while(1))
-		end while
+		:Print ERROR;
+	    note right: Infinite loop
 		-[hidden]->
 		detach
 	endif	
 
-	:Print wrapped payload]
+	:Print wrapped payload;
 
 
-	:ret = <b>stsafea_unwrap_payload</b> (key 0 , wrapped payload) |
+	:ret = <b>stsafea_unwrap_payload</b> (key 0 , wrapped payload);
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR]
-		while (while(1))
-		end while
+		:Print ERROR;
+	    note right: Infinite loop
 		-[hidden]->
 		detach
 	endif	
 
-	:Print un-wrapped payload]
+	:Print un-wrapped payload;
 
-	while (while(1) )
-	end while
-	-[hidden]->
-    detach
+	stop
 @enduml
 
 API and services used in the example :

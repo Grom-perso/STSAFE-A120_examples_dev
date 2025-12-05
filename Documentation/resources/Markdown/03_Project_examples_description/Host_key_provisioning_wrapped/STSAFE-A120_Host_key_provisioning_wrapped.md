@@ -1,8 +1,11 @@
 # STSAFE-A120 Host Key Provisioning (Wrapped) {#STSAFE-A120_Host_key_provisioning_wrapped}
 
-This document provides a comprehensive overview of the host key provisioning process using wrapped keys for the STSAFE-A120 secure element. The example demonstrates the step-by-step procedure to securely provision host MAC and cipher keys into the target STSAFE-A120 device, leveraging its advanced security features to ensure confidentiality and integrity.
+This document provides a comprehensive overview of the host key provisioning process using wrapped keys for the STSAFE-A120 secure element.  
+The example demonstrates the step-by-step procedure to securely provision host MAC and cipher keys into the target STSAFE-A120 device, leveraging its advanced security features to ensure confidentiality and integrity.
 
-Host key provisioning is a critical operation that enables secure communication between the host system and the STSAFE-A120 device. By using wrapped keys, sensitive cryptographic material is protected during transfer and storage, reducing the risk of exposure or unauthorized access. This example guides users through the initialization, configuration, and provisioning stages, highlighting important security considerations and operational constraints.
+Host key provisioning is a critical operation that enables secure communication between the host system and the STSAFE-A120 device.  
+By using wrapped keys, sensitive cryptographic material is protected during transfer and storage, reducing the risk of exposure or unauthorized access.  
+This example guides users through the initialization, configuration, and provisioning stages, highlighting important security considerations and operational constraints.
 
 ## Example Flowchart
 
@@ -14,24 +17,22 @@ The following flowchart illustrates the main steps involved in the host key prov
 	:Initialize STSAFE-A120 device (address 0x20);
 	:Display Host MAC and Host Cipher keys;
 	:Query host key provisioning control fields;
-	if(ret != STSE_OK) then (No)
+	if(ret != STSE_OK) then (Yes)
 		:Display ERROR;
-		while (while(1))
-		end while
+		note right: Infinite loop
 		-[hidden]->
 		detach
-	else (Yes)
+	else (No)
 		:Display host key provisioning control fields;
 		:Display WARNING regarding slot lock;
 		if(provisioning_ctrl_fields.change_right == 0) then (No)
 			:Update host key provisioning control fields;
-			if(ret != STSE_OK) then (No)
+			if(ret != STSE_OK) then (Yes)
 				:Display ERROR;
-				while (while(1))
-				end while
+				note right: Infinite loop
 				-[hidden]->
 				detach
-			else (Yes)
+			else (No)
 				:Proceed;
 			endif
 		else (Yes)
@@ -39,27 +40,22 @@ The following flowchart illustrates the main steps involved in the host key prov
 				:Display "Control fields already set";
 			else (Yes)
 				:Display ERROR;
-				while (while(1))
-				end while
+				note right: Infinite loop
 				-[hidden]->
 				detach
 			endif
 		endif
 	endif
 	:Provision host keys using wrapped method;
-	if(ret != STSE_OK) then (No)
+	if(ret != STSE_OK) then (Yes)
 		:Display ERROR;
-		while (while(1))
-		end while
+		note right: Infinite loop
 		-[hidden]->
 		detach
-	else (Yes)
+	else (No)
 		:Display "Host key provisioning wrapped: PASS";
+		stop
 	endif
-	while (while(1))
-	end while
-	-[hidden]->
-	detach
 @enduml
 
 ## STSELib APIs and Services Utilized

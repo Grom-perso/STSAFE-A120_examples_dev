@@ -20,37 +20,35 @@ The following flowchart illustrates the main steps of the example application, f
 @startuml "STSAFE-A120_Device_authentication Example flowchart" width=5cm
 
 	:MAIN;
-	:Initialize Apps terminal (baudrate = 115200)];
-	:Print example title and instructions];
-	:ret = <b>stse_init</b>|;
+	:Initialize Apps terminal (baudrate = 115200);
+	:Print example title and instructions;
+	:ret = <b>stse_init</b>;
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR];
-		while (while(1))
-		end while
+		:Print ERROR;
+	    note right: Infinite loop
 		-[hidden]->
 		detach
 	endif
 
-	:Print data partition record table];
+	:Print data partition record table;
 
 	:ret = <b>stse_data_storage_read_counter</b> (
 	\tzone 5 , 
 	\toffset 0 , 
 	\tsize of associated buffer
-	)|;
+	);
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR];
-		while (while(1))
-		end while
+		:Print ERROR;
+	    note right: Infinite loop
 		-[hidden]->
 		detach
 	endif
 
-	:Print counter value and associated data];
+	:Print counter value and associated data;
 
-	:Randomize associated data buffer];
+	:Randomize associated data buffer;
 
 	:ret = <b>stse_data_storage_decrement_counter</b> (
 	\tzone 5 , 
@@ -58,37 +56,32 @@ The following flowchart illustrates the main steps of the example application, f
 	\toffset 0 , 
 	\tassociated data buffer,
 	\tsize of associated buffer
-	)|;
+	);
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR];
-		while (while(1))
-		end while
+		:Print ERROR;
+	    note right: Infinite loop
 		-[hidden]->
 		detach
 	endif
-	:Print new counter value ];
+	:Print new counter value;
 
 	:ret = <b>stse_data_storage_read_counter</b> (
 	\tzone 5 , 
 	\toffset 0 , 
 	\tsize of associated buffer
-	)|;
+	);
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR];
-		while (while(1))
-		end while
+		:Print ERROR;
+	    note right: Infinite loop
 		-[hidden]->
 		detach
 	endif
 
-	:Print counter value and associated data];
+	:Print counter value and associated data;
 
-	while (while(1) )
-	end while
-	-[hidden]->
-	detach
+	stop
 @enduml
 
 ## STSELib APIs Utilized

@@ -1,6 +1,8 @@
 # STSAFE-A120 Multi-step Device Authentication {#STSAFE-A120_Multi-step_device_authentication}
 
-The multi-step authentication process ensures that only genuine devices, equipped with valid certificates issued by a trusted Certificate Authority (CA), can participate in secure communications. The procedure involves parsing and verifying certificates, generating cryptographic challenges, and validating digital signatures. This example serves as a reference implementation for developers aiming to integrate robust device authentication into their systems.
+The multi-step authentication process ensures that only genuine devices, equipped with valid certificates issued by a trusted Certificate Authority (CA), can participate in secure communications.  
+The procedure involves parsing and verifying certificates, generating cryptographic challenges, and validating digital signatures.  
+This example serves as a reference implementation for developers aiming to integrate robust device authentication into their systems.
 
 ## Example Flowchart
 
@@ -9,83 +11,80 @@ The following flowchart illustrates the sequence of operations performed during 
 @startuml STSAFE-A120_Device_authentication Example flowchart width=5cm
 
 	:MAIN;
-	:Initialize Apps terminal (baudrate = 115200)]
-	:Print example title and instructions]
-	:ret = <b>stse_init</b>|
+	:Initialize Apps terminal (baudrate = 115200);
+	:Print example title and instructions;
+	:ret = <b>stse_init</b>;
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR]
-		while (while(1))
-		end while
-		-[hidden]-> detach
+		:Print ERROR;
+		note right: Infinite loop
+		-[hidden]->
+		detach
 	endif
 	
-	:ret = <b>stse_certificate_parse</b>(CA certificate)|
+	:ret = <b>stse_certificate_parse</b>(CA certificate);
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR]
-		while (while(1))
-		end while
-		-[hidden]-> detach
+		:Print ERROR;
+		note right: Infinite loop
+		-[hidden]->
+		detach
 	endif
 
-	:<b>stse_certificate_print_parsed_cert</b> (parsed CA certificate)|
+	:<b>stse_certificate_print_parsed_cert</b> (parsed CA certificate);
 
-	:ret = <b>stse_get_device_certificate</b>|
+	:ret = <b>stse_get_device_certificate</b>;
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR]
-		while (while(1))
-		end while
-		-[hidden]-> detach
+		:Print ERROR;
+		note right: Infinite loop
+		-[hidden]->
+		detach
 	endif
 
-	:ret = <b>stse_certificate_parse</b> (device certificate)|
+	:ret = <b>stse_certificate_parse</b> (device certificate);
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR]
-		while (while(1))
-		end while
-		-[hidden]-> detach
+		:Print ERROR;
+		note right: Infinite loop
+		-[hidden]->
+		detach
 	endif
 
-	:<b>stse_certificate_print_parsed_cert</b> (parsed device certificate)|
+	:<b>stse_certificate_print_parsed_cert</b> (parsed device certificate);
 	
-	:ret = <b>stse_certificate_is_parent</b> (parsed CA certificate,parsed device certificate)|
+	:ret = <b>stse_certificate_is_parent</b> (parsed CA certificate,parsed device certificate);
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR]
-		while (while(1))
-		end while
-		-[hidden]-> detach
+		:Print ERROR;
+		note right: Infinite loop
+		-[hidden]->
+		detach
 	endif
 
-	:keytype = <b>stse_certificate_get_key_type (parsed device certificate)</b>|
-	:Generate challenge (keytype) ]
-	:ret = <b>stse_ecc_generate_signature</b> (keytype)|
+	:keytype = <b>stse_certificate_get_key_type (parsed device certificate)</b>;
+	:Generate challenge (keytype);
+	:ret = <b>stse_ecc_generate_signature</b> (keytype);
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print ERROR ]
-		while (while(1))
-		end while
-		-[hidden]-> detach
+		:Print ERROR;
+		note right: Infinite loop
+		-[hidden]->
+		detach
 	endif
 
-	:Print signature ]
-	:ret=<b>stse_certificate_verify_signature</b> (keytype) |
+	:Print signature;
+	:ret=<b>stse_certificate_verify_signature</b> (keytype);
 	if(ret != STSE_OK) then (No)
 	else (Yes)
-		:Print Error ]
-		while (while(1))
-		end while
-		-[hidden]-> detach
+		:Print Error;
+		note right: Infinite loop
+		-[hidden]->
+		detach
 	endif
-	:Print "<b>Device Authenticated</b>" ]
+	:Print "<b>Device Authenticated</b>";
 
-	while (while(1) )
-	end while
-	-[hidden]->
-	detach
+	stop
 @enduml
 
 ## API Functions Utilized

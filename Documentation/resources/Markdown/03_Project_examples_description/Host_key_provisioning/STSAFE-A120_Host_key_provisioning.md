@@ -1,7 +1,9 @@
 # STSAFE-A120 Host Key Provisioning {#STSAFE-A120_Host_key_provisioning}
 
- Host key provisioning is a critical step in establishing secure communication channel between a host system and the STSAFE-A120 device.
-The example described here demonstrates the end-to-end procedure for provisioning host keys to a target STSAFE-A120 device. This includes initializing the necessary hardware and software components, querying and configuring key provisioning control fields, and securely writing both MAC and cipher keys to the device. The process also highlights important security considerations and constraints associated with key provisioning, especially in the context of production environments.
+Host key provisioning is a critical step in establishing secure communication channel between a host system and the STSAFE-A120 device.  
+The example described here demonstrates the end-to-end procedure for provisioning host keys to a target STSAFE-A120 device.  
+This includes initializing the necessary hardware and software components, querying and configuring key provisioning control fields, and securely writing both MAC and cipher keys to the device.  
+The process also highlights important security considerations and constraints associated with key provisioning, especially in the context of production environments.
 
 ## Example Flowchart
 
@@ -16,9 +18,9 @@ The following flowchart illustrates the main steps involved in the host key prov
 	if(ret != STSE_OK) then (No)
 	else (Yes)
 		:print ERROR]
-		while (while(1))
-		end while
-		-[hidden]-> detach
+	    note right: Infinite loop
+		-[hidden]->
+		detach
 	endif
 	:print Host key provisioning control fields]
 	:print WARNING about the lock of target slot]
@@ -27,33 +29,30 @@ The following flowchart illustrates the main steps involved in the host key prov
 		if(ret != STSE_OK) then (No)
 		else (Yes)
 			:print ERROR]
-			while (while(1))
-			end while
-			-[hidden]-> detach
+			note right: Infinite loop
+			-[hidden]->
+			detach
 		endif
 	else (Yes)
 		if(provisioning_ctrl_fields.reprovision == 0) then (No)
 			:print "control fields already set"]
 		else (Yes)
 			:print ERROR]
-			while (while(1))
-			end while
-			-[hidden]-> detach
+		    note right: Infinite loop
+			-[hidden]->
+			detach
 		endif
 	endif
 	:ret = stse_host_key_provisioning|
 	if(ret != STSE_OK) then (No)
 	else (Yes)
 		:print ERROR]
-		while (while(1))
-		end while
-		-[hidden]-> detach
+	    note right: Infinite loop
+		-[hidden]->
+		detach
 	endif
 	:print "stse_host_key_provisioning : PASS"]
-	while (while(1))
-	end while
-	-[hidden]->
-	detach
+	stop
 @enduml
 
 ## APIs and Services Utilized

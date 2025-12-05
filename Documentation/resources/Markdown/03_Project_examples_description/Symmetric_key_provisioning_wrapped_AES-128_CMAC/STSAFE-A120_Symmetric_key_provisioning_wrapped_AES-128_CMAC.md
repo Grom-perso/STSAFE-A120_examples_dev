@@ -14,28 +14,27 @@ The following flowchart illustrates the wrapped key provisioning and CMAC operat
 	:Display example title and instructions;
 	:ret = <b>stse_init</b>;
 	if(ret == STSE_OK) then (No)
-	:Display error message;
-	while (while(1))
-	end while
-	-[hidden]->
-	detach
+		:Display error message;
+		note right: Infinite loop
+		-[hidden]->
+		detach
 	else (Yes)
-	:Establish host secure session;
-	:Wrap AES-128 key using KEK from session;
-	:Provision wrapped key to symmetric key slot;
-	:Configure key for CMAC mode of operation;
-	:Generate test message;
-	:Compute CMAC using provisioned key;
-	:Verify CMAC using platform crypto library;
-	if(CMAC valid?) then (Yes)
-	:Display success message;
-	else (No)
-	:Display error message;
-	endif
-	while (while(1))
-	end while
-	-[hidden]->
-	detach
+		:Establish host secure session;
+		:Wrap AES-128 key using KEK from session;
+		:Provision wrapped key to symmetric key slot;
+		:Configure key for CMAC mode of operation;
+		:Generate test message;
+		:Compute CMAC using provisioned key;
+		:Verify CMAC using platform crypto library;
+		if(CMAC valid?) then (Yes)
+			:Display success message;
+			stop
+		else (No)
+			:Display error message;
+			note right: Infinite loop
+			-[hidden]->
+			detach
+		endif
 	endif
 @enduml
 
