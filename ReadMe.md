@@ -1,16 +1,17 @@
 # STSAFE-A120 examples package 
 
-The **STSAFE-A120 example package** offers developers a collection of applicative examples demonstrating the use of the STSAFE-A120 secure element product line from STMicroelectronics. These examples can serve as software reference implementations for integrating STSAFE-A120 devices on host microcontroller platforms. 
+The **STSAFE-A120 example package** offers developers a collection of applicative examples demonstrating the use of the STSAFE-A120 secure element product line from STMicroelectronics.  
+These examples can serve as software reference implementations for integrating STSAFE-A120 devices on host microcontroller platforms. 
 
 ![STSAFE-A120 Examples package](Documentation/resources/Markdown/00_introduction/Software_package_architecture.png)
 
-Following HW/SW prerequisites are required to work with the package
+Following hardware(HW)/software(SW) prerequisites are required to work with the package
 
 - Hardware Prerequisites
-  - [NUCLEO-L4523](https://www.st.com/en/evaluation-tools/nucleo-l452re.html) STM32 development board
+  - [NUCLEO-L452RE](https://www.st.com/en/evaluation-tools/nucleo-l452re.html) STM32 development board
   - [X-NUCLEO-ESE01A1](https://www.st.com/en/evaluation-tools/x-nucleo-ese01a1.html#overview) Nucleo expansion board
 
-- SW prerequisites 
+- Software prerequisites 
   - One of the following compatible toolchain/IDE 
     - [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html)
     - [Keil uVision 5.37](https://www.st.com/en/partner-products-and-services/arm-keil-mdk.html)
