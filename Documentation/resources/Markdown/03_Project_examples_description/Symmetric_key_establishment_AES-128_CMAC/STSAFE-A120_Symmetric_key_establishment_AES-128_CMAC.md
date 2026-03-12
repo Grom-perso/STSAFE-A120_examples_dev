@@ -1,11 +1,11 @@
-# STSAFE-A120_Symmetric_key_establishment_AES-128_CMAC{#STSAFE-A120_Symmetric_key_establishment_AES-128_CMAC}
+# STSAFE-A120 Symmetric Key Establishment AES-128 CMAC {#STSAFE-A120_Symmetric_key_establishment_AES-128_CMAC}
 
 This example demonstrates a symmetric key (AES-128 CMAC) establishment and usage in STSAFE-A1xx Secure Element.
 It uses the STSAFE Middleware APIs to a establish a key and compute then verify a MAC.
 
 The example applicative flowchart is illustrated below :
 
-@startuml{STSAFE-A120_Symmetric_key_establishment_AES-128_CMAC.png} "STSAFE-A120_Symmetric_key_establishment_AES-128_CMAC Example flowchart" width=5cm
+@startuml "STSAFE-A120_Symmetric_key_establishment_AES-128_CMAC Example flowchart" width=5cm
 	:MAIN;
 	:Initialize UART (baudrate = 115200)]
 	:Print example title and instructions]
@@ -21,7 +21,7 @@ The example applicative flowchart is illustrated below :
     detach
 @enduml
 
-When executed following logs can be seen on the host attached computer terminal window \n
+When executed following logs can be seen on the host attached computer terminal window  
 
 ```
 ----------------------------------------------------------------------------------------------------------------

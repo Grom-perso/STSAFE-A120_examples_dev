@@ -6,40 +6,53 @@ The STSAFE-A120 is a secure element designed to provide robust cryptographic fun
 
 The following flowchart illustrates the step-by-step process implemented in the example application:
 
-@startuml{STSAFE-A120_Device_authentication.png} "STSAFE-A120_Device_authentication Example flowchart" width=5cm
+@startuml "STSAFE-A120_Device_authentication Example flowchart" width=5cm
     :MAIN;
     :Initialize application terminal (baudrate = 115200);
     :Display example title and user instructions;
     :ret = <b>stse_init</b>;
     if(ret != STSE_OK) then (Initialization Failed)
         :Display ERROR message;
+        while (while(1))
+        end while
+          -[hidden]->
         detach
-    endif
+    else
 
     :ret = <b>stse_get_device_certificate_size</b>;
     if(ret != STSE_OK) then (Certificate Size Retrieval Failed)
         :Display ERROR message;
+        while (while(1))
+        end while
+          -[hidden]->
         detach
-    endif
+    else
 
     :ret = <b>stse_get_device_certificate</b>;
     if(ret != STSE_OK) then (Certificate Retrieval Failed)
         :Display ERROR message;
+        while (while(1))
+        end while
+          -[hidden]->
         detach
-    endif
+    else
 
     :Display retrieved <b>Device Certificate</b>;
     
     :ret = <b>stse_device_authenticate</b>;
     if(ret != STSE_OK) then (Authentication Failed)
         :Display ERROR message;
+        while (while(1))
+        end while
+          -[hidden]->
         detach
-    endif
+    else (Authentication Succeeded)
 
-    while (true)
-        :Maintain application loop for continuous operation;
-    end while
+	while (while(1) )
+	end while
+	-[hidden]->
     detach
+    endif
 @enduml
 
 ## STSELib API Functions Utilized

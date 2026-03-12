@@ -4,13 +4,11 @@ This template provides a minimal starting point for developing custom STSAFE-A12
 
 The template demonstrates the essential setup steps required for any STSAFE-A120 application, including terminal initialization and the main application loop structure. Developers can use this as a foundation and add their specific functionality.
 
-![STSAFE-A120_Project_template](./STSAFE-A120_Project_template.png)
-
 ## Example Flowchart
 
 The following flowchart illustrates the basic template structure:
 
-@startuml{Project_template_flowchart.png} "Project Template flowchart" width=5cm
+@startuml "Project Template flowchart" width=5cm
 	:MAIN;
 	:Initialize application terminal (baudrate = 115200);
 	note right

@@ -1,23 +1,24 @@
 # STSAFE-A120 NIST P-256 Key Pair Generation {#STSAFE-A120_Key_pair_generation_NIST_P256}
 
-This example demonstrates how to generate an ECC (Elliptic Curve Cryptography) key pair using the NIST P-256 curve on the STSAFE-A120 secure element. ECC is widely used for digital signatures, key exchange, and other cryptographic operations in modern security applications.
+This example demonstrates how to generate an ECDSA (Elliptic curve Digital Signature Algorithm) key pair using the NIST P-256 curve on the STSAFE-A120 secure element.  
+Elliptic curve (ECC) is widely used for digital signatures, key exchange, and other cryptographic operations in modern security applications.
 
-The NIST P-256 curve (also known as secp256r1 or prime256v1) is a standardized elliptic curve recommended by NIST for cryptographic use. It provides 128-bit security with relatively small key sizes (256 bits), making it suitable for resource-constrained embedded systems.
-
-![STSAFE-A120_Key_pair_generation_NIST_P256](./STSAFE-A120_Key_pair_generation_NIST_P256.png)
+The NIST P-256 curve (also known as secp256r1 or prime256v1) is a standardized elliptic curve recommended by NIST for cryptographic use.  
+It provides 128-bit security with relatively small key sizes (256 bits), making it suitable for resource-constrained embedded systems.
 
 ## Example Flowchart
 
-The following flowchart illustrates the key pair generation and signature verification process:
+The following flowchart illustrates the NIST P-256 key pair generation and signature verification process:
 
-@startuml{Key_pair_generation_NIST_P256_flowchart.png} "NIST P-256 Key Pair Generation flowchart" width=5cm
+@startuml "NIST P-256 Key Pair Generation flowchart" width=5cm
 	:MAIN;
 	:Initialize application terminal (baudrate = 115200);
 	:Display example title and instructions;
 	:ret = <b>stse_init</b>;
 	if(ret == STSE_OK) then (No)
 	:Display error message;
-	:Terminate application;
+	while (while(1))
+	end while
 	-[hidden]->
 	detach
 	else (Yes)
@@ -47,7 +48,7 @@ Upon execution, the host terminal displays the key generation process and signat
 ----------------------------------------------------------------------------------------------------------------
 -                              STSAFE-A120 NIST-P256 key pair generation                                       -
 ----------------------------------------------------------------------------------------------------------------
-- This example demonstrates how to generate and use a NIST-P256 key pair on a target STSAFE-A120 device         -
+- This example demonstrates how to generate and use a NIST-P256 key pair on a target STSAFE-A120 device        -
 ----------------------------------------------------------------------------------------------------------------
 
  - Initialize target STSAFE-A120
@@ -63,9 +64,7 @@ Upon execution, the host terminal displays the key generation process and signat
   0xA1 0xB2 0xC3 0xD4 0xE5 0xF6 0x07 0x18 0x29 0x3A 0x4B 0x5C 0x6D 0x7E 0x8F 0x90
   0xA1 0xB2 0xC3 0xD4 0xE5 0xF6 0x07 0x18 0x29 0x3A 0x4B 0x5C 0x6D 0x7E 0x8F 0x90
 
- - Generate random message and compute hash
- - Generate ECDSA signature
- - Verify signature: SUCCESS
+ - STSAFE-A120 verify signature : success
 ```
 
 ## Applicative Scenarios

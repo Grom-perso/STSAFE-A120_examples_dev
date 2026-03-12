@@ -4,20 +4,19 @@ This example demonstrates how to securely provision an AES-256 symmetric key int
 
 Wrapped key provisioning protects the symmetric key during transfer by encrypting it with a Key Encryption Key (KEK) derived from the host secure session. This ensures the key is never exposed in plaintext on the communication bus, providing production-grade security for key management.
 
-![STSAFE-A120_Symmetric_key_provisioning_wrapped_AES-256_CCM](./STSAFE-A120_Symmetric_key_provisioning_wrapped_AES-256_CCM.png)
-
 ## Example Flowchart
 
 The following flowchart illustrates the wrapped key provisioning and CCM* operation:
 
-@startuml{Symmetric_key_provisioning_wrapped_AES-256_CCM_flowchart.png} "Wrapped AES-256 Key Provisioning CCM flowchart" width=5cm
+@startuml "Wrapped AES-256 Key Provisioning CCM flowchart" width=5cm
 	:MAIN;
 	:Initialize application terminal (baudrate = 115200);
 	:Display example title and instructions;
 	:ret = <b>stse_init</b>;
 	if(ret == STSE_OK) then (No)
 	:Display error message;
-	:Terminate application;
+	while (while(1))
+	end while
 	-[hidden]->
 	detach
 	else (Yes)

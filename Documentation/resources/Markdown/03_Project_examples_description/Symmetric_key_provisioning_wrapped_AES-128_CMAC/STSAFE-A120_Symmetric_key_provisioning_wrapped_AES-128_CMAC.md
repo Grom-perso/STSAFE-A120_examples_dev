@@ -4,20 +4,19 @@ This example demonstrates how to securely provision an AES-128 symmetric key int
 
 Wrapped key provisioning provides a secure method for transferring symmetric keys to the STSAFE-A120 without exposing them in plaintext on the communication bus. The key is encrypted using a Key Encryption Key (KEK) derived from the host secure session, ensuring end-to-end protection during the provisioning process.
 
-![STSAFE-A120_Symmetric_key_provisioning_wrapped_AES-128_CMAC](./STSAFE-A120_Symmetric_key_provisioning_wrapped_AES-128_CMAC.png)
-
 ## Example Flowchart
 
 The following flowchart illustrates the wrapped key provisioning and CMAC operation:
 
-@startuml{Symmetric_key_provisioning_wrapped_AES-128_CMAC_flowchart.png} "Wrapped AES-128 Key Provisioning CMAC flowchart" width=5cm
+@startuml "Wrapped AES-128 Key Provisioning CMAC flowchart" width=5cm
 	:MAIN;
 	:Initialize application terminal (baudrate = 115200);
 	:Display example title and instructions;
 	:ret = <b>stse_init</b>;
 	if(ret == STSE_OK) then (No)
 	:Display error message;
-	:Terminate application;
+	while (while(1))
+	end while
 	-[hidden]->
 	detach
 	else (Yes)

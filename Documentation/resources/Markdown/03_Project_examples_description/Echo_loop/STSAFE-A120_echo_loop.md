@@ -1,4 +1,4 @@
-# STSAFE-A120 Echo Loop Example {#STSAFE-A120_echo_loop}
+# STSAFE-A120 Echo Loop {#STSAFE-A120_echo_loop}
 
 This example provides a comprehensive demonstration of the echo loop functionality between a Host system and a target STSAFE-A120 device. The echo loop is a fundamental mechanism used to verify communication integrity, device responsiveness, and data consistency between the host and the secure element (SE). By continuously sending randomized messages from the host to the STSAFE-A120 and receiving the echoed responses, users can validate both the hardware and software integration of the SE in real-world scenarios.
 
@@ -15,7 +15,8 @@ The following flowchart outlines the detailed steps performed by the echo loop e
   :ret = <b>stse_init</b>;
   if(ret == STSE_OK) then (No)
   :Display error message;
-  :Terminate application;
+	while (while(1))
+	end while
     -[hidden]->
   detach
   else (Yes)
@@ -28,7 +29,8 @@ The following flowchart outlines the detailed steps performed by the echo loop e
     :Wait for 1 second before next iteration;
     else (No)
     :Display error message;
-    :Terminate application;
+	while (while(1))
+	end while
     -[hidden]->
     detach
     endif

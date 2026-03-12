@@ -4,8 +4,6 @@ This example demonstrates how to configure command access conditions (AC) and en
 
 Access condition provisioning is a critical security configuration that determines which commands can be executed freely, which require host authentication (via host session), and which are forbidden. This configuration is typically performed during device personalization and cannot be changed afterward once the change right is disabled.
 
-![STSAFE-A120_Command_AC_provisioning](./STSAFE-A120_Command_AC_provisioning.png)
-
 ## Example Flowchart
 
 The following flowchart illustrates the command AC provisioning process:
@@ -17,7 +15,8 @@ The following flowchart illustrates the command AC provisioning process:
 	:ret = <b>stse_init</b>;
 	if(ret == STSE_OK) then (No)
 	:Display error message;
-	:Terminate application;
+	while (while(1))
+	end while
 	-[hidden]->
 	detach
 	else (Yes)

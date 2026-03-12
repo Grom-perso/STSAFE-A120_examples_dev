@@ -4,20 +4,19 @@ This example demonstrates how to configure the provisioning control fields for s
 
 Control fields provide fine-grained control over how symmetric keys can be installed into the STSAFE-A120, including whether keys can be written in plaintext, wrapped (encrypted), or derived via ECDHE (Elliptic Curve Diffie-Hellman Ephemeral). This configuration is critical for establishing the security posture of the device.
 
-![STSAFE-A120_Symmetric_key_provisioning_control_fields](./STSAFE-A120_Symmetric_key_provisioning_control_fields.png)
-
 ## Example Flowchart
 
 The following flowchart illustrates the control field configuration process:
 
-@startuml{Symmetric_key_provisioning_control_fields_flowchart.png} "Symmetric Key Provisioning Control Fields flowchart" width=5cm
+@startuml "Symmetric Key Provisioning Control Fields flowchart" width=5cm
 	:MAIN;
 	:Initialize application terminal (baudrate = 115200);
 	:Display example title and instructions;
 	:ret = <b>stse_init</b>;
 	if(ret == STSE_OK) then (No)
 	:Display error message;
-	:Terminate application;
+	while (while(1))
+	end while
 	-[hidden]->
 	detach
 	else (Yes)
