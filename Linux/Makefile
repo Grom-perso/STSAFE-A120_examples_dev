@@ -28,9 +28,29 @@ REPO_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))/../
 # ---------------------------------------------------------------------------
 # Toolchain
 # ---------------------------------------------------------------------------
-CC      := $(CROSS_COMPILE)gcc
-AR      := $(CROSS_COMPILE)ar
-STRIP   := $(CROSS_COMPILE)strip
+# Two supported workflows:
+#
+#   1. OpenSTLinux SDK (recommended for STM32MP1):
+#        source /opt/st/stm32mp1/<ver>/environment-setup-cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi
+#        make
+#      The SDK environment-setup script exports CC (with --sysroot, -march, etc.),
+#      CFLAGS, LDFLAGS, etc.  Do NOT pass CROSS_COMPILE in this case — the SDK
+#      has already set CC correctly.
+#
+#   2. Generic cross-toolchain (e.g. Linaro, Debian):
+#        make CROSS_COMPILE=arm-linux-gnueabihf-
+#
+# If CC is already set in the environment (origin != "default"), honour it
+# unchanged so that the SDK sysroot flags are preserved.
+ifeq ($(origin CC), default)
+CC := $(CROSS_COMPILE)gcc
+endif
+ifeq ($(origin AR), default)
+AR := $(CROSS_COMPILE)ar
+endif
+ifeq ($(origin STRIP), default)
+STRIP := $(CROSS_COMPILE)strip
+endif
 
 # ---------------------------------------------------------------------------
 # Directories
@@ -119,7 +139,10 @@ DEFINES := \
 # OpenSSL 1.1.1, which remain functional in OpenSSL 3.x. This ensures the
 # same source compiles cleanly on both OpenSSL 1.1.x (OpenSTLinux SDK) and
 # OpenSSL 3.x (recent host distributions).
-CFLAGS := \
+#
+# Using += so that any --sysroot, -march, -mfpu, -mfloat-abi flags injected
+# by the OpenSTLinux SDK environment-setup script are preserved.
+CFLAGS += \
     -Wall \
     -Wextra \
     -Wno-unused-parameter \
@@ -132,7 +155,8 @@ CFLAGS := \
 # ---------------------------------------------------------------------------
 # Linker flags
 # ---------------------------------------------------------------------------
-LDFLAGS := -lssl -lcrypto -lm
+# Using += to preserve --sysroot and rpath flags from the SDK environment.
+LDFLAGS += -lssl -lcrypto -lm
 
 # ---------------------------------------------------------------------------
 # Platform source files (shared across all examples)
@@ -214,15 +238,19 @@ help:
 	@echo "  clean            Remove all build artifacts"
 	@echo "  help             Show this help message"
 	@echo ""
-	@echo "Variables:"
-	@echo "  CROSS_COMPILE    Toolchain prefix (e.g. arm-linux-gnueabihf-)"
-	@echo "  EXAMPLE          Example name to build (e.g. 01_Echo_loop)"
+	@echo "Workflows:"
 	@echo ""
-	@echo "Examples:"
-	@echo "  make"
-	@echo "  make EXAMPLE=01_Echo_loop"
-	@echo "  make CROSS_COMPILE=arm-linux-gnueabihf-"
-	@echo "  make CROSS_COMPILE=arm-linux-gnueabihf- EXAMPLE=01_Echo_loop"
+	@echo "  OpenSTLinux SDK (recommended for STM32MP1):"
+	@echo "    source /opt/st/stm32mp1/<ver>/environment-setup-cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi"
+	@echo "    make"
+	@echo "    -- The SDK sets CC with --sysroot automatically. Do NOT pass CROSS_COMPILE."
+	@echo ""
+	@echo "  Generic cross-toolchain:"
+	@echo "    make CROSS_COMPILE=arm-linux-gnueabihf-"
+	@echo ""
+	@echo "Variables:"
+	@echo "  CROSS_COMPILE    Toolchain prefix for generic toolchains (NOT needed with OpenSTLinux SDK)"
+	@echo "  EXAMPLE          Build only the specified example (e.g. 01_Echo_loop)"
 	@echo ""
 	@echo "Available examples:"
 	@$(foreach ex,$(ALL_EXAMPLES),echo "  $(ex)";)

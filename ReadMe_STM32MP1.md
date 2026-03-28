@@ -144,7 +144,31 @@ make EXAMPLE=01_Echo_loop
 
 ### Cross-compile for STM32MP1
 
-After sourcing the OpenSTLinux SDK environment:
+There are two supported workflows depending on your toolchain.
+
+#### Option A — OpenSTLinux SDK (recommended)
+
+The SDK environment-setup script sets `CC` with `--sysroot`, `-march`, `-mfpu` and other target-specific flags. **Source the SDK first, then run `make` without `CROSS_COMPILE`**:
+
+```bash
+source /opt/st/stm32mp1/<version>/environment-setup-cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi
+cd Linux
+make
+```
+
+> **Important**: Do **not** pass `CROSS_COMPILE=` when using the OpenSTLinux SDK. The SDK environment already provides a correctly configured `CC`. Passing `CROSS_COMPILE` would reconstruct `CC` without `--sysroot`, causing compiler errors such as `stdint.h: No such file or directory`.
+
+To build a specific example with the SDK:
+
+```bash
+source /opt/st/stm32mp1/<version>/environment-setup-cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi
+cd Linux
+make EXAMPLE=01_Echo_loop
+```
+
+#### Option B — Generic cross-toolchain (e.g. Linaro, Debian arm-gnueabihf)
+
+If you are **not** using the OpenSTLinux SDK and have a generic ARM cross-compiler installed:
 
 ```bash
 cd Linux
@@ -161,7 +185,7 @@ make CROSS_COMPILE=arm-linux-gnueabihf- EXAMPLE=01_Echo_loop
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `CROSS_COMPILE` | *(empty)* | Toolchain prefix (e.g. `arm-linux-gnueabihf-`) |
+| `CROSS_COMPILE` | *(empty)* | Toolchain prefix for generic toolchains — **not needed** when using the OpenSTLinux SDK |
 | `EXAMPLE` | *(all)* | Build only the specified example |
 
 ---
@@ -327,7 +351,30 @@ fatal error: openssl/evp.h: No such file or directory
 ```bash
 sudo apt-get install libssl-dev
 ```
-**Solution** (cross-compilation): Source the OpenSTLinux SDK which includes OpenSSL in its sysroot.
+**Solution** (cross-compilation with OpenSTLinux SDK): Source the SDK environment before building — the SDK sysroot includes OpenSSL headers and libraries:
+```bash
+source /opt/st/stm32mp1/<version>/environment-setup-cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi
+make
+```
+
+### `stdint.h: No such file or directory` when cross-compiling
+
+```
+stdint.h:9:16: fatal error: stdint.h: No such file or directory
+    9 | # include_next <stdint.h>
+```
+
+This error means the cross-compiler was invoked **without `--sysroot`**. The GCC wrapper `stdint.h` tries to `#include_next` the target sysroot's `stdint.h` but cannot find it.
+
+**Cause**: Passing `CROSS_COMPILE=arm-ostl-linux-gnueabi-` when using the OpenSTLinux SDK. The Makefile then constructs `CC=arm-ostl-linux-gnueabi-gcc` without the `--sysroot` that the SDK normally provides.
+
+**Solution**: Source the SDK environment first and run `make` **without** `CROSS_COMPILE`:
+```bash
+source /opt/st/stm32mp1/<version>/environment-setup-cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi
+cd Linux
+make
+```
+The SDK environment-setup script exports `CC` pre-configured with `--sysroot`, `-march`, `-mfpu`, and all other target flags. The Makefile honours this `CC` when it is already set in the environment.
 
 ### STSELib submodule missing
 
