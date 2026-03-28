@@ -108,7 +108,7 @@ static size_t stse_platform_get_coord_size(stse_ecc_key_type_t key_type) {
  * -------------------------------------------------------------------------- */
 stse_ReturnCode_t stse_platform_ecc_verify(
     stse_ecc_key_type_t  key_type,
-    PLAT_UI8            *pPubKey,
+    const PLAT_UI8      *pPubKey,
     PLAT_UI8            *pDigest,
     PLAT_UI16            digestLen,
     PLAT_UI8            *pSignature) {

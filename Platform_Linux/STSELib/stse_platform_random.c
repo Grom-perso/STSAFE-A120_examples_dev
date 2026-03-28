@@ -15,15 +15,36 @@
  ******************************************************************************
  */
 
-#include "Drivers/rng/rng.h"
 #include "stse_conf.h"
 #include "stselib.h"
+#include <fcntl.h>
+#include <stdio.h>
+#include <sys/random.h>
+#include <unistd.h>
 
 stse_ReturnCode_t stse_platform_generate_random_init(void) {
-    rng_start();
+    /* Nothing to start on Linux - kernel RNG is always available */
     return STSE_OK;
 }
 
 PLAT_UI32 stse_platform_generate_random(void) {
-    return rng_generate_random_number();
+    PLAT_UI32 value = 0;
+    ssize_t   ret;
+
+    ret = getrandom(&value, sizeof(value), 0);
+    if (ret != (ssize_t)sizeof(value)) {
+        /* Fallback: read from /dev/urandom */
+        int fd = open("/dev/urandom", O_RDONLY);
+        if (fd >= 0) {
+            if (read(fd, &value, sizeof(value)) != (ssize_t)sizeof(value)) {
+                value = 0;
+                fprintf(stderr, "stse_platform_generate_random: /dev/urandom read failed\n");
+            }
+            close(fd);
+        } else {
+            fprintf(stderr, "stse_platform_generate_random: failed to open /dev/urandom\n");
+        }
+    }
+
+    return value;
 }

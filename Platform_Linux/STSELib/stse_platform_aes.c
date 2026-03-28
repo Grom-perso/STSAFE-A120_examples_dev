@@ -205,80 +205,80 @@ static const EVP_CIPHER *aes_cbc_cipher(PLAT_UI16 key_length) {
     }
 }
 
-stse_ReturnCode_t stse_platform_aes_cbc_encrypt(PLAT_UI8 *pPlaintext, PLAT_UI16 plaintext_length,
-                                                PLAT_UI8 *pKey, PLAT_UI16 key_length,
-                                                PLAT_UI8 *pIv,
-                                                PLAT_UI8 *pCiphertext, PLAT_UI16 *pCiphertext_length) {
+stse_ReturnCode_t stse_platform_aes_cbc_enc(const PLAT_UI8 *pPlaintext, PLAT_UI16 plaintext_length,
+                                            PLAT_UI8 *pInitial_value, const PLAT_UI8 *pKey,
+                                            PLAT_UI16 key_length,
+                                            PLAT_UI8 *pEncryptedtext, PLAT_UI16 *pEncryptedtext_length) {
     EVP_CIPHER_CTX   *ctx    = NULL;
     const EVP_CIPHER *cipher = aes_cbc_cipher(key_length);
     int               out_len, final_len;
     stse_ReturnCode_t ret = STSE_OK;
 
     if (cipher == NULL) {
-        return STSE_PLATFORM_AES_CBC_ENC_ERROR;
+        return STSE_PLATFORM_AES_CBC_ENCRYPT_ERROR;
     }
 
     ctx = EVP_CIPHER_CTX_new();
     if (ctx == NULL) {
-        return STSE_PLATFORM_AES_CBC_ENC_ERROR;
+        return STSE_PLATFORM_AES_CBC_ENCRYPT_ERROR;
     }
 
-    if (EVP_EncryptInit_ex(ctx, cipher, NULL, pKey, pIv) != 1) {
-        ret = STSE_PLATFORM_AES_CBC_ENC_ERROR;
+    if (EVP_EncryptInit_ex(ctx, cipher, NULL, pKey, pInitial_value) != 1) {
+        ret = STSE_PLATFORM_AES_CBC_ENCRYPT_ERROR;
         goto cleanup;
     }
 
     EVP_CIPHER_CTX_set_padding(ctx, 0); /* No padding - caller ensures block alignment */
 
-    if (EVP_EncryptUpdate(ctx, pCiphertext, &out_len, pPlaintext, plaintext_length) != 1) {
-        ret = STSE_PLATFORM_AES_CBC_ENC_ERROR;
+    if (EVP_EncryptUpdate(ctx, pEncryptedtext, &out_len, pPlaintext, plaintext_length) != 1) {
+        ret = STSE_PLATFORM_AES_CBC_ENCRYPT_ERROR;
         goto cleanup;
     }
 
-    if (EVP_EncryptFinal_ex(ctx, pCiphertext + out_len, &final_len) != 1) {
-        ret = STSE_PLATFORM_AES_CBC_ENC_ERROR;
+    if (EVP_EncryptFinal_ex(ctx, pEncryptedtext + out_len, &final_len) != 1) {
+        ret = STSE_PLATFORM_AES_CBC_ENCRYPT_ERROR;
         goto cleanup;
     }
 
-    *pCiphertext_length = (PLAT_UI16)(out_len + final_len);
+    *pEncryptedtext_length = (PLAT_UI16)(out_len + final_len);
 
 cleanup:
     EVP_CIPHER_CTX_free(ctx);
     return ret;
 }
 
-stse_ReturnCode_t stse_platform_aes_cbc_decrypt(PLAT_UI8 *pCiphertext, PLAT_UI16 ciphertext_length,
-                                                PLAT_UI8 *pKey, PLAT_UI16 key_length,
-                                                PLAT_UI8 *pIv,
-                                                PLAT_UI8 *pPlaintext, PLAT_UI16 *pPlaintext_length) {
+stse_ReturnCode_t stse_platform_aes_cbc_dec(const PLAT_UI8 *pEncryptedtext, PLAT_UI16 encryptedtext_length,
+                                            PLAT_UI8 *pInitial_value, const PLAT_UI8 *pKey,
+                                            PLAT_UI16 key_length,
+                                            PLAT_UI8 *pPlaintext, PLAT_UI16 *pPlaintext_length) {
     EVP_CIPHER_CTX   *ctx    = NULL;
     const EVP_CIPHER *cipher = aes_cbc_cipher(key_length);
     int               out_len, final_len;
     stse_ReturnCode_t ret = STSE_OK;
 
     if (cipher == NULL) {
-        return STSE_PLATFORM_AES_CBC_DEC_ERROR;
+        return STSE_PLATFORM_AES_CBC_DECRYPT_ERROR;
     }
 
     ctx = EVP_CIPHER_CTX_new();
     if (ctx == NULL) {
-        return STSE_PLATFORM_AES_CBC_DEC_ERROR;
+        return STSE_PLATFORM_AES_CBC_DECRYPT_ERROR;
     }
 
-    if (EVP_DecryptInit_ex(ctx, cipher, NULL, pKey, pIv) != 1) {
-        ret = STSE_PLATFORM_AES_CBC_DEC_ERROR;
+    if (EVP_DecryptInit_ex(ctx, cipher, NULL, pKey, pInitial_value) != 1) {
+        ret = STSE_PLATFORM_AES_CBC_DECRYPT_ERROR;
         goto cleanup;
     }
 
     EVP_CIPHER_CTX_set_padding(ctx, 0); /* No padding */
 
-    if (EVP_DecryptUpdate(ctx, pPlaintext, &out_len, pCiphertext, ciphertext_length) != 1) {
-        ret = STSE_PLATFORM_AES_CBC_DEC_ERROR;
+    if (EVP_DecryptUpdate(ctx, pPlaintext, &out_len, pEncryptedtext, encryptedtext_length) != 1) {
+        ret = STSE_PLATFORM_AES_CBC_DECRYPT_ERROR;
         goto cleanup;
     }
 
     if (EVP_DecryptFinal_ex(ctx, pPlaintext + out_len, &final_len) != 1) {
-        ret = STSE_PLATFORM_AES_CBC_DEC_ERROR;
+        ret = STSE_PLATFORM_AES_CBC_DECRYPT_ERROR;
         goto cleanup;
     }
 
@@ -309,78 +309,78 @@ static const EVP_CIPHER *aes_ecb_cipher(PLAT_UI16 key_length) {
     }
 }
 
-stse_ReturnCode_t stse_platform_aes_ecb_encrypt(PLAT_UI8 *pPlaintext, PLAT_UI16 plaintext_length,
-                                                PLAT_UI8 *pKey, PLAT_UI16 key_length,
-                                                PLAT_UI8 *pCiphertext, PLAT_UI16 *pCiphertext_length) {
+stse_ReturnCode_t stse_platform_aes_ecb_enc(const PLAT_UI8 *pPlaintext, PLAT_UI16 plaintext_length,
+                                            const PLAT_UI8 *pKey, PLAT_UI16 key_length,
+                                            PLAT_UI8 *pEncryptedtext, PLAT_UI16 *pEncryptedtext_length) {
     EVP_CIPHER_CTX   *ctx    = NULL;
     const EVP_CIPHER *cipher = aes_ecb_cipher(key_length);
     int               out_len, final_len;
     stse_ReturnCode_t ret = STSE_OK;
 
     if (cipher == NULL) {
-        return STSE_PLATFORM_AES_ECB_ENC_ERROR;
+        return STSE_PLATFORM_AES_ECB_ENCRYPT_ERROR;
     }
 
     ctx = EVP_CIPHER_CTX_new();
     if (ctx == NULL) {
-        return STSE_PLATFORM_AES_ECB_ENC_ERROR;
+        return STSE_PLATFORM_AES_ECB_ENCRYPT_ERROR;
     }
 
     if (EVP_EncryptInit_ex(ctx, cipher, NULL, pKey, NULL) != 1) {
-        ret = STSE_PLATFORM_AES_ECB_ENC_ERROR;
+        ret = STSE_PLATFORM_AES_ECB_ENCRYPT_ERROR;
         goto cleanup;
     }
 
     EVP_CIPHER_CTX_set_padding(ctx, 0);
 
-    if (EVP_EncryptUpdate(ctx, pCiphertext, &out_len, pPlaintext, plaintext_length) != 1) {
-        ret = STSE_PLATFORM_AES_ECB_ENC_ERROR;
+    if (EVP_EncryptUpdate(ctx, pEncryptedtext, &out_len, pPlaintext, plaintext_length) != 1) {
+        ret = STSE_PLATFORM_AES_ECB_ENCRYPT_ERROR;
         goto cleanup;
     }
 
-    if (EVP_EncryptFinal_ex(ctx, pCiphertext + out_len, &final_len) != 1) {
-        ret = STSE_PLATFORM_AES_ECB_ENC_ERROR;
+    if (EVP_EncryptFinal_ex(ctx, pEncryptedtext + out_len, &final_len) != 1) {
+        ret = STSE_PLATFORM_AES_ECB_ENCRYPT_ERROR;
         goto cleanup;
     }
 
-    *pCiphertext_length = (PLAT_UI16)(out_len + final_len);
+    *pEncryptedtext_length = (PLAT_UI16)(out_len + final_len);
 
 cleanup:
     EVP_CIPHER_CTX_free(ctx);
     return ret;
 }
 
-stse_ReturnCode_t stse_platform_aes_ecb_decrypt(PLAT_UI8 *pCiphertext, PLAT_UI16 ciphertext_length,
-                                                PLAT_UI8 *pKey, PLAT_UI16 key_length,
-                                                PLAT_UI8 *pPlaintext, PLAT_UI16 *pPlaintext_length) {
+stse_ReturnCode_t stse_platform_aes_ecb_dec(const PLAT_UI8 *pEncryptedtext, PLAT_UI16 encryptedtext_length,
+                                            const PLAT_UI8 *pKey, PLAT_UI16 key_length,
+                                            PLAT_UI8 *pPlaintext, PLAT_UI16 *pPlaintext_length) {
     EVP_CIPHER_CTX   *ctx    = NULL;
     const EVP_CIPHER *cipher = aes_ecb_cipher(key_length);
     int               out_len, final_len;
     stse_ReturnCode_t ret = STSE_OK;
 
     if (cipher == NULL) {
-        return STSE_PLATFORM_AES_ECB_DEC_ERROR;
+        return STSE_PLATFORM_AES_ECB_DECRYPT_ERROR;
     }
 
     ctx = EVP_CIPHER_CTX_new();
     if (ctx == NULL) {
-        return STSE_PLATFORM_AES_ECB_DEC_ERROR;
+        return STSE_PLATFORM_AES_ECB_DECRYPT_ERROR;
     }
 
     if (EVP_DecryptInit_ex(ctx, cipher, NULL, pKey, NULL) != 1) {
-        ret = STSE_PLATFORM_AES_ECB_DEC_ERROR;
+        ret = STSE_PLATFORM_AES_ECB_DECRYPT_ERROR;
         goto cleanup;
     }
 
     EVP_CIPHER_CTX_set_padding(ctx, 0);
 
-    if (EVP_DecryptUpdate(ctx, pPlaintext, &out_len, pCiphertext, ciphertext_length) != 1) {
-        ret = STSE_PLATFORM_AES_ECB_DEC_ERROR;
+    if (EVP_DecryptUpdate(ctx, pPlaintext, &out_len, pEncryptedtext, encryptedtext_length) != 1) {
+        ret = STSE_PLATFORM_AES_ECB_DECRYPT_ERROR;
         goto cleanup;
     }
 
     if (EVP_DecryptFinal_ex(ctx, pPlaintext + out_len, &final_len) != 1) {
-        ret = STSE_PLATFORM_AES_ECB_DEC_ERROR;
+        ret = STSE_PLATFORM_AES_ECB_DECRYPT_ERROR;
         goto cleanup;
     }
 

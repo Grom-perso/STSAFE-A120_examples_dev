@@ -37,6 +37,11 @@ extern "C" {
 #define PLAT_I32          int32_t
 #define PLAT_PACKED_STRUCT __attribute__((packed))
 
+/* GCC weak attribute — allows platform functions to be overridden at link time */
+#ifndef __WEAK
+#define __WEAK __attribute__((weak))
+#endif
+
 #ifdef __cplusplus
 }
 #endif

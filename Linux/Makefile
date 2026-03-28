@@ -22,6 +22,9 @@
 
 REPO_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))/../
 
+# Ensure the default goal is 'all', regardless of rule ordering below.
+.DEFAULT_GOAL := all
+
 # ---------------------------------------------------------------------------
 # Toolchain
 # ---------------------------------------------------------------------------
@@ -56,6 +59,7 @@ ALL_EXAMPLES := \
     02_Command_AC_provisioning \
     02_Host_key_provisioning \
     02_Host_key_provisioning_wrapped \
+    03_ECDH \
     03_Key_wrapping \
     04_Symmetric_key_provisioning_control_fields \
     05_Symmetric_key_establishment_compute_AES-128_CMAC \
@@ -143,12 +147,6 @@ PLATFORM_SRCS := \
     $(PLATFORM_DIR)/STSELib/stse_platform_crc.c \
     $(PLATFORM_DIR)/STSELib/stse_platform_crypto_init.c \
     $(PLATFORM_DIR)/STSELib/stse_platform_power.c \
-    $(PLATFORM_DIR)/Drivers/i2c/I2C.c \
-    $(PLATFORM_DIR)/Drivers/delay_ms/delay_ms.c \
-    $(PLATFORM_DIR)/Drivers/delay_us/delay_us.c \
-    $(PLATFORM_DIR)/Drivers/uart/uart.c \
-    $(PLATFORM_DIR)/Drivers/crc16/crc16.c \
-    $(PLATFORM_DIR)/Drivers/rng/rng.c \
     $(APPS_UTILS_DIR)/Apps_utils.c
 
 # ---------------------------------------------------------------------------
