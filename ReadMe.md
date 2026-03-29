@@ -3,7 +3,6 @@
 The **STSAFE-A120 example package** offers developers a collection of applicative examples demonstrating the use of the STSAFE-A120 secure element product line from STMicroelectronics.  
 These examples can serve as software reference implementations for integrating STSAFE-A120 devices on embedded Linux Host Microprocessor 
 
-![STSAFE-A120 Examples package](Documentation/resources/Markdown/00_introduction/Software_package_architecture.png)
 
 The following readme sections explain how to build and run the STSAFE-A120 example applications on the **STM32MP1** platform running **c** (Linux userspace on the Cortex-A7 core).
 
