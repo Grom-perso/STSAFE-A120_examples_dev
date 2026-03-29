@@ -1,6 +1,6 @@
 /******************************************************************************
- * \file	stse_platform_crypto.c
- * \brief   STSecureElement cryptographic platform file
+ * \file    stse_platform_delay.c
+ * \brief   STSecureElement delay platform for Linux (STM32MP1)
  * \author  STMicroelectronics - CS application team
  *
  ******************************************************************************
@@ -15,26 +15,40 @@
  ******************************************************************************
  */
 
-#include "Drivers/delay_ms/delay_ms.h"
-#include "Drivers/delay_us/delay_us.h"
 #include "stse_conf.h"
 #include "stselib.h"
+#include <time.h>
+
+static struct timespec timeout_end;
 
 stse_ReturnCode_t stse_platform_delay_init(void) {
-    /* Initialize platform Drivers used by PAL */
-    delay_ms_init();
-
+    /* Nothing to initialize on Linux */
     return STSE_OK;
 }
 
 void stse_platform_Delay_ms(PLAT_UI32 delay_val) {
-    delay_ms(delay_val);
+    struct timespec ts;
+    ts.tv_sec  = delay_val / 1000U;
+    ts.tv_nsec = (long)(delay_val % 1000U) * 1000000L;
+    nanosleep(&ts, NULL);
 }
 
 void stse_platform_timeout_ms_start(PLAT_UI16 timeout_val) {
-    timeout_ms_start(timeout_val);
+    clock_gettime(CLOCK_MONOTONIC, &timeout_end);
+    timeout_end.tv_sec  += timeout_val / 1000;
+    timeout_end.tv_nsec += (long)(timeout_val % 1000) * 1000000L;
+    if (timeout_end.tv_nsec >= 1000000000L) {
+        timeout_end.tv_sec  += 1;
+        timeout_end.tv_nsec -= 1000000000L;
+    }
 }
 
 PLAT_UI8 stse_platform_timeout_ms_get_status(void) {
-    return timeout_ms_get_status();
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    if (now.tv_sec > timeout_end.tv_sec ||
+        (now.tv_sec == timeout_end.tv_sec && now.tv_nsec >= timeout_end.tv_nsec)) {
+        return 1; /* timeout elapsed */
+    }
+    return 0;
 }

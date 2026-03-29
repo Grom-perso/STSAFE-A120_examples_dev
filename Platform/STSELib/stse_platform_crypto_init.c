@@ -1,6 +1,6 @@
 /******************************************************************************
- * \file	stse_platform_crypto_init.c
- * \brief   STSecureElement cryptographic platform file
+ * \file    stse_platform_crypto_init.c
+ * \brief   STSecureElement cryptographic platform init for Linux (STM32MP1)
  * \author  STMicroelectronics - CS application team
  *
  ******************************************************************************
@@ -15,17 +15,14 @@
  ******************************************************************************
  */
 
-#include "Middleware/STM32_Cryptographic/include/cmox_crypto.h"
 #include "stse_conf.h"
 #include "stselib.h"
+#include <openssl/crypto.h>
 
 stse_ReturnCode_t stse_platform_crypto_init(void) {
-    stse_ReturnCode_t ret = STSE_OK;
-
-    /* - Initialize STM32 CMOX library */
-    if (cmox_initialize(NULL) != CMOX_INIT_SUCCESS) {
-        ret = STSE_PLATFORM_CRYPTO_INIT_ERROR;
-    }
-
-    return ret;
+    /*
+     * OpenSSL is self-initializing since version 1.1.0.
+     * No explicit initialization call is required.
+     */
+    return STSE_OK;
 }
