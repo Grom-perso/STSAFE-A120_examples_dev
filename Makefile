@@ -85,7 +85,8 @@ ALL_EXAMPLES := \
     05_Symmetric_key_establishment_compute_AES-128_CMAC \
     05_Symmetric_key_establishment_encrypt_AES-256_CCM \
     05_Symmetric_key_provisioning_wrapped_compute_AES-128_CMAC \
-    05_Symmetric_key_provisioning_wrapped_encrypt_AES-256_CCM
+    05_Symmetric_key_provisioning_wrapped_encrypt_AES-256_CCM \
+    06_TLS_client
 
 # If EXAMPLE is specified on the command line, build only that one
 ifdef EXAMPLE
@@ -199,7 +200,10 @@ check_stselib:
 
 all: check_stselib $(addprefix $(BUILD_DIR)/,$(TARGETS))
 
-# Rule to build a single example binary
+# Rule to build a single example binary.
+# Compiles all *.c files found in the project directory so that examples
+# with multiple source files (e.g. 06_TLS_client with its engine) are handled
+# automatically alongside the single-file examples.
 $(BUILD_DIR)/%: check_stselib
 	@mkdir -p $(BUILD_DIR)
 	@if [ ! -f "$(PROJECTS_DIR)/$*/main.c" ]; then \
@@ -209,7 +213,7 @@ $(BUILD_DIR)/%: check_stselib
 	@echo "Building $* ..."
 	$(CC) $(CFLAGS) \
 		-I$(PROJECTS_DIR)/$* \
-		$(PROJECTS_DIR)/$*/main.c \
+		$(wildcard $(PROJECTS_DIR)/$*/*.c) \
 		$(PLATFORM_SRCS) \
 		$(STSELIB_SRCS) \
 		-o $@ \
