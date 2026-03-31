@@ -103,7 +103,7 @@ int main(void) {
         printf("\n\n\r - stse_data_storage_read_counter_zone ( zone : 05 - length : %d)", sizeof(readBuffer) / sizeof(readBuffer[0]));
         printf("\n\r\t o Associated Data : ");
         apps_print_hex_buffer(readBuffer, sizeof(readBuffer));
-        printf("\n\r\t o Counter Value : %lu", counter_value);
+        printf("\n\r\t o Counter Value : %u", counter_value);
     }
 
     /* ## Decrement zone 5 counter and store Randomized Associated data */
@@ -124,7 +124,7 @@ int main(void) {
         printf("\n\n\r - stse_data_storage_decrement_counter_zone ( zone : 05 - length : %d)", sizeof(random) / sizeof(random[0]));
         printf("\n\r\t o New Associated Data : ");
         apps_print_hex_buffer(random, sizeof(random));
-        printf("\n\r\t o New Counter Value : %lu", new_counter_value);
+        printf("\n\r\t o New Counter Value : %u", new_counter_value);
     }
 
     /* ## Read zone 5 (counter zone) */
@@ -144,7 +144,7 @@ int main(void) {
         printf("\n\n\r - stse_data_storage_read_counter_zone ( zone : 05 - length : %d)", sizeof(readBuffer) / sizeof(readBuffer[0]));
         printf("\n\r\t o Associated Data : ");
         apps_print_hex_buffer(readBuffer, sizeof(readBuffer));
-        printf("\n\r\t o Counter Value : %lu", counter_value);
+        printf("\n\r\t o Counter Value : %u", counter_value);
     }
 
     while (1) {

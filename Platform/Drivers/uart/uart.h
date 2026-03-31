@@ -1,6 +1,8 @@
 /******************************************************************************
- * \file	uart.h
- * \brief   UART driver for STM32L452
+ * \file    uart.h
+ * \brief   UART inline helpers for Linux (STM32MP1)
+ *          Redirects to stdio putchar/getchar — no driver compilation unit
+ *          required.
  * \author  STMicroelectronics - CS application team
  *
  ******************************************************************************
@@ -8,20 +10,31 @@
  *
  * <h2><center>&copy; COPYRIGHT 2022 STMicroelectronics</center></h2>
  *
- * This software is licensed under terms that can be found in the LICENSE file in
- * the root directory of this software component.
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
  * If no LICENSE file comes with this software, it is provided AS-IS.
  *
  ******************************************************************************
  */
 
-#ifndef UART_H_
-#define UART_H_
+#ifndef UART_H
+#define UART_H
 
-#include "stm32l4xx.h"
+#include <stdint.h>
+#include <stdio.h>
 
-void uart_init(uint32_t baudrate);
-void uart_putc(uint8_t c);
-uint8_t uart_getc(void);
+static inline void uart_init(uint32_t baudrate) {
+    (void)baudrate;
+    /* On Linux the terminal is already open; nothing to configure */
+}
 
-#endif /* UART_H_ */
+static inline void uart_putc(uint8_t ch) {
+    putchar((int)ch);
+}
+
+static inline uint8_t uart_getc(void) {
+    int c = getchar();
+    return (c == EOF) ? 0u : (uint8_t)c;
+}
+
+#endif /* UART_H */
