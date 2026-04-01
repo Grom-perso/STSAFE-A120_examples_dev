@@ -1,0 +1,74 @@
+# openssl-stsafe.cnf
+# OpenSSL configuration file for loading the STSAFE-A120 hardware engine.
+#
+# Usage
+# -----
+#   export OPENSSL_CONF=/path/to/Engine/openssl-stsafe.cnf
+#
+#   # Verify the engine loads successfully:
+#   openssl engine -v -t stsafe
+#
+#   # TLS handshake using the STSAFE private key (slot 0) for client auth:
+#   openssl s_client \
+#       -engine stsafe \
+#       -keyform ENGINE -key "0" \
+#       -connect <server>:443
+#
+#   # Run the TLS client example in dynamic-engine mode:
+#   ./build/06_TLS_client
+#   (requires the example to be compiled with -DSTSAFE_USE_DYNAMIC_ENGINE)
+#
+# Notes
+# -----
+# * Adjust 'dynamic_path' to the absolute path of libstsafe_engine.so if it
+#   is not installed in the OpenSSL engines directory.
+# * Adjust I2C_BUS to match the bus exposed on your board's Arduino connector
+#   (on STM32MP157-DK2 the Arduino I2C bus is typically i2c-5, so set
+#   I2C_BUS = 5).
+# * CERT_ZONE and KEY_SLOT correspond to the STSAFE-A120 data zone index and
+#   private key slot that hold the device certificate and key pair.
+# * 'init = 1' causes ENGINE_init() to be called immediately at load time so
+#   that any I2C error is reported during startup rather than at first use.
+#
+
+# ----- Global OpenSSL init section ----------------------------------------
+
+openssl_conf = openssl_init
+
+[openssl_init]
+engines = engine_section
+
+# ----- Engine list --------------------------------------------------------
+
+[engine_section]
+stsafe = stsafe_engine_section
+
+# ----- STSAFE engine configuration ----------------------------------------
+
+[stsafe_engine_section]
+
+# Engine identifier (must match STSAFE_ENGINE_ID in stsafe_engine_so.c)
+engine_id = stsafe
+
+# Path to the shared library.
+# If libstsafe_engine.so is installed in the system ENGINESDIR (returned by
+# 'openssl version -e'), you can omit dynamic_path entirely.
+# Otherwise set the absolute path, for example:
+#   dynamic_path = /opt/stsafe/lib/libstsafe_engine.so
+dynamic_path = build/libstsafe_engine.so
+
+# I2C bus number where the STSAFE-A120 is connected.
+# Typical value for STM32MP157-DK2 Arduino connector: 5
+I2C_BUS = 1
+
+# I2C bus speed in kHz (100 or 400)
+I2C_SPEED = 400
+
+# STSAFE data zone index holding the DER leaf certificate
+CERT_ZONE = 0
+
+# STSAFE private key slot associated with the leaf certificate
+KEY_SLOT = 0
+
+# Initialize the engine immediately at load time (opens /dev/i2c-N)
+init = 1

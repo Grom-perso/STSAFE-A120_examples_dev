@@ -47,8 +47,19 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "Apps_utils.h"
-#include "stsafe_engine.h"
 #include "stse_conf.h"
+
+/* In static engine mode the application uses the stsafe_engine.h API
+ * (stsafe_engine_get, stsafe_engine_load_cert, stsafe_engine_load_key).
+ * In dynamic engine mode those symbols live in libstsafe_engine.so and are
+ * accessed via the standard OpenSSL ENGINE_* API – no extra header needed. */
+#ifndef STSAFE_USE_DYNAMIC_ENGINE
+#  include "stsafe_engine.h"
+#else
+#  include <openssl/engine.h>
+   /* Engine ID must match the value baked into the .so */
+#  define STSAFE_ENGINE_ID "stsafe"
+#endif
 
 #include <openssl/err.h>
 #include <openssl/evp.h>
@@ -82,7 +93,8 @@ static void tls_print_response(SSL *ssl);
 /**
  * @brief  Main program entry point – STSAFE-A120 TLS Client example
  * @details
- *   1. Initialise STSAFE-A120 handler.
+ *   1. Initialise STSAFE-A120 handler (static mode) or load engine from .so
+ *      (dynamic mode).
  *   2. Register STSAFE OpenSSL engine.
  *   3. Load device certificate from STSAFE zone 0.
  *   4. Create engine-backed private key (signing done inside STSAFE).
@@ -103,9 +115,11 @@ int main(void)
     EVP_PKEY *dev_key  = NULL;
     int       tcp_fd   = -1;
 
-    /* STSELib objects */
+#ifndef STSAFE_USE_DYNAMIC_ENGINE
+    /* STSELib objects – only needed in static engine mode */
     stse_Handler_t    stse_handler;
     stse_ReturnCode_t stse_ret;
+#endif
 
     /* -----------------------------------------------------------------------
      * Banner
@@ -124,6 +138,129 @@ int main(void)
            TLS_SERVER_PATH);
     printf("STSAFE I2C bus: %d  |  Cert zone: %d  |  Key slot: %d\n\r\n\r",
            STSAFE_I2C_BUS, STSAFE_CERT_ZONE, STSAFE_KEY_SLOT);
+
+    /* OpenSSL 1.1.1+ initialises itself; load built-in algorithms */
+    OpenSSL_add_all_algorithms();
+    SSL_load_error_strings();
+
+#ifdef STSAFE_USE_DYNAMIC_ENGINE
+    /* =======================================================================
+     * DYNAMIC ENGINE MODE
+     * The engine shared library (libstsafe_engine.so) manages its own
+     * stse_Handler_t.  No application-side I2C initialisation is needed.
+     * ===================================================================== */
+
+    /* -----------------------------------------------------------------------
+     * Step 1 – Load the STSAFE engine from the shared library
+     * -------------------------------------------------------------------- */
+    printf(PRINT_CYAN "## Step 1 – Load STSAFE dynamic engine\n\r" PRINT_RESET);
+
+    /* First try: the engine may have been pre-loaded by OpenSSL via
+     * OPENSSL_CONF pointing to Engine/openssl-stsafe.cnf */
+    engine = ENGINE_by_id(STSAFE_ENGINE_ID);
+
+    if (engine == NULL) {
+        /* Second try: load the shared library explicitly via the built-in
+         * 'dynamic' meta-engine */
+        printf("   Engine not pre-loaded – loading from: %s\n\r",
+               STSAFE_ENGINE_SO_PATH);
+
+        ENGINE *loader = ENGINE_by_id("dynamic");
+        if (loader == NULL) {
+            printf(PRINT_RED
+                   "   ERROR: ENGINE_by_id(\"dynamic\") failed – "
+                   "is the dynamic engine loader available?\n\r" PRINT_RESET);
+            print_openssl_errors();
+            goto cleanup;
+        }
+
+        /* Point the dynamic loader at the .so */
+        if (!ENGINE_ctrl_cmd_string(loader, "SO_PATH",
+                                    STSAFE_ENGINE_SO_PATH, 0) ||
+            !ENGINE_ctrl_cmd_string(loader, "LOAD", NULL, 0)) {
+            printf(PRINT_RED
+                   "   ERROR: failed to load engine from %s\n\r" PRINT_RESET,
+                   STSAFE_ENGINE_SO_PATH);
+            print_openssl_errors();
+            ENGINE_free(loader);
+            goto cleanup;
+        }
+        ENGINE_free(loader);
+
+        /* The loaded engine is now registered; retrieve it by ID */
+        engine = ENGINE_by_id(STSAFE_ENGINE_ID);
+        if (engine == NULL) {
+            printf(PRINT_RED
+                   "   ERROR: ENGINE_by_id(\"" STSAFE_ENGINE_ID "\") failed "
+                   "after dynamic load\n\r" PRINT_RESET);
+            print_openssl_errors();
+            goto cleanup;
+        }
+    }
+
+    /* Configure I2C before ENGINE_init() */
+    ENGINE_ctrl_cmd(engine, "I2C_BUS",   STSAFE_I2C_BUS,       NULL, NULL, 0);
+    ENGINE_ctrl_cmd(engine, "I2C_SPEED", STSAFE_I2C_SPEED_KHZ, NULL, NULL, 0);
+    ENGINE_ctrl_cmd(engine, "CERT_ZONE", STSAFE_CERT_ZONE,      NULL, NULL, 0);
+    ENGINE_ctrl_cmd(engine, "KEY_SLOT",  STSAFE_KEY_SLOT,       NULL, NULL, 0);
+
+    /* Initialise the engine (opens I2C bus, calls stse_init inside .so) */
+    if (!ENGINE_init(engine)) {
+        printf(PRINT_RED "   ERROR: ENGINE_init failed\n\r" PRINT_RESET);
+        print_openssl_errors();
+        goto cleanup;
+    }
+
+    printf("   Engine '%s' loaded: %s\n\r",
+           ENGINE_get_id(engine), ENGINE_get_name(engine));
+
+    /* -----------------------------------------------------------------------
+     * Step 2 – Load device certificate via LOAD_CERT engine control
+     * -------------------------------------------------------------------- */
+    printf(PRINT_CYAN
+           "\n\r## Step 2 – Load device certificate (dynamic engine, zone %d)"
+           "\n\r" PRINT_RESET, STSAFE_CERT_ZONE);
+
+    if (!ENGINE_ctrl_cmd(engine, "LOAD_CERT",
+                          (long)STSAFE_CERT_ZONE, &dev_cert, NULL, 0)
+        || dev_cert == NULL) {
+        printf(PRINT_RED
+               "   ERROR: ENGINE_ctrl_cmd(LOAD_CERT) failed\n\r" PRINT_RESET);
+        print_openssl_errors();
+        goto cleanup;
+    }
+    print_cert_info(dev_cert, "Device certificate");
+
+    /* -----------------------------------------------------------------------
+     * Step 3 – Load private key via ENGINE_load_private_key
+     *          key_id = "<slot>" or "<slot>:<zone>"
+     * -------------------------------------------------------------------- */
+    printf(PRINT_CYAN
+           "\n\r## Step 3 – Load STSAFE-backed private key via engine "
+           "(slot %d)\n\r" PRINT_RESET, STSAFE_KEY_SLOT);
+    {
+        char key_id[32];
+        snprintf(key_id, sizeof(key_id), "%d:%d",
+                 STSAFE_KEY_SLOT, STSAFE_CERT_ZONE);
+
+        dev_key = ENGINE_load_private_key(engine, key_id, NULL, NULL);
+        if (dev_key == NULL) {
+            printf(PRINT_RED
+                   "   ERROR: ENGINE_load_private_key(\"%s\") failed\n\r"
+                   PRINT_RESET, key_id);
+            print_openssl_errors();
+            goto cleanup;
+        }
+    }
+    printf("   Engine-backed private key loaded (ECDSA/P-256, slot %d)\n\r",
+           STSAFE_KEY_SLOT);
+
+#else  /* STSAFE_USE_DYNAMIC_ENGINE not defined → static engine */
+    /* =======================================================================
+     * STATIC ENGINE MODE  (default)
+     * The engine is linked directly into this binary.  The application
+     * initialises the stse_Handler_t and passes it to the engine API.
+     * ===================================================================== */
 
     /* -----------------------------------------------------------------------
      * Step 1 – Initialise the STSAFE-A120 device handler
@@ -157,14 +294,10 @@ int main(void)
     printf("   STSAFE-A120 initialised on /dev/i2c-%d\n\r", STSAFE_I2C_BUS);
 
     /* -----------------------------------------------------------------------
-     * Step 2 – Register the STSAFE OpenSSL engine
+     * Step 2 – Register the STSAFE OpenSSL engine (static)
      * -------------------------------------------------------------------- */
     printf(PRINT_CYAN "\n\r## Step 2 – Register STSAFE OpenSSL engine\n\r"
            PRINT_RESET);
-
-    /* OpenSSL 1.1.1+ initialises itself; load built-in algorithms */
-    OpenSSL_add_all_algorithms();
-    SSL_load_error_strings();
 
     engine = stsafe_engine_get();
     if (engine == NULL) {
@@ -197,31 +330,37 @@ int main(void)
     printf(PRINT_CYAN "\n\r## Step 4 – Create STSAFE-backed private key (slot %d)\n\r"
            PRINT_RESET, STSAFE_KEY_SLOT);
 
-    EVP_PKEY *cert_pub = X509_get0_pubkey(dev_cert);
-    if (cert_pub == NULL || EVP_PKEY_id(cert_pub) != EVP_PKEY_EC) {
-        printf(PRINT_RED
-               "   ERROR: certificate does not contain an EC public key\n\r"
-               PRINT_RESET);
-        goto cleanup;
-    }
+    {
+        EVP_PKEY *cert_pub = X509_get0_pubkey(dev_cert);
+        if (cert_pub == NULL || EVP_PKEY_id(cert_pub) != EVP_PKEY_EC) {
+            printf(PRINT_RED
+                   "   ERROR: certificate does not contain an EC public key\n\r"
+                   PRINT_RESET);
+            goto cleanup;
+        }
 
-    const EC_KEY *pub_ec_key = EVP_PKEY_get0_EC_KEY(cert_pub);
-    if (pub_ec_key == NULL) {
-        printf(PRINT_RED "   ERROR: EVP_PKEY_get0_EC_KEY failed\n\r" PRINT_RESET);
-        goto cleanup;
-    }
+        const EC_KEY *pub_ec_key = EVP_PKEY_get0_EC_KEY(cert_pub);
+        if (pub_ec_key == NULL) {
+            printf(PRINT_RED "   ERROR: EVP_PKEY_get0_EC_KEY failed\n\r"
+                   PRINT_RESET);
+            goto cleanup;
+        }
 
-    dev_key = stsafe_engine_load_key(engine, &stse_handler,
-                                      STSAFE_KEY_SLOT,
-                                      STSE_ECC_KT_NIST_P_256,
-                                      (EC_KEY *)(uintptr_t)pub_ec_key);
-    if (dev_key == NULL) {
-        printf(PRINT_RED "   ERROR: stsafe_engine_load_key failed\n\r" PRINT_RESET);
-        print_openssl_errors();
-        goto cleanup;
+        dev_key = stsafe_engine_load_key(engine, &stse_handler,
+                                          STSAFE_KEY_SLOT,
+                                          STSE_ECC_KT_NIST_P_256,
+                                          (EC_KEY *)(uintptr_t)pub_ec_key);
+        if (dev_key == NULL) {
+            printf(PRINT_RED "   ERROR: stsafe_engine_load_key failed\n\r"
+                   PRINT_RESET);
+            print_openssl_errors();
+            goto cleanup;
+        }
     }
     printf("   Engine-backed private key created (ECDSA/P-256, slot %d)\n\r",
            STSAFE_KEY_SLOT);
+
+#endif /* STSAFE_USE_DYNAMIC_ENGINE */
 
     /* -----------------------------------------------------------------------
      * Step 5 – Configure SSL_CTX

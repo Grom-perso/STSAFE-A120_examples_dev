@@ -59,6 +59,7 @@ PLATFORM_DIR   := $(REPO_ROOT)/Platform
 STSELIB_DIR    := $(REPO_ROOT)/Middleware/STSELib
 APPS_UTILS_DIR := $(REPO_ROOT)/Applications/Apps_utils
 PROJECTS_DIR   := $(REPO_ROOT)/Applications/Projects
+ENGINE_DIR     := $(REPO_ROOT)/Engine
 BUILD_DIR      := build
 
 # ---------------------------------------------------------------------------
@@ -196,7 +197,7 @@ check_stselib:
 # ---------------------------------------------------------------------------
 # Build targets
 # ---------------------------------------------------------------------------
-.PHONY: all clean $(ALL_EXAMPLES)
+.PHONY: all clean engine $(ALL_EXAMPLES)
 
 all: check_stselib $(addprefix $(BUILD_DIR)/,$(TARGETS))
 
@@ -220,9 +221,99 @@ $(BUILD_DIR)/%: check_stselib
 		$(LDFLAGS)
 	@echo "  -> $@ built successfully"
 
+# ---------------------------------------------------------------------------
+# Shared-library engine target
+#
+# Builds the dynamically-loadable OpenSSL engine:
+#   build/libstsafe_engine.so
+#
+# The .so can then be loaded by OpenSSL at runtime via:
+#   export OPENSSL_CONF=Engine/openssl-stsafe.cnf
+#   openssl engine -v -t stsafe
+#
+# The Engine/ directory contains its own stse_conf.h (included via
+# -I$(ENGINE_DIR)) which configures the STSELib feature set for the
+# shared library.
+#
+# Platform sources are compiled with -fPIC because position-independent
+# code is mandatory for shared libraries.  The APPS_UTILS_DIR sources are
+# NOT included here (they reference UART/terminal helpers not needed in
+# the engine).
+# ---------------------------------------------------------------------------
+ENGINE_SRCS := \
+	$(ENGINE_DIR)/stsafe_engine_so.c \
+	$(PLATFORM_DIR)/STSELib/stse_platform_i2c.c \
+	$(PLATFORM_DIR)/STSELib/stse_platform_delay.c \
+	$(PLATFORM_DIR)/STSELib/stse_platform_aes.c \
+	$(PLATFORM_DIR)/STSELib/stse_platform_ecc.c \
+	$(PLATFORM_DIR)/STSELib/stse_platform_hash.c \
+	$(PLATFORM_DIR)/STSELib/stse_platform_random.c \
+	$(PLATFORM_DIR)/STSELib/stse_platform_crc.c \
+	$(PLATFORM_DIR)/STSELib/stse_platform_crypto_init.c \
+	$(PLATFORM_DIR)/STSELib/stse_platform_power.c
+
+ENGINE_CFLAGS := \
+	-shared -fPIC \
+	-Wall -Wextra -Wno-unused-parameter \
+	-O2 -g \
+	-DOPENSSL_API_COMPAT=0x10101000L \
+	-I$(ENGINE_DIR) \
+	-I$(PLATFORM_DIR) \
+	-I$(PLATFORM_DIR)/STSELib \
+	-I$(STSELIB_DIR)
+
+engine: check_stselib $(BUILD_DIR)/libstsafe_engine.so
+
+$(BUILD_DIR)/libstsafe_engine.so: check_stselib
+	@mkdir -p $(BUILD_DIR)
+	@echo "Building dynamic engine (libstsafe_engine.so) ..."
+	$(CC) $(ENGINE_CFLAGS) \
+		$(ENGINE_SRCS) \
+		$(STSELIB_SRCS) \
+		-o $@ \
+		-lssl -lcrypto -lm
+	@echo "  -> $@ built successfully"
+	@echo ""
+	@echo "  To use the engine:"
+	@echo "    export OPENSSL_CONF=$(REPO_ROOT)/Engine/openssl-stsafe.cnf"
+	@echo "    openssl engine -v -t stsafe"
+
 # Convenience target: build a single example via EXAMPLE=<name>
 .PHONY: example
 example: check_stselib $(BUILD_DIR)/$(EXAMPLE)
+
+# ---------------------------------------------------------------------------
+# Dynamic-engine variant of the TLS client
+#
+# Builds 06_TLS_client with -DSTSAFE_USE_DYNAMIC_ENGINE so it loads the
+# STSAFE engine from build/libstsafe_engine.so at runtime instead of having
+# the engine compiled directly into the binary.
+#
+# Run it with:
+#   export OPENSSL_CONF=$(REPO_ROOT)/Engine/openssl-stsafe.cnf
+#   ./build/06_TLS_client_dynamic
+# ---------------------------------------------------------------------------
+.PHONY: tls_dynamic
+tls_dynamic: check_stselib $(BUILD_DIR)/libstsafe_engine.so \
+             $(BUILD_DIR)/06_TLS_client_dynamic
+
+$(BUILD_DIR)/06_TLS_client_dynamic: check_stselib
+	@mkdir -p $(BUILD_DIR)
+	@echo "Building 06_TLS_client (dynamic engine mode) ..."
+	$(CC) $(CFLAGS) \
+		-DSTSAFE_USE_DYNAMIC_ENGINE \
+		-DSTSAFE_ENGINE_SO_PATH=\"build/libstsafe_engine.so\" \
+		-I$(PROJECTS_DIR)/06_TLS_client \
+		$(PROJECTS_DIR)/06_TLS_client/main.c \
+		$(PLATFORM_SRCS) \
+		$(STSELIB_SRCS) \
+		-o $@ \
+		$(LDFLAGS)
+	@echo "  -> $@ built successfully"
+	@echo ""
+	@echo "  Run with:"
+	@echo "    export OPENSSL_CONF=$(REPO_ROOT)/Engine/openssl-stsafe.cnf"
+	@echo "    $@"
 
 clean:
 	rm -rf $(BUILD_DIR)
@@ -238,6 +329,8 @@ help:
 	@echo ""
 	@echo "Targets:"
 	@echo "  all              Build all examples (default)"
+	@echo "  engine           Build the dynamically-loadable OpenSSL engine"
+	@echo "                   (output: build/libstsafe_engine.so)"
 	@echo "  EXAMPLE=<name>   Build a specific example"
 	@echo "  clean            Remove all build artifacts"
 	@echo "  help             Show this help message"
@@ -255,6 +348,14 @@ help:
 	@echo "Variables:"
 	@echo "  CROSS_COMPILE    Toolchain prefix for generic toolchains (NOT needed with OpenSTLinux SDK)"
 	@echo "  EXAMPLE          Build only the specified example (e.g. 01_Echo_loop)"
+	@echo ""
+	@echo "Dynamic OpenSSL engine:"
+	@echo "  make engine          Build build/libstsafe_engine.so"
+	@echo "  make tls_dynamic     Build the TLS client in dynamic-engine mode"
+	@echo "  export OPENSSL_CONF=Engine/openssl-stsafe.cnf"
+	@echo "  openssl engine -v -t stsafe          # verify loading"
+	@echo "  openssl s_client -engine stsafe \\"
+	@echo "    -keyform ENGINE -key \"0\" -connect <server>:443"
 	@echo ""
 	@echo "Available examples:"
 	@$(foreach ex,$(ALL_EXAMPLES),echo "  $(ex)";)

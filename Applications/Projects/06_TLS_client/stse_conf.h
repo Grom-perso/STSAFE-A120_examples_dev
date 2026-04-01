@@ -116,6 +116,38 @@ extern "C" {
  *  Set to NULL to use the system default CA store. */
 #define TLS_CA_BUNDLE         NULL
 
+/* -------------------------------------------------------------------------
+ * DYNAMIC ENGINE OPTION
+ * -------------------------------------------------------------------------
+ * Define STSAFE_USE_DYNAMIC_ENGINE to use the dynamically-loaded engine
+ * (build/libstsafe_engine.so) instead of the statically-linked engine.
+ *
+ * In dynamic mode the application does NOT initialise the stse_Handler_t
+ * itself; the engine does it internally.  The TLS example will:
+ *   1. Try ENGINE_by_id("stsafe") – succeeds if OPENSSL_CONF already loaded
+ *      the engine.
+ *   2. Fall back to loading the .so explicitly from STSAFE_ENGINE_SO_PATH.
+ *   3. Call ENGINE_ctrl_cmd to load the cert (LOAD_CERT command).
+ *   4. Call ENGINE_load_private_key for the engine-backed EVP_PKEY.
+ *
+ * Build command (relative to repo root):
+ *   make engine
+ *   make EXAMPLE=06_TLS_client \
+ *     CFLAGS="-DSTSAFE_USE_DYNAMIC_ENGINE \
+ *             -DSTSAFE_ENGINE_SO_PATH=\\\"build/libstsafe_engine.so\\\""
+ *
+ * Run command:
+ *   export OPENSSL_CONF=Engine/openssl-stsafe.cnf
+ *   ./build/06_TLS_client
+ */
+// #define STSAFE_USE_DYNAMIC_ENGINE
+
+/** Path to the engine shared library for fallback loading.
+ *  Only used when STSAFE_USE_DYNAMIC_ENGINE is defined. */
+#ifndef STSAFE_ENGINE_SO_PATH
+#define STSAFE_ENGINE_SO_PATH "build/libstsafe_engine.so"
+#endif
+
 /** @} */
 
 #ifdef __cplusplus
