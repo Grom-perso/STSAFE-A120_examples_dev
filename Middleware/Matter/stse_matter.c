@@ -22,6 +22,9 @@
 #include "stse_matter.h"
 #include <string.h>
 
+/** Size in bytes of one ECDSA-P256 integer component (r or s). */
+#define ECDSA_P256_COMPONENT_SIZE 32U
+
 /* --------------------------------------------------------------------------
  * Internal helpers
  * -------------------------------------------------------------------------- */
@@ -133,7 +136,7 @@ stse_ReturnCode_t stse_matter_sign_attestation(stse_Handler_t *pSTSE,
 {
     stse_ReturnCode_t ret;
     /* ECDSA-P256 raw signature: r (32 B) + s (32 B) */
-    uint8_t  raw_sig[64];
+    uint8_t  raw_sig[ECDSA_P256_COMPONENT_SIZE * 2U];
     uint16_t raw_sig_len = sizeof(raw_sig);
 
     if (pSTSE == NULL ||
@@ -160,18 +163,19 @@ stse_ReturnCode_t stse_matter_sign_attestation(stse_Handler_t *pSTSE,
     }
 
     /* Encode the raw (r, s) as a DER SEQUENCE { INTEGER r, INTEGER s } */
-    uint8_t  r[32], s[32];
+    uint8_t  r[ECDSA_P256_COMPONENT_SIZE];
+    uint8_t  s[ECDSA_P256_COMPONENT_SIZE];
     uint8_t  r_pad, s_pad;
 
-    memcpy(r, raw_sig,        32);
-    memcpy(s, raw_sig + 32,   32);
+    memcpy(r, raw_sig,                          ECDSA_P256_COMPONENT_SIZE);
+    memcpy(s, raw_sig + ECDSA_P256_COMPONENT_SIZE, ECDSA_P256_COMPONENT_SIZE);
 
     /* DER INTEGER requires a leading 0x00 if the MSBit is set */
     r_pad = (r[0] & 0x80U) ? 1U : 0U;
     s_pad = (s[0] & 0x80U) ? 1U : 0U;
 
-    uint8_t r_len  = (uint8_t)(32U + r_pad);
-    uint8_t s_len  = (uint8_t)(32U + s_pad);
+    uint8_t r_len  = (uint8_t)(ECDSA_P256_COMPONENT_SIZE + r_pad);
+    uint8_t s_len  = (uint8_t)(ECDSA_P256_COMPONENT_SIZE + s_pad);
     uint8_t seq_content_len = (uint8_t)(2U + r_len + 2U + s_len);
     uint8_t der_total_len   = (uint8_t)(2U + seq_content_len);
 
@@ -185,11 +189,11 @@ stse_ReturnCode_t stse_matter_sign_attestation(stse_Handler_t *pSTSE,
     *p++ = 0x02;               /* INTEGER r */
     *p++ = r_len;
     if (r_pad) { *p++ = 0x00; }
-    memcpy(p, r, 32); p += 32;
+    memcpy(p, r, ECDSA_P256_COMPONENT_SIZE); p += ECDSA_P256_COMPONENT_SIZE;
     *p++ = 0x02;               /* INTEGER s */
     *p++ = s_len;
     if (s_pad) { *p++ = 0x00; }
-    memcpy(p, s, 32); p += 32;
+    memcpy(p, s, ECDSA_P256_COMPONENT_SIZE); p += ECDSA_P256_COMPONENT_SIZE;
 
     *pSigLen = (uint16_t)(p - pSignature);
 

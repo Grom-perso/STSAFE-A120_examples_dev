@@ -42,7 +42,7 @@ endif
 # Directories
 # --------------------------------------------------------------------------
 
-ROOT_DIR   := $(realpath $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))..
+ROOT_DIR   := $(realpath $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))/..
 BUILD_DIR  := $(ROOT_DIR)/Linux/build
 
 MIDDLEWARE_DIR := $(ROOT_DIR)/Middleware/STSELib

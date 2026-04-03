@@ -28,6 +28,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+/** Size in bytes of one ECDSA-P256 integer component (r or s). */
+#define ECDSA_P256_COMPONENT_SIZE 32U
+
 /* --------------------------------------------------------------------------
  * Entropy source
  * -------------------------------------------------------------------------- */
@@ -100,7 +103,7 @@ static int stsafe_pk_sign(void *ctx, mbedtls_md_type_t md_alg,
 {
     stse_mbedtls_pk_ctx_t *pk_ctx = (stse_mbedtls_pk_ctx_t *)ctx;
     stse_ReturnCode_t      stse_ret;
-    uint8_t                raw_sig[64];
+    uint8_t                raw_sig[ECDSA_P256_COMPONENT_SIZE * 2U];
     uint16_t               raw_sig_len = sizeof(raw_sig);
 
     (void)md_alg;
@@ -125,10 +128,10 @@ static int stsafe_pk_sign(void *ctx, mbedtls_md_type_t md_alg,
     }
 
     /* DER-encode the raw (r || s) signature */
-    uint8_t r_pad = (raw_sig[0]    & 0x80U) ? 1U : 0U;
-    uint8_t s_pad = (raw_sig[32]   & 0x80U) ? 1U : 0U;
-    uint8_t r_len = (uint8_t)(32U + r_pad);
-    uint8_t s_len = (uint8_t)(32U + s_pad);
+    uint8_t r_pad = (raw_sig[0]                         & 0x80U) ? 1U : 0U;
+    uint8_t s_pad = (raw_sig[ECDSA_P256_COMPONENT_SIZE] & 0x80U) ? 1U : 0U;
+    uint8_t r_len = (uint8_t)(ECDSA_P256_COMPONENT_SIZE + r_pad);
+    uint8_t s_len = (uint8_t)(ECDSA_P256_COMPONENT_SIZE + s_pad);
     uint8_t seq_len = (uint8_t)(2U + r_len + 2U + s_len);
     size_t  der_len = (size_t)(2U + seq_len);
 
@@ -142,11 +145,13 @@ static int stsafe_pk_sign(void *ctx, mbedtls_md_type_t md_alg,
     *p++ = 0x02;
     *p++ = r_len;
     if (r_pad) { *p++ = 0x00; }
-    memcpy(p, raw_sig,      32); p += 32;
+    memcpy(p, raw_sig,                          ECDSA_P256_COMPONENT_SIZE);
+    p += ECDSA_P256_COMPONENT_SIZE;
     *p++ = 0x02;
     *p++ = s_len;
     if (s_pad) { *p++ = 0x00; }
-    memcpy(p, raw_sig + 32, 32); p += 32;
+    memcpy(p, raw_sig + ECDSA_P256_COMPONENT_SIZE, ECDSA_P256_COMPONENT_SIZE);
+    p += ECDSA_P256_COMPONENT_SIZE;
 
     *sig_len = (size_t)(p - sig);
     return 0;

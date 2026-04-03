@@ -35,8 +35,6 @@ PLAT_UI32 stse_platform_generate_random(void)
     PLAT_UI32 rand_val = 0;
 
     if (io != NULL && io->rng != NULL) {
-        /* Calling the stored function pointer does not modify *io; the cast
-         * is safe and only avoids a spurious -Wcast-qual diagnostic. */
         stse_portable_rng_t rng_fn = io->rng;
         rng_fn((uint8_t *)&rand_val, sizeof(rand_val));
     }

@@ -51,6 +51,9 @@
 #include <time.h>
 #include <unistd.h>
 
+/** Size in bytes of one ECDSA-P256 integer component (r or s). */
+#define ECDSA_P256_COMPONENT_SIZE 32U
+
 /* --------------------------------------------------------------------------
  * Engine state
  * -------------------------------------------------------------------------- */
@@ -215,7 +218,7 @@ static ECDSA_SIG *stsafe_ecdsa_sign_sig(const unsigned char *dgst,
         return NULL;
     }
 
-    uint8_t  raw_sig[64];
+    uint8_t  raw_sig[ECDSA_P256_COMPONENT_SIZE * 2U];
     uint16_t raw_sig_len = sizeof(raw_sig);
 
     stse_ReturnCode_t ret =
@@ -232,8 +235,8 @@ static ECDSA_SIG *stsafe_ecdsa_sign_sig(const unsigned char *dgst,
     }
 
     /* Build and return an ECDSA_SIG from the raw (r || s) bytes */
-    BIGNUM *r = BN_bin2bn(raw_sig,      32, NULL);
-    BIGNUM *s = BN_bin2bn(raw_sig + 32, 32, NULL);
+    BIGNUM *r = BN_bin2bn(raw_sig,                          ECDSA_P256_COMPONENT_SIZE, NULL);
+    BIGNUM *s = BN_bin2bn(raw_sig + ECDSA_P256_COMPONENT_SIZE, ECDSA_P256_COMPONENT_SIZE, NULL);
     if (r == NULL || s == NULL) {
         BN_free(r);
         BN_free(s);
