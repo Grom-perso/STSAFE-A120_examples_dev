@@ -28,3 +28,6 @@ Middleware/STM32_Cryptographic/
 
 # CodeQL
 _codeql_detected_source_root
+
+# Linux build artefacts
+Linux/build/
