@@ -1,14 +1,14 @@
 # ******************************************************************************
-# STSAFE-A120 Examples - Linux / STM32MP1 Build System
+# STSAFE-A120 Examples - OpenSTDroid Build System
 # ******************************************************************************
 #
 # This Makefile builds all STSAFE-A120 example applications for Linux,
-# targeting the STM32MP1 platform (Cortex-A7 running OpenSTLinux).
+# targeting Linux userspace with OpenSTDroid.
 #
 # Usage:
 #   make                          - Build all examples (native)
 #   make EXAMPLE=01_Echo_loop     - Build a specific example
-#   make CROSS_COMPILE=arm-linux-gnueabihf-  - Cross-compile for STM32MP1
+#   make CROSS_COMPILE=arm-linux-gnueabihf-  - Cross-compile for OpenSTDroid target
 #   make clean                    - Remove all build artifacts
 #
 # Prerequisites:
@@ -16,7 +16,7 @@
 #       git submodule update --init Middleware/STSELib
 #   - OpenSSL development libraries must be installed:
 #       (native)  sudo apt-get install libssl-dev
-#       (Yocto)   Included in OpenSTLinux SDK
+#       Included in OpenSTDroid target SDK/sysroot
 #
 # ******************************************************************************
 
@@ -30,8 +30,8 @@ REPO_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 # ---------------------------------------------------------------------------
 # Two supported workflows:
 #
-#   1. OpenSTLinux SDK (recommended for STM32MP1):
-#        source /opt/st/stm32mp1/<ver>/environment-setup-cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi
+#   1. OpenSTDroid SDK/toolchain (recommended):
+#        source /opt/openstdroid/<sdk-version>/environment-setup-<target-triplet>
 #        make
 #      The SDK environment-setup script exports CC (with --sysroot, -march, etc.),
 #      CFLAGS, LDFLAGS, etc.  Do NOT pass CROSS_COMPILE in this case — the SDK
@@ -136,12 +136,10 @@ INCLUDES := \
 # Compiler flags
 # ---------------------------------------------------------------------------
 # OPENSSL_API_COMPAT: Suppress deprecation warnings for APIs available in
-# OpenSSL 1.1.1, which remain functional in OpenSSL 3.x. This ensures the
-# same source compiles cleanly on both OpenSSL 1.1.x (OpenSTLinux SDK) and
-# OpenSSL 3.x (recent host distributions).
+# OpenSSL 1.1.1, which remain functional in OpenSSL 3.x.
 #
-# Using += so that any --sysroot, -march, -mfpu, -mfloat-abi flags injected
-# by the OpenSTLinux SDK environment-setup script are preserved.
+# Using += so that any --sysroot and target CPU flags injected
+# by the OpenSTDroid SDK/toolchain environment are preserved.
 CFLAGS += \
     -Wall \
     -Wextra \
@@ -229,7 +227,7 @@ clean:
 .PHONY: help
 help:
 	@echo ""
-	@echo "STSAFE-A120 Examples - Linux/STM32MP1 Build System"
+	@echo "STSAFE-A120 Examples - OpenSTDroid Build System"
 	@echo "===================================================="
 	@echo ""
 	@echo "Targets:"
@@ -240,8 +238,8 @@ help:
 	@echo ""
 	@echo "Workflows:"
 	@echo ""
-	@echo "  OpenSTLinux SDK (recommended for STM32MP1):"
-	@echo "    source /opt/st/stm32mp1/<ver>/environment-setup-cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi"
+	@echo "  OpenSTDroid SDK/toolchain (recommended):"
+	@echo "    source /opt/openstdroid/<sdk-version>/environment-setup-<target-triplet>"
 	@echo "    make"
 	@echo "    -- The SDK sets CC with --sysroot automatically. Do NOT pass CROSS_COMPILE."
 	@echo ""
@@ -249,7 +247,7 @@ help:
 	@echo "    make CROSS_COMPILE=arm-linux-gnueabihf-"
 	@echo ""
 	@echo "Variables:"
-	@echo "  CROSS_COMPILE    Toolchain prefix for generic toolchains (NOT needed with OpenSTLinux SDK)"
+	@echo "  CROSS_COMPILE    Toolchain prefix for generic toolchains (optional when CC is preconfigured)"
 	@echo "  EXAMPLE          Build only the specified example (e.g. 01_Echo_loop)"
 	@echo ""
 	@echo "Available examples:"
