@@ -1,6 +1,8 @@
 /******************************************************************************
- * \file	delay_ms.h
- * \brief   Millisecond delay driver for STM32L452
+ * \file    delay_ms.h
+ * \brief   Millisecond delay inline helpers for Linux (STM32MP1)
+ *          Uses POSIX nanosleep() / clock_gettime() directly — no driver
+ *          compilation unit required.
  * \author  STMicroelectronics - CS application team
  *
  ******************************************************************************
@@ -8,21 +10,24 @@
  *
  * <h2><center>&copy; COPYRIGHT 2022 STMicroelectronics</center></h2>
  *
- * This software is licensed under terms that can be found in the LICENSE file in
- * the root directory of this software component.
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
  * If no LICENSE file comes with this software, it is provided AS-IS.
  *
  ******************************************************************************
  */
 
-#ifndef DELAY_MS_H_
-#define DELAY_MS_H_
+#ifndef DELAY_MS_H
+#define DELAY_MS_H
 
-#include "stm32l4xx.h"
+#include <stdint.h>
+#include <time.h>
 
-void delay_ms_init(void);
-void delay_ms(uint16_t ms);
-void timeout_ms_start(uint16_t ms);
-uint8_t timeout_ms_get_status(void);
+static inline void delay_ms(uint16_t ms) {
+    struct timespec ts;
+    ts.tv_sec  = ms / 1000U;
+    ts.tv_nsec = (long)(ms % 1000U) * 1000000L;
+    nanosleep(&ts, NULL);
+}
 
-#endif /* DELAY_MS_H_ */
+#endif /* DELAY_MS_H */
