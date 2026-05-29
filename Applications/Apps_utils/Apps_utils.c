@@ -297,7 +297,6 @@ void apps_print_asymmetric_key_table_info(stse_Handler_t *pSTSE) {
     stse_ReturnCode_t ret;
     PLAT_UI8 i;
     PLAT_UI8 slot_count;
-    PLAT_UI8 change_right;
     PLAT_UI16 global_usage_limit;
     stse_ecc_key_type_t key_type;
 
@@ -309,7 +308,7 @@ void apps_print_asymmetric_key_table_info(stse_Handler_t *pSTSE) {
     }
 
     stsafea_private_key_slot_information_t pPrivate_key_table_info[slot_count];
-    ret = stse_get_ecc_key_table_info(pSTSE, slot_count, &change_right, &global_usage_limit, pPrivate_key_table_info);
+    ret = stse_get_ecc_key_table_info(pSTSE, slot_count, &global_usage_limit, pPrivate_key_table_info);
     if (ret != STSE_OK) {
         printf("\n\n\r - stse_get_ecc_key_table_info : ERROR 0x%04x", ret);
         while (1)
@@ -318,7 +317,7 @@ void apps_print_asymmetric_key_table_info(stse_Handler_t *pSTSE) {
 
     printf("\n\n\r");
     printf("\n\r -----------------------------------------------------------------------------------------");
-    printf("\n\r               Change right : %s                  Global usage limit : %d", change_right == 1 ? "YES" : "NO ", global_usage_limit);
+    printf("\n\r               Global usage limit : %d", global_usage_limit);
     printf("\n\r ------+----------------------------------------------------------------------------------");
     printf("\n\r       |                                 ASYMMETRIC KEY INFO                              ");
     printf("\n\r ------+----------+------------+---------------+------------+---------+-------------------");
@@ -507,8 +506,8 @@ void apps_print_data_partition_record_table(stse_Handler_t *pSTSE) {
         case STSE_AC_HOST:
             printf("   HOST  |");
             break;
-        case STSE_AC_AUTH:
-            printf("   AUTH  |");
+        case STSE_AC_AUTH_AND_HOST:
+            printf(" AUTH+H  |");
             break;
         default:
             printf("  NEVER  |");
@@ -526,8 +525,8 @@ void apps_print_data_partition_record_table(stse_Handler_t *pSTSE) {
         case STSE_AC_HOST:
             printf("   HOST   |");
             break;
-        case STSE_AC_AUTH:
-            printf("  AUTH    |");
+        case STSE_AC_AUTH_AND_HOST:
+            printf(" AUTH+H   |");
             break;
         default:
             printf("  NEVER   |");

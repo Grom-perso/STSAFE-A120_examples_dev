@@ -3,6 +3,31 @@
 The **STSAFE-A120 example package** offers developers a collection of applicative examples demonstrating the use of the STSAFE-A120 secure element product line from STMicroelectronics.  
 These examples can serve as software reference implementations for integrating STSAFE-A120 devices on embedded Linux Host Microprocessor 
 
+```
++------------------------+---------------------------------------------------------------------+
+|                        |                                                                     |
+|                        |   +-------------------------------------------------------------+   |
+|       APPLICATION      |   |                 Example Projects / Tools                    |   |
+|                        |   +-------------------------------------------------------------+   |
+|                        |                                                                     |
+|========================|=====================================================================|
+|                        |   +-------------------------------------------------------------+   |
+|                        |   |                             |                               |   |
+|                        |   |                             |                               |   |
+|       MIDDLEWARE       |   |            STSELib          |           OpenSSL             |   |
+|                        |   |                             |                               |   |
+|                        |   |                             |                               |   |
+|                        |   +-------------------------------------------------------------+   |
+|                        |                                                                     |
+|========================|=====================================================================|
+|                        |                                                                     |
+|                        |   +-------------------------------------------------------------+   |
+|        PLATFORM        |   |                         STM32MP1                            |   |
+|                        |   +-------------------------------------------------------------+   |
+|                        |                                                                     |
++------------------------+---------------------------------------------------------------------+
+
+```
 
 The following readme sections explain how to build and run the STSAFE-A120 example applications on the **STM32MP1** platform running **c** (Linux userspace on the Cortex-A7 core).
 
@@ -60,7 +85,8 @@ ls /dev/i2c-*
 i2cdetect -l
 ```
 
-Identify the I2C bus corresponding to the Arduino connector (typically `/dev/i2c-5` on STM32MP157-DK2). The examples use bus ID `1` by default – update `stse_handler.io.busID` in `main.c` or the application to match your actual bus number.
+Identify the I2C bus corresponding to the Arduino connector (typically `/dev/i2c-1` on STM32MP157-DK2). The examples use bus ID `1` by default – update `stse_handler.io.busID` in `main.c` or the application to match your actual bus number.
+In case the bus is not accessible or the board is not detected corectly (aswer on I2C address 0x20) , enablement is required at device tree level (please refer to following section for details on how to recompile device tree)  
 
 ---
 
@@ -209,6 +235,9 @@ i2cdetect -y 1   # Replace 1 with your actual I2C bus number
 sudo chmod 666 /dev/i2c-1
 ```
 
+Note that 'sudo chmod 666 /dev/i2c-1' can also be executed at boot 
+
+
 ### 3. Configure the I2C Bus ID
 
 By default, examples use `busID = 1` (mapping to `/dev/i2c-1`). On the STM32MP157-DK2, the Arduino connector uses I2C5, so you may need to adjust `main.c`:
@@ -307,6 +336,7 @@ The Linux platform layer provides Linux-compatible implementations of all hardwa
 
 ## Troubleshooting
 
+
 ### I2C device not found
 
 ```
@@ -317,6 +347,71 @@ i2c_init: failed to open /dev/i2c-1: No such file or directory
 ```bash
 i2cdetect -l        # List all I2C buses
 i2cdetect -y 1      # Scan bus 1 for connected devices
+```
+Note: If the Arduino connector I2C (I2C5 at 40015000) is missing, it is likely disabled in the default device tree to prevent pin conflicts with SPI or HDMI.
+In case the Arduino I2C is disabled (default in many images) , follow these steps to activate it:
+
+Extract the device tree from the STM32 target (from Host) 
+
+``` bash
+scp root@<ip>:/boot/stm32mp157c-dk2.dtb ./
+```
+
+Decompile the device tree 
+``` bash
+dtc -I dtb -O dts -o stm32mp1-custom.dts stm32mp157c-dk2.dtb
+```
+
+Open stm32mp1-custom.dts in a text editor. Search for the address of I2C5 (40015000).
+
+You are looking for a block that looks like this:
+
+```
+i2c@40015000 {
+    compatible = "st,stm32mp15-i2c";
+    reg = <0x40015000 0x400>;
+    interrupts = <0x0 0x6b 0x4 0x0 0x6c 0x4>;
+    clocks = <0x3 0xa5>;
+    resets = <0x3 0x2f>;
+    status = "disabled";  <-- CHANGE THIS TO "okay"
+};
+
+```
+
+**Crucial Check:** While in the file, ensure no other device is using the same pins (PA11/PA12). Search for PA11 or PA12. If they are assigned to a spi or usart node that is also marked as okay, you must change that node to disabled to avoid a pin conflict.
+
+Convert your edited text and recompile it :
+
+```bash
+dtc -I dts -O dtb -o stm32mp157c-dk2.dtb stm32mp1-custom.dts
+```
+
+Push the new dts file back to the board and reboot.
+
+```bash
+# Backup the original first
+ssh root@192.168.31.154 "mv /boot/stm32mp157c-dk2.dtb /boot/stm32mp157c-dk2.dtb.old"
+
+# Upload the new one
+scp stm32mp157c-dk2.dtb root@192.168.31.154:/boot/stm32mp157c-dk2.dtb
+
+# Reboot
+ssh root@192.168.31.154 "reboot"
+```
+
+After the reboot, check the status:
+
+```bash
+cat /proc/device-tree/soc/bus@5c007000/i2c@40015000/status
+```
+It should now return okay.
+
+Finally, find the new bus number and scan for your STSAFE-A120:
+
+```bash
+i2cdetect -l
+# Look for the new I2C bus associated with 40015000
+i2cdetect -y -r <NEW_BUS_NUMBER>
 ```
 
 ### Permission denied accessing I2C
