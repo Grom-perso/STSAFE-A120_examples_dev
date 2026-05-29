@@ -23,7 +23,12 @@
 extern "C" {
 #endif
 
+#if defined(__has_include)
+#if __has_include("stm32l4xx.h")
 #include "stm32l4xx.h"
+#endif
+#endif
+#include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
@@ -35,7 +40,29 @@ extern "C" {
 #define PLAT_I8 int8_t
 #define PLAT_I16 int16_t
 #define PLAT_I32 int32_t
+#if defined(__PACKED)
 #define PLAT_PACKED_STRUCT __PACKED
+#elif defined(__GNUC__) || defined(__clang__)
+#define PLAT_PACKED_STRUCT __attribute__((__packed__))
+#else
+#define PLAT_PACKED_STRUCT
+#endif
+
+#if defined(__WEAK)
+#define PLAT_WEAK __WEAK
+#elif defined(__GNUC__) || defined(__clang__)
+#define PLAT_WEAK __attribute__((weak))
+#else
+#define PLAT_WEAK
+#endif
+
+#ifndef __WEAK
+#define __WEAK PLAT_WEAK
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* STSE_PLATFORM_GENERIC_H */
 
