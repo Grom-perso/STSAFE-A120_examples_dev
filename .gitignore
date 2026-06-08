@@ -22,6 +22,8 @@ __docbook
 *.xml
 /.metadata/
 inline_umlgraph_cache_all.pu
+Middleware/STM32_Cryptographic/
+
 
 # Linux build artifacts
 build/
