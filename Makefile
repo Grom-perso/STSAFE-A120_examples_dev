@@ -1,28 +1,32 @@
 # ******************************************************************************
-# STSAFE-A120 Examples - Linux / STM32MP1 Build System
+# STSAFE-A120 Examples — Linux / STM32MP1 Build System
 # ******************************************************************************
 #
 # This Makefile builds all STSAFE-A120 example applications for Linux,
 # targeting the STM32MP1 platform (Cortex-A7 running OpenSTLinux).
 #
 # Usage:
-#   make                          - Build all examples (native)
-#   make EXAMPLE=01_Echo_loop     - Build a specific example
-#   make CROSS_COMPILE=arm-linux-gnueabihf-  - Cross-compile for STM32MP1
-#   make clean                    - Remove all build artifacts
+#   make                                    - Build all console examples
+#   make EXAMPLE=01_Echo_loop              - Build a specific console example
+#   make gtk_demo                           - Build the GTK3 graphical demo
+#   make CROSS_COMPILE=arm-linux-gnueabihf- - Cross-compile for STM32MP1
+#   make clean                              - Remove all build artefacts
+#   make help                               - Show this help
 #
 # Prerequisites:
-#   - STSELib submodule must be initialized:
+#   - STSELib submodule must be initialised:
 #       git submodule update --init Middleware/STSELib
-#   - OpenSSL development libraries must be installed:
+#   - OpenSSL development libraries:
 #       (native)  sudo apt-get install libssl-dev
-#       (Yocto)   Included in OpenSTLinux SDK
+#       (Yocto)   Included in OpenSTLinux SDK sysroot
+#   - GTK3 development libraries (gtk_demo target only):
+#       (native)  sudo apt-get install libgtk-3-dev
+#       (Yocto)   Included in OpenSTLinux SDK sysroot
 #
 # ******************************************************************************
 
 REPO_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
-# Ensure the default goal is 'all', regardless of rule ordering below.
 .DEFAULT_GOAL := all
 
 # ---------------------------------------------------------------------------
@@ -34,14 +38,11 @@ REPO_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 #        source /opt/st/stm32mp1/<ver>/environment-setup-cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi
 #        make
 #      The SDK environment-setup script exports CC (with --sysroot, -march, etc.),
-#      CFLAGS, LDFLAGS, etc.  Do NOT pass CROSS_COMPILE in this case — the SDK
-#      has already set CC correctly.
+#      CFLAGS, LDFLAGS, etc.  Do NOT pass CROSS_COMPILE in this case.
 #
 #   2. Generic cross-toolchain (e.g. Linaro, Debian):
 #        make CROSS_COMPILE=arm-linux-gnueabihf-
 #
-# If CC is already set in the environment (origin != "default"), honour it
-# unchanged so that the SDK sysroot flags are preserved.
 ifeq ($(origin CC), default)
 CC := $(CROSS_COMPILE)gcc
 endif
@@ -50,6 +51,10 @@ AR := $(CROSS_COMPILE)ar
 endif
 ifeq ($(origin STRIP), default)
 STRIP := $(CROSS_COMPILE)strip
+endif
+
+ifeq ($(origin PKG_CONFIG), default)
+PKG_CONFIG := $(CROSS_COMPILE)pkg-config
 endif
 
 # ---------------------------------------------------------------------------
@@ -62,7 +67,7 @@ PROJECTS_DIR   := $(REPO_ROOT)/Applications/Projects
 BUILD_DIR      := build
 
 # ---------------------------------------------------------------------------
-# List of all example projects (excluding template)
+# List of all console example projects (excluding template and GTK demo)
 # ---------------------------------------------------------------------------
 ALL_EXAMPLES := \
     01_Echo_loop \
@@ -87,7 +92,8 @@ ALL_EXAMPLES := \
     05_Symmetric_key_provisioning_wrapped_compute_AES-128_CMAC \
     05_Symmetric_key_provisioning_wrapped_encrypt_AES-256_CCM
 
-# If EXAMPLE is specified on the command line, build only that one
+GTK_EXAMPLE := 06_GTK_Authentication_Demo
+
 ifdef EXAMPLE
 TARGETS := $(EXAMPLE)
 else
@@ -104,44 +110,8 @@ INCLUDES := \
     -I$(APPS_UTILS_DIR)
 
 # ---------------------------------------------------------------------------
-# Preprocessor definitions
-#
-# Enable all supported ECC curves and hash algorithms so that each example
-# can select what it needs via its own stse_conf.h.
-# The crypto feature flags below match what is needed across the full example
-# set; individual examples that do not use a feature simply leave it uncalled.
-# ---------------------------------------------------------------------------
-# DEFINES := \
-#     -DSTSE_CONF_STSAFE_A_SUPPORT \
-#     -DSTSE_CONF_ECC_NIST_P_256 \
-#     -DSTSE_CONF_ECC_NIST_P_384 \
-#     -DSTSE_CONF_ECC_NIST_P_521 \
-#     -DSTSE_CONF_ECC_BRAINPOOL_P_256 \
-#     -DSTSE_CONF_ECC_BRAINPOOL_P_384 \
-#     -DSTSE_CONF_ECC_BRAINPOOL_P_512 \
-#     -DSTSE_CONF_ECC_CURVE_25519 \
-#     -DSTSE_CONF_ECC_EDWARD_25519 \
-#     -DSTSE_CONF_HASH_SHA_1 \
-#     -DSTSE_CONF_HASH_SHA_224 \
-#     -DSTSE_CONF_HASH_SHA_256 \
-#     -DSTSE_CONF_HASH_SHA_384 \
-#     -DSTSE_CONF_HASH_SHA_512 \
-#     -DSTSE_CONF_USE_HOST_KEY_ESTABLISHMENT \
-#     -DSTSE_CONF_USE_HOST_SESSION \
-#     -DSTSE_CONF_USE_SYMMETRIC_KEY_ESTABLISHMENT \
-#     -DSTSE_CONF_USE_HOST_KEY_PROVISIONING_WRAPPED \
-#     -DSTSE_CONF_USE_SYMMETRIC_KEY_PROVISIONING_WRAPPED
-
-# ---------------------------------------------------------------------------
 # Compiler flags
 # ---------------------------------------------------------------------------
-# OPENSSL_API_COMPAT: Suppress deprecation warnings for APIs available in
-# OpenSSL 1.1.1, which remain functional in OpenSSL 3.x. This ensures the
-# same source compiles cleanly on both OpenSSL 1.1.x (OpenSTLinux SDK) and
-# OpenSSL 3.x (recent host distributions).
-#
-# Using += so that any --sysroot, -march, -mfpu, -mfloat-abi flags injected
-# by the OpenSTLinux SDK environment-setup script are preserved.
 CFLAGS += \
     -Wall \
     -Wextra \
@@ -149,13 +119,11 @@ CFLAGS += \
     -O2 \
     -g \
     -DOPENSSL_API_COMPAT=0x10101000L \
-    $(INCLUDES) \
-    $(DEFINES)
+    $(INCLUDES)
 
 # ---------------------------------------------------------------------------
 # Linker flags
 # ---------------------------------------------------------------------------
-# Using += to preserve --sysroot and rpath flags from the SDK environment.
 LDFLAGS += -lssl -lcrypto -lm
 
 # ---------------------------------------------------------------------------
@@ -175,31 +143,30 @@ PLATFORM_SRCS := \
 
 # ---------------------------------------------------------------------------
 # STSELib source files (from submodule)
-# Discover all .c files in the library directory tree.
 # ---------------------------------------------------------------------------
 STSELIB_SRCS := $(shell find $(STSELIB_DIR) -name '*.c' 2>/dev/null)
 
 # ---------------------------------------------------------------------------
-# Sanity check: verify STSELib submodule is initialized
+# Sanity check: verify STSELib submodule is initialised
 # ---------------------------------------------------------------------------
 .PHONY: check_stselib
 check_stselib:
 	@if [ -z "$(STSELIB_SRCS)" ]; then \
 		echo ""; \
-		echo "ERROR: STSELib submodule is not initialized!"; \
+		echo "ERROR: STSELib submodule is not initialised!"; \
 		echo "       Please run: git submodule update --init Middleware/STSELib"; \
 		echo ""; \
 		exit 1; \
 	fi
 
 # ---------------------------------------------------------------------------
-# Build targets
+# Build targets — console examples
 # ---------------------------------------------------------------------------
-.PHONY: all clean $(ALL_EXAMPLES)
+.PHONY: all clean $(ALL_EXAMPLES) gtk_demo example
 
 all: check_stselib $(addprefix $(BUILD_DIR)/,$(TARGETS))
 
-# Rule to build a single example binary
+# Rule to build a single console example binary
 $(BUILD_DIR)/%: check_stselib
 	@mkdir -p $(BUILD_DIR)
 	@if [ ! -f "$(PROJECTS_DIR)/$*/main.c" ]; then \
@@ -217,41 +184,80 @@ $(BUILD_DIR)/%: check_stselib
 	@echo "  -> $@ built successfully"
 
 # Convenience target: build a single example via EXAMPLE=<name>
-.PHONY: example
 example: check_stselib $(BUILD_DIR)/$(EXAMPLE)
 
+# ---------------------------------------------------------------------------
+# Build target — GTK3 graphical authentication demo
+# ---------------------------------------------------------------------------
+#
+# Extra flags are obtained via pkg-config so they correctly pick up the
+# sysroot paths when cross-compiling with the OpenSTLinux SDK.
+#
+GTK_CFLAGS  := $(shell $(PKG_CONFIG) --cflags gtk+-3.0 2>/dev/null)
+GTK_LDFLAGS := $(shell $(PKG_CONFIG) --libs   gtk+-3.0 2>/dev/null)
+
+gtk_demo: check_stselib
+	@if [ -z "$(GTK_CFLAGS)" ]; then \
+		echo ""; \
+		echo "ERROR: GTK+ 3 development files not found!"; \
+		echo "       Native build:        sudo apt-get install libgtk-3-dev"; \
+		echo "       Cross-compilation:   source the OpenSTLinux SDK (includes GTK3)"; \
+		echo ""; \
+		exit 1; \
+	fi
+	@mkdir -p $(BUILD_DIR)
+	@echo "Building $(GTK_EXAMPLE) (GTK3 graphical demo) ..."
+	$(CC) $(CFLAGS) $(GTK_CFLAGS) \
+		-I$(PROJECTS_DIR)/$(GTK_EXAMPLE) \
+		$(PROJECTS_DIR)/$(GTK_EXAMPLE)/main.c \
+		$(PLATFORM_SRCS) \
+		$(STSELIB_SRCS) \
+		-o $(BUILD_DIR)/$(GTK_EXAMPLE) \
+		$(LDFLAGS) $(GTK_LDFLAGS) -lpthread
+	@echo "  -> $(BUILD_DIR)/$(GTK_EXAMPLE) built successfully"
+
+# ---------------------------------------------------------------------------
+# Clean
+# ---------------------------------------------------------------------------
 clean:
 	rm -rf $(BUILD_DIR)
 
 # ---------------------------------------------------------------------------
-# Help target
+# Help
 # ---------------------------------------------------------------------------
 .PHONY: help
 help:
 	@echo ""
-	@echo "STSAFE-A120 Examples - Linux/STM32MP1 Build System"
+	@echo "STSAFE-A120 Examples — Linux/STM32MP1 Build System"
 	@echo "===================================================="
 	@echo ""
 	@echo "Targets:"
-	@echo "  all              Build all examples (default)"
-	@echo "  EXAMPLE=<name>   Build a specific example"
-	@echo "  clean            Remove all build artifacts"
+	@echo "  all              Build all console examples (default)"
+	@echo "  gtk_demo         Build the GTK3 graphical authentication demo"
+	@echo "  EXAMPLE=<name>   Build a specific console example"
+	@echo "  clean            Remove all build artefacts"
 	@echo "  help             Show this help message"
 	@echo ""
 	@echo "Workflows:"
 	@echo ""
 	@echo "  OpenSTLinux SDK (recommended for STM32MP1):"
 	@echo "    source /opt/st/stm32mp1/<ver>/environment-setup-cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi"
-	@echo "    make"
+	@echo "    make            # all console examples"
+	@echo "    make gtk_demo   # GTK3 graphical demo"
 	@echo "    -- The SDK sets CC with --sysroot automatically. Do NOT pass CROSS_COMPILE."
 	@echo ""
 	@echo "  Generic cross-toolchain:"
 	@echo "    make CROSS_COMPILE=arm-linux-gnueabihf-"
+	@echo "    make CROSS_COMPILE=arm-linux-gnueabihf- gtk_demo"
 	@echo ""
 	@echo "Variables:"
-	@echo "  CROSS_COMPILE    Toolchain prefix for generic toolchains (NOT needed with OpenSTLinux SDK)"
-	@echo "  EXAMPLE          Build only the specified example (e.g. 01_Echo_loop)"
+	@echo "  CROSS_COMPILE    Toolchain prefix (NOT needed with OpenSTLinux SDK)"
+	@echo "  PKG_CONFIG       pkg-config binary (default: \$(CROSS_COMPILE)pkg-config)"
+	@echo "  EXAMPLE          Build only the specified console example"
 	@echo ""
-	@echo "Available examples:"
+	@echo "Available console examples:"
 	@$(foreach ex,$(ALL_EXAMPLES),echo "  $(ex)";)
+	@echo ""
+	@echo "Available graphical examples:"
+	@echo "  $(GTK_EXAMPLE)  (use 'make gtk_demo')"
 	@echo ""
