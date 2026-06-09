@@ -207,7 +207,7 @@ static const char *ac_to_str(uint8_t ac) {
     switch (ac) {
     case STSE_AC_ALWAYS: return "ALWAYS";
     case STSE_AC_HOST:   return "HOST";
-    case STSE_AC_AUTH:   return "AUTH";
+    case STSE_AC_AUTH_AND_HOST: return "AUTH+HOST";
     default:             return "NEVER";
     }
 }
@@ -234,6 +234,8 @@ static gpointer auth_worker_thread(gpointer user_data) {
     stse_ReturnCode_t  ret;
     char              *rbuf    = app->result_text;
     const size_t       rbuf_sz = RESULT_BUF_SIZE;
+    stsafea_data_partition_record_t *zones = NULL;
+    uint16_t           table_len = 0U;
 
     static const uint8_t ca_cert[] = {CA_SELF_SIGNED_CERTIFICATE_01};
 
@@ -318,18 +320,26 @@ static gpointer auth_worker_thread(gpointer user_data) {
     rbuf_append(rbuf, rbuf_sz,
                 "  ─────┼─────────┼────────────────────┼───────────┼───────────┼────────────┼────────────\n");
 
-    stsafea_data_partition_record_t zones[total_zones];
-    uint16_t table_len = (uint16_t)sizeof(zones);
+    if (total_zones > 0U) {
+        zones = calloc(total_zones, sizeof(*zones));
+        if (zones == NULL) {
+            rbuf_append(rbuf, rbuf_sz, "  ERROR: out of memory while allocating zone table\n\n");
+            goto done;
+        }
+        table_len = (uint16_t)(total_zones * (uint16_t)sizeof(*zones));
+    }
 
-    ret = stse_data_storage_get_partitioning_table(
-        &app->stse_handler,
-        total_zones,
-        zones,
-        table_len);
-    if (ret != STSE_OK) {
-        rbuf_append(rbuf, rbuf_sz,
-                    "  ERROR: stse_data_storage_get_partitioning_table (0x%04X)\n\n", ret);
-        goto done;
+    if (total_zones > 0U) {
+        ret = stse_data_storage_get_partitioning_table(
+            &app->stse_handler,
+            total_zones,
+            zones,
+            table_len);
+        if (ret != STSE_OK) {
+            rbuf_append(rbuf, rbuf_sz,
+                        "  ERROR: stse_data_storage_get_partitioning_table (0x%04X)\n\n", ret);
+            goto done;
+        }
     }
 
     for (uint8_t i = 0U; i < total_zones; i++) {
@@ -396,6 +406,7 @@ static gpointer auth_worker_thread(gpointer user_data) {
     }
 
 done:
+    free(zones);
     rbuf_append(rbuf, rbuf_sz,
                 "\n══════════════════════════════════════════════════════\n");
 
