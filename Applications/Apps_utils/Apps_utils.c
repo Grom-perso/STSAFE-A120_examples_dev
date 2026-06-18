@@ -126,7 +126,7 @@ stse_ReturnCode_t get_curve_id_key_type(stsafea_ecc_curve_id_t curve_id, stse_ec
         }
     }
     /* If the comparison loop reach the end and pKey_type is always as initialized return error */
-    if ((curve_id_index + 1) >= STSE_ECC_KT_INVALID || *pKey_type == STSE_ECC_KT_INVALID) {
+    if (curve_id_index >= STSE_ECC_KT_INVALID || *pKey_type == STSE_ECC_KT_INVALID) {
         return STSE_UNEXPECTED_ERROR;
     }
 
@@ -478,24 +478,21 @@ void apps_print_data_partition_record_table(stse_Handler_t *pSTSE) {
         data_partition_record_table,
         data_partition_record_table_length);
     if (ret != STSE_OK) {
-        printf("\n ### stse_get_data_partitions_configuration : ERROR 0x%04X", ret);
+        printf("\n\r ### stse_get_data_partitions_configuration : ERROR 0x%04X", ret);
         while (1)
             ;
     } else {
         printf("\n\n\r - stse_get_data_partitions_configuration");
     }
 
-    printf("\n  ID | COUNTER | DATA SEGMENT SIZE | READ AC CR |  READ AC | UPDATE AC CR | UPDATE AC |  COUNTER VAL \r\n");
+    printf("\n\r  ID | COUNTER | DATA SEGMENT SIZE | READ AC CR |  READ AC | UPDATE AC CR | UPDATE AC |  COUNTER VAL \r\n");
     for (i = 0; i < total_zone_count; i++) {
         /*- print id (col 1)*/
         printf(" %03d | ", data_partition_record_table[i].index);
-
         /*- print counter presence (col 2)*/
         printf("   %c    |", (data_partition_record_table[i].zone_type) == 0 ? '.' : 'x');
-
         /*- print data segment size (col 3) */
         printf("       %04u        | ", data_partition_record_table[i].data_segment_length);
-
         /*- read ac change right (col 4) */
         printf(" %s | ", (data_partition_record_table[i].read_ac_cr) == 1 ? " ALLOWED " : " DENIED  ");
 
@@ -504,15 +501,12 @@ void apps_print_data_partition_record_table(stse_Handler_t *pSTSE) {
         case STSE_AC_ALWAYS:
             printf(" ALWAYS  |");
             break;
-
         case STSE_AC_HOST:
             printf("   HOST  |");
             break;
-
         case STSE_AC_AUTH_AND_HOST:
-            printf("   AUTH + HOST  |");
+            printf(" AUTH+HOST|");
             break;
-
         default:
             printf("  NEVER  |");
             break;
@@ -526,15 +520,12 @@ void apps_print_data_partition_record_table(stse_Handler_t *pSTSE) {
         case STSE_AC_ALWAYS:
             printf("  ALWAYS  |");
             break;
-
         case STSE_AC_HOST:
             printf("   HOST   |");
             break;
-
         case STSE_AC_AUTH_AND_HOST:
-            printf("  AUTH + HOST  |");
+            printf(" AUTH+HOST|");
             break;
-
         default:
             printf("  NEVER   |");
             break;

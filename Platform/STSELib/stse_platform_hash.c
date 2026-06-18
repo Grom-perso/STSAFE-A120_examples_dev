@@ -1,6 +1,6 @@
 /******************************************************************************
- * \file	stse_platform_hash.c
- * \brief   STSecureElement HASH platform file
+ * \file    stse_platform_hash.c
+ * \brief   STSecureElement hash platform for Linux (STM32MP1) using OpenSSL
  * \author  STMicroelectronics - CS application team
  *
  ******************************************************************************
@@ -15,43 +15,45 @@
  ******************************************************************************
  */
 
-#include "Middleware/STM32_Cryptographic/include/cmox_crypto.h"
 #include "stse_conf.h"
 #include "stselib.h"
+#include <openssl/evp.h>
+#include <openssl/hmac.h>
+#include <string.h>
 
-static cmox_hash_algo_t stse_platform_get_cmox_hash_algo(stse_hash_algorithm_t hash_algo) {
+static const EVP_MD *stse_platform_get_openssl_md(stse_hash_algorithm_t hash_algo) {
     switch (hash_algo) {
 #ifdef STSE_CONF_HASH_SHA_1
     case STSE_SHA_1:
-        return CMOX_SHA1_ALGO;
+        return EVP_sha1();
 #endif
 #ifdef STSE_CONF_HASH_SHA_224
     case STSE_SHA_224:
-        return CMOX_SHA224_ALGO;
+        return EVP_sha224();
 #endif
 #ifdef STSE_CONF_HASH_SHA_256
     case STSE_SHA_256:
-        return CMOX_SHA256_ALGO;
+        return EVP_sha256();
 #endif
 #ifdef STSE_CONF_HASH_SHA_384
     case STSE_SHA_384:
-        return CMOX_SHA384_ALGO;
+        return EVP_sha384();
 #endif
 #ifdef STSE_CONF_HASH_SHA_512
     case STSE_SHA_512:
-        return CMOX_SHA512_ALGO;
+        return EVP_sha512();
 #endif
 #ifdef STSE_CONF_HASH_SHA_3_256
     case STSE_SHA3_256:
-        return CMOX_SHA3_256_ALGO;
+        return EVP_sha3_256();
 #endif
 #ifdef STSE_CONF_HASH_SHA_3_384
     case STSE_SHA3_384:
-        return CMOX_SHA3_384_ALGO;
+        return EVP_sha3_384();
 #endif
 #ifdef STSE_CONF_HASH_SHA_3_512
     case STSE_SHA3_512:
-        return CMOX_SHA3_512_ALGO;
+        return EVP_sha3_512();
 #endif
     default:
         return NULL;
@@ -61,54 +63,59 @@ static cmox_hash_algo_t stse_platform_get_cmox_hash_algo(stse_hash_algorithm_t h
 stse_ReturnCode_t stse_platform_hash_compute(stse_hash_algorithm_t hash_algo,
                                              PLAT_UI8 *pPayload, PLAT_UI16 payload_length,
                                              PLAT_UI8 *pHash, PLAT_UI16 *hash_length) {
-#if defined(STSE_CONF_HASH_SHA_1) || defined(STSE_CONF_HASH_SHA_224) ||                                      \
-    defined(STSE_CONF_HASH_SHA_256) || defined(STSE_CONF_HASH_SHA_384) || defined(STSE_CONF_HASH_SHA_512) || \
-    defined(STSE_CONF_HASH_SHA_3_256) || defined(STSE_CONF_HASH_SHA_3_284) || defined(STSE_CONF_HASH_SHA_3_512)
+    const EVP_MD *md;
+    EVP_MD_CTX   *ctx;
+    unsigned int  out_len;
+    int           ret;
 
-    cmox_hash_retval_t retval;
-    size_t cmox_hash_length = *hash_length;
-
-    retval = cmox_hash_compute(
-        stse_platform_get_cmox_hash_algo(hash_algo),
-        pPayload,
-        payload_length,
-        pHash,
-        *hash_length,
-        &cmox_hash_length);
-
-    /*- Verify Hash compute return */
-    if (retval != CMOX_HASH_SUCCESS || cmox_hash_length != *hash_length) {
+    md = stse_platform_get_openssl_md(hash_algo);
+    if (md == NULL) {
         return STSE_PLATFORM_HASH_ERROR;
     }
 
+    ctx = EVP_MD_CTX_new();
+    if (ctx == NULL) {
+        return STSE_PLATFORM_HASH_ERROR;
+    }
+
+    ret = EVP_DigestInit_ex(ctx, md, NULL);
+    if (ret != 1) {
+        EVP_MD_CTX_free(ctx);
+        return STSE_PLATFORM_HASH_ERROR;
+    }
+
+    ret = EVP_DigestUpdate(ctx, pPayload, payload_length);
+    if (ret != 1) {
+        EVP_MD_CTX_free(ctx);
+        return STSE_PLATFORM_HASH_ERROR;
+    }
+
+    out_len = (unsigned int)*hash_length;
+    ret     = EVP_DigestFinal_ex(ctx, pHash, &out_len);
+    EVP_MD_CTX_free(ctx);
+
+    if (ret != 1) {
+        return STSE_PLATFORM_HASH_ERROR;
+    }
+
+    *hash_length = (PLAT_UI16)out_len;
+
     return STSE_OK;
-#else
-    return STSE_PLATFORM_HASH_ERROR;
-#endif /* STSE_CONF_HASH_SHA_1 || STSE_CONF_HASH_SHA_224 ||\
-          STSE_CONF_HASH_SHA_256 || STSE_CONF_HASH_SHA_384 || STSE_CONF_HASH_SHA_512 ||\
-          STSE_CONF_HASH_SHA_3_256 || STSE_CONF_HASH_SHA_3_284 || STSE_CONF_HASH_SHA_3_512 */
 }
 
 stse_ReturnCode_t stse_platform_hmac_sha256_extract(PLAT_UI8 *pSalt, PLAT_UI16 salt_length,
                                                     PLAT_UI8 *pInput_keying_material, PLAT_UI16 input_keying_material_length,
                                                     PLAT_UI8 *pPseudorandom_key, PLAT_UI16 pseudorandom_key_expected_length) {
-    cmox_mac_retval_t retval;
+    unsigned int hmac_len = pseudorandom_key_expected_length;
+    PLAT_UI8    *result;
 
-    size_t pseudorandom_key_length = pseudorandom_key_expected_length;
+    /* HKDF-Extract: PRK = HMAC-Hash(salt, IKM) */
+    result = HMAC(EVP_sha256(),
+                  pSalt, salt_length,
+                  pInput_keying_material, input_keying_material_length,
+                  pPseudorandom_key, &hmac_len);
 
-    retval = cmox_mac_compute(CMOX_HMAC_SHA256_ALGO,
-                              pInput_keying_material,
-                              input_keying_material_length,
-                              pSalt,
-                              salt_length,
-                              NULL,
-                              0,
-                              pPseudorandom_key,
-                              pseudorandom_key_expected_length,
-                              &pseudorandom_key_length);
-
-    /*- Verify MAC compute return */
-    if (retval != CMOX_MAC_SUCCESS) {
+    if (result == NULL || hmac_len != pseudorandom_key_expected_length) {
         return STSE_PLATFORM_HKDF_ERROR;
     }
 
@@ -118,65 +125,54 @@ stse_ReturnCode_t stse_platform_hmac_sha256_extract(PLAT_UI8 *pSalt, PLAT_UI16 s
 stse_ReturnCode_t stse_platform_hmac_sha256_expand(PLAT_UI8 *pPseudorandom_key, PLAT_UI16 pseudorandom_key_length,
                                                    PLAT_UI8 *pInfo, PLAT_UI16 info_length,
                                                    PLAT_UI8 *pOutput_keying_material, PLAT_UI16 output_keying_material_length) {
-    cmox_mac_retval_t retval;
+#define SHA256_DIGEST_LEN 32
 
-    PLAT_UI8 tmp[CMOX_SHA256_SIZE];
-    PLAT_UI16 tmp_length = 0;
-    PLAT_UI16 out_index = 0;
-    PLAT_UI8 n = 0x1;
+    PLAT_UI8     tmp[SHA256_DIGEST_LEN];
+    PLAT_UI16    tmp_length = 0;
+    PLAT_UI16    out_index  = 0;
+    PLAT_UI8     n          = 0x01;
+    unsigned int hmac_len   = SHA256_DIGEST_LEN;
 
-    cmox_mac_handle_t *pMac_handle;
-    cmox_hmac_handle_t hmac_handle;
-
-    /*	RFC 5869 : output keying material must be
-	 * 		- L <= 255*HashLen
-	 * 		- N = ceil(L/HashLen) */
-    if (pOutput_keying_material == NULL || ((output_keying_material_length / CMOX_SHA256_SIZE) + ((output_keying_material_length % CMOX_SHA256_SIZE) != 0)) > 255) {
+    if (pOutput_keying_material == NULL) {
         return STSE_PLATFORM_HKDF_ERROR;
     }
 
-    pMac_handle = cmox_hmac_construct(&hmac_handle, CMOX_HMAC_SHA256);
-    retval = cmox_mac_init(pMac_handle);
-
-    if (retval != CMOX_MAC_SUCCESS) {
+    /* RFC 5869: L <= 255*HashLen */
+    if (((output_keying_material_length / SHA256_DIGEST_LEN) +
+         ((output_keying_material_length % SHA256_DIGEST_LEN) != 0)) > 255) {
         return STSE_PLATFORM_HKDF_ERROR;
     }
 
+    /* HKDF-Expand */
     while (out_index < output_keying_material_length) {
         PLAT_UI16 left = output_keying_material_length - out_index;
+        HMAC_CTX *ctx  = HMAC_CTX_new();
+        if (ctx == NULL) {
+            return STSE_PLATFORM_HKDF_ERROR;
+        }
 
-        retval = cmox_mac_setKey(pMac_handle, pPseudorandom_key, pseudorandom_key_length);
-        if (retval != CMOX_MAC_SUCCESS)
-            break;
-        retval = cmox_mac_append(pMac_handle, tmp, tmp_length);
-        if (retval != CMOX_MAC_SUCCESS)
-            break;
-        retval = cmox_mac_append(pMac_handle, pInfo, info_length);
-        if (retval != CMOX_MAC_SUCCESS)
-            break;
-        retval = cmox_mac_append(pMac_handle, &n, 1);
-        if (retval != CMOX_MAC_SUCCESS)
-            break;
-        retval = cmox_mac_generateTag(pMac_handle, tmp, NULL);
-        if (retval != CMOX_MAC_SUCCESS)
-            break;
+        if (HMAC_Init_ex(ctx, pPseudorandom_key, pseudorandom_key_length, EVP_sha256(), NULL) != 1 ||
+            HMAC_Update(ctx, tmp, tmp_length) != 1 ||
+            HMAC_Update(ctx, pInfo, info_length) != 1 ||
+            HMAC_Update(ctx, &n, 1) != 1 ||
+            HMAC_Final(ctx, tmp, &hmac_len) != 1) {
+            HMAC_CTX_free(ctx);
+            memset(tmp, 0, SHA256_DIGEST_LEN);
+            memset(pOutput_keying_material, 0, output_keying_material_length);
+            return STSE_PLATFORM_HKDF_ERROR;
+        }
 
-        left = left < CMOX_SHA256_SIZE ? left : CMOX_SHA256_SIZE;
+        HMAC_CTX_free(ctx);
+
+        left = (left < SHA256_DIGEST_LEN) ? left : SHA256_DIGEST_LEN;
         memcpy(pOutput_keying_material + out_index, tmp, left);
 
-        tmp_length = CMOX_SHA256_SIZE;
-        out_index += CMOX_SHA256_SIZE;
+        tmp_length = SHA256_DIGEST_LEN;
+        out_index += SHA256_DIGEST_LEN;
         n++;
     }
 
-    cmox_mac_cleanup(pMac_handle);
-
-    /*- Verify MAC compute return */
-    if (retval != CMOX_MAC_SUCCESS) {
-        memset(tmp, 0, CMOX_SHA256_SIZE);
-        memset(pOutput_keying_material, 0, output_keying_material_length);
-        return STSE_PLATFORM_HKDF_ERROR;
-    }
+    memset(tmp, 0, SHA256_DIGEST_LEN);
 
     return STSE_OK;
 }
